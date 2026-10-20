@@ -135,7 +135,7 @@ Requires Python 3.10 or newer. Works on Windows, macOS and Linux.
 Windows (PowerShell):
 
 ```powershell
-git clone <this repo> receipts
+git clone https://github.com/AakashMutum/receipts.git
 cd receipts
 python -m venv .venv
 .venv\Scripts\Activate.ps1
@@ -148,7 +148,7 @@ receipts serve           # opens on http://127.0.0.1:8000
 macOS and Linux:
 
 ```bash
-git clone <this repo> receipts && cd receipts
+git clone https://github.com/AakashMutum/receipts.git && cd receipts
 python3 -m venv .venv && source .venv/bin/activate
 make install
 make judge-check

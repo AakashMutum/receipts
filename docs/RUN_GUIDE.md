@@ -5,7 +5,7 @@
 Requires Python 3.10 or newer.
 
 ```bash
-git clone <this repo> receipts && cd receipts
+git clone https://github.com/AakashMutum/receipts.git && cd receipts
 python3 -m venv .venv && source .venv/bin/activate
 make install
 make judge-check
