@@ -219,7 +219,7 @@ class ExasolBackend(Backend):
     def load_csv(self, path: Path, schema: str, table: str) -> None:
         t = time.perf_counter()
         self.con.import_from_file(str(path), (schema.upper(), table.upper()),
-                                  import_params={"column_separator": ",", "skip": 1})
+                                  import_params={"column_separator": ",", "row_separator": "LF", "skip": 1})
         self.log.append(Executed(f"IMPORT INTO {schema}.{table} FROM CSV {path.name}",
                                  (time.perf_counter() - t) * 1000, 0))
 

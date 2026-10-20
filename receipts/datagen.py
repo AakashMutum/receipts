@@ -166,7 +166,7 @@ def _write_csv(path: Path, header: list[str], rows) -> int:
     import csv
 
     with path.open("w", newline="") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(header)
         n = 0
         for r in rows:
@@ -190,7 +190,7 @@ def generate(out_dir: Path, cfg: GenConfig) -> dict:
     import csv
     fo = (out_dir / "ORDERS.csv").open("w", newline="")
     fp = (out_dir / "PAYMENTS.csv").open("w", newline="")
-    wo, wp = csv.writer(fo), csv.writer(fp)
+    wo, wp = csv.writer(fo, lineterminator="\n"), csv.writer(fp, lineterminator="\n")
     wo.writerow(hdr["ORDERS"])
     wp.writerow(hdr["PAYMENTS"])
     n_o = n_p = 0
