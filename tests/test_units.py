@@ -68,7 +68,7 @@ def test_no_em_dashes_anywhere():
     bad = []
     for p in ROOT.rglob("*"):
         if p.is_file() and p.suffix in {".py", ".md", ".html", ".css", ".js", ".sql", ".json", ".toml", ".txt", ""} \
-                and not any(x in p.parts for x in (".git", "data", "__pycache__", ".pytest_cache")):
+                and not any(x in p.parts for x in (".git", "data", "__pycache__", ".pytest_cache", ".venv", "venv", "site-packages", "node_modules")):
             try:
                 if chr(0x2014) in p.read_text(encoding="utf-8"):
                     bad.append(str(p.relative_to(ROOT)))
