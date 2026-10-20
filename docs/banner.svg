@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 360" role="img" aria-label="Receipts: hold the number, prove why, tell people and agents whether to trust it">
+  <rect width="1280" height="360" fill="#0c3d51"/>
+  <rect x="0" y="336" width="1280" height="24" fill="#6ab541"/>
+  <g font-family="Archivo, 'Segoe UI', Arial, sans-serif" fill="#ffffff">
+    <text x="72" y="150" font-size="96" font-weight="800" letter-spacing="-2">Receipts</text>
+    <text x="76" y="204" font-size="28" fill="#cfe3ea">Hold the number. Prove why it moved.</text>
+    <text x="76" y="244" font-size="28" fill="#cfe3ea">Tell people and AI agents whether to trust it.</text>
+    <text x="76" y="300" font-size="20" fill="#6ab541" font-weight="700">ExaThon India 2026  |  Track 4: The Work Behind the Work  |  Runs inside Exasol</text>
+  </g>
+  <g transform="translate(880 36)">
+    <path d="M0 0 H300 V268 L282 254 L264 268 L246 254 L228 268 L210 254 L192 268 L174 254 L156 268 L138 254 L120 268 L102 254 L84 268 L66 254 L48 268 L30 254 L12 268 L0 258 Z" fill="#f4f7f8"/>
+    <g font-family="'IBM Plex Mono', Consolas, monospace" fill="#0c3d51" font-size="17">
+      <text x="24" y="44" font-weight="700" font-size="20">REVENUE 20 OCT</text>
+      <text x="24" y="72" fill="#5b7684">gateway B day sits 5h30 late</text>
+      <text x="24" y="112">tonight     -19%</text>
+      <text x="24" y="140">undo clock  back in range</text>
+      <text x="24" y="168">history     unchanged</text>
+      <text x="24" y="196">verdict     proven fault</text>
+    </g>
+    <g transform="rotate(-8 214 218)">
+      <rect x="140" y="196" width="148" height="42" rx="4" fill="none" stroke="#e8772e" stroke-width="4"/>
+      <text x="214" y="225" text-anchor="middle" font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="24" fill="#e8772e">HELD</text>
+    </g>
+  </g>
+</svg>

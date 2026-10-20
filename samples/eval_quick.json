@@ -1,0 +1,975 @@
+{
+  "generated_at": "2026-10-20 10:39:41",
+  "backend": "duckdb",
+  "seeds": [
+    11,
+    22,
+    33
+  ],
+  "orders_per_day": 3000,
+  "history_days": 42,
+  "scenarios": 10,
+  "runs": 30,
+  "passed": 29,
+  "systems": {
+    "receipts": {
+      "runs": 30,
+      "cause_precision": 1.0,
+      "cause_recall": 1.0,
+      "hold_decision_accuracy": 0.967,
+      "verdict_accuracy": 0.967,
+      "false_causes": 0,
+      "missed_causes": 0
+    },
+    "detectors_only": {
+      "runs": 30,
+      "cause_precision": 0.889,
+      "cause_recall": 1.0,
+      "hold_decision_accuracy": 0.8,
+      "verdict_accuracy": 0.8,
+      "false_causes": 3,
+      "missed_causes": 0
+    },
+    "threshold_alert": {
+      "runs": 30,
+      "cause_precision": 1.0,
+      "cause_recall": 0.0,
+      "hold_decision_accuracy": 0.733,
+      "verdict_accuracy": 0.167,
+      "false_causes": 0,
+      "missed_causes": 24
+    }
+  },
+  "corrected_value_error_pct": {
+    "max": 0.009,
+    "mean": 0.001
+  },
+  "latency_ms": {
+    "median": 453.8,
+    "max": 601.8
+  },
+  "seconds": 21.3,
+  "runs_detail": [
+    {
+      "seed": 11,
+      "scenario": "healthy",
+      "kind": "control",
+      "expected_verdict": "NO_INCIDENT",
+      "expected_causes": [],
+      "change_pct": 0.0397,
+      "receipts": {
+        "verdict": "NO_INCIDENT",
+        "causes": [],
+        "held": false,
+        "corrected_error_pct": null
+      },
+      "detectors_only": {
+        "causes": [],
+        "held": false,
+        "verdict": "NO_INCIDENT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": false,
+        "verdict": "NO_INCIDENT"
+      },
+      "ms": 433.5,
+      "pass": true
+    },
+    {
+      "seed": 11,
+      "scenario": "festival",
+      "kind": "control",
+      "expected_verdict": "REAL_CHANGE",
+      "expected_causes": [],
+      "change_pct": 0.2605,
+      "receipts": {
+        "verdict": "REAL_CHANGE",
+        "causes": [],
+        "held": false,
+        "corrected_error_pct": null
+      },
+      "detectors_only": {
+        "causes": [
+          "duplicate_key"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 423.9,
+      "pass": true
+    },
+    {
+      "seed": 11,
+      "scenario": "unit_paise",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "unit_scale"
+      ],
+      "change_pct": 5.5864,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "unit_scale"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "unit_scale"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 389.5,
+      "pass": true
+    },
+    {
+      "seed": 11,
+      "scenario": "duplicate_load",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "duplicate_key"
+      ],
+      "change_pct": 0.1687,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "duplicate_key"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "duplicate_key"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 444.2,
+      "pass": true
+    },
+    {
+      "seed": 11,
+      "scenario": "join_fanout",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "key_fanout"
+      ],
+      "change_pct": 0.2562,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "key_fanout"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "key_fanout"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 458.3,
+      "pass": true
+    },
+    {
+      "seed": 11,
+      "scenario": "stale_fx",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "stale_feed"
+      ],
+      "change_pct": -0.0522,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "stale_feed"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.009
+      },
+      "detectors_only": {
+        "causes": [
+          "stale_feed"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": false,
+        "verdict": "NO_INCIDENT"
+      },
+      "ms": 525.9,
+      "pass": true
+    },
+    {
+      "seed": 11,
+      "scenario": "ist_utc",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "clock_shift"
+      ],
+      "change_pct": -0.1171,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "clock_shift"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "clock_shift"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 449.8,
+      "pass": true
+    },
+    {
+      "seed": 11,
+      "scenario": "new_code",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "orphan_code"
+      ],
+      "change_pct": -0.1441,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "orphan_code"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "orphan_code"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 436.8,
+      "pass": true
+    },
+    {
+      "seed": 11,
+      "scenario": "masked_pair",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "change_pct": 0.1088,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "clock_shift",
+          "duplicate_key"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "duplicate_key",
+          "clock_shift"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 594.9,
+      "pass": true
+    },
+    {
+      "seed": 11,
+      "scenario": "unknown_discount",
+      "kind": "unknown",
+      "expected_verdict": "UNEXPLAINED",
+      "expected_causes": [],
+      "change_pct": -0.0784,
+      "receipts": {
+        "verdict": "UNEXPLAINED",
+        "causes": [],
+        "held": true,
+        "corrected_error_pct": null
+      },
+      "detectors_only": {
+        "causes": [],
+        "held": false,
+        "verdict": ""
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 413.3,
+      "pass": true
+    },
+    {
+      "seed": 22,
+      "scenario": "healthy",
+      "kind": "control",
+      "expected_verdict": "NO_INCIDENT",
+      "expected_causes": [],
+      "change_pct": -0.0142,
+      "receipts": {
+        "verdict": "NO_INCIDENT",
+        "causes": [],
+        "held": false,
+        "corrected_error_pct": null
+      },
+      "detectors_only": {
+        "causes": [],
+        "held": false,
+        "verdict": "NO_INCIDENT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": false,
+        "verdict": "NO_INCIDENT"
+      },
+      "ms": 403.1,
+      "pass": true
+    },
+    {
+      "seed": 22,
+      "scenario": "festival",
+      "kind": "control",
+      "expected_verdict": "REAL_CHANGE",
+      "expected_causes": [],
+      "change_pct": 0.2191,
+      "receipts": {
+        "verdict": "REAL_CHANGE",
+        "causes": [],
+        "held": false,
+        "corrected_error_pct": null
+      },
+      "detectors_only": {
+        "causes": [
+          "duplicate_key"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 536.1,
+      "pass": true
+    },
+    {
+      "seed": 22,
+      "scenario": "unit_paise",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "unit_scale"
+      ],
+      "change_pct": 3.8893,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "unit_scale"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "unit_scale"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 396.7,
+      "pass": true
+    },
+    {
+      "seed": 22,
+      "scenario": "duplicate_load",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "duplicate_key"
+      ],
+      "change_pct": 0.0996,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "duplicate_key"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "duplicate_key"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 529.8,
+      "pass": true
+    },
+    {
+      "seed": 22,
+      "scenario": "join_fanout",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "key_fanout"
+      ],
+      "change_pct": 0.1504,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "key_fanout"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "key_fanout"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 495.4,
+      "pass": true
+    },
+    {
+      "seed": 22,
+      "scenario": "stale_fx",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "stale_feed"
+      ],
+      "change_pct": -0.0872,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "stale_feed"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.005
+      },
+      "detectors_only": {
+        "causes": [
+          "stale_feed"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 479.9,
+      "pass": true
+    },
+    {
+      "seed": 22,
+      "scenario": "ist_utc",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "clock_shift"
+      ],
+      "change_pct": -0.1634,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "clock_shift"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "clock_shift"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 401.5,
+      "pass": true
+    },
+    {
+      "seed": 22,
+      "scenario": "new_code",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "orphan_code"
+      ],
+      "change_pct": -0.2059,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "orphan_code"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "orphan_code"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 428.7,
+      "pass": true
+    },
+    {
+      "seed": 22,
+      "scenario": "masked_pair",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "change_pct": 0.0401,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "clock_shift",
+          "duplicate_key"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "duplicate_key",
+          "clock_shift"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": false,
+        "verdict": "NO_INCIDENT"
+      },
+      "ms": 567.8,
+      "pass": true
+    },
+    {
+      "seed": 22,
+      "scenario": "unknown_discount",
+      "kind": "unknown",
+      "expected_verdict": "UNEXPLAINED",
+      "expected_causes": [],
+      "change_pct": -0.1125,
+      "receipts": {
+        "verdict": "UNEXPLAINED",
+        "causes": [],
+        "held": true,
+        "corrected_error_pct": null
+      },
+      "detectors_only": {
+        "causes": [],
+        "held": false,
+        "verdict": ""
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 445.8,
+      "pass": true
+    },
+    {
+      "seed": 33,
+      "scenario": "healthy",
+      "kind": "control",
+      "expected_verdict": "NO_INCIDENT",
+      "expected_causes": [],
+      "change_pct": 0.011,
+      "receipts": {
+        "verdict": "NO_INCIDENT",
+        "causes": [],
+        "held": false,
+        "corrected_error_pct": null
+      },
+      "detectors_only": {
+        "causes": [],
+        "held": false,
+        "verdict": "NO_INCIDENT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": false,
+        "verdict": "NO_INCIDENT"
+      },
+      "ms": 556.7,
+      "pass": true
+    },
+    {
+      "seed": 33,
+      "scenario": "festival",
+      "kind": "control",
+      "expected_verdict": "REAL_CHANGE",
+      "expected_causes": [],
+      "change_pct": 0.2593,
+      "receipts": {
+        "verdict": "REAL_CHANGE",
+        "causes": [],
+        "held": false,
+        "corrected_error_pct": null
+      },
+      "detectors_only": {
+        "causes": [
+          "duplicate_key"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 480.2,
+      "pass": true
+    },
+    {
+      "seed": 33,
+      "scenario": "unit_paise",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "unit_scale"
+      ],
+      "change_pct": 3.55,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "unit_scale"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "unit_scale"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 453.8,
+      "pass": true
+    },
+    {
+      "seed": 33,
+      "scenario": "duplicate_load",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "duplicate_key"
+      ],
+      "change_pct": 0.1316,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "duplicate_key"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "duplicate_key"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 541.3,
+      "pass": true
+    },
+    {
+      "seed": 33,
+      "scenario": "join_fanout",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "key_fanout"
+      ],
+      "change_pct": 0.2296,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "key_fanout"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "key_fanout"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 494.5,
+      "pass": true
+    },
+    {
+      "seed": 33,
+      "scenario": "stale_fx",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "stale_feed"
+      ],
+      "change_pct": -0.0608,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "stale_feed"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.007
+      },
+      "detectors_only": {
+        "causes": [
+          "stale_feed"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": false,
+        "verdict": "NO_INCIDENT"
+      },
+      "ms": 466.1,
+      "pass": true
+    },
+    {
+      "seed": 33,
+      "scenario": "ist_utc",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "clock_shift"
+      ],
+      "change_pct": -0.1577,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "clock_shift"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "clock_shift"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 438.9,
+      "pass": true
+    },
+    {
+      "seed": 33,
+      "scenario": "new_code",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "orphan_code"
+      ],
+      "change_pct": -0.163,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "orphan_code"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "orphan_code"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": true,
+        "verdict": "UNEXPLAINED"
+      },
+      "ms": 436.3,
+      "pass": true
+    },
+    {
+      "seed": 33,
+      "scenario": "masked_pair",
+      "kind": "fault",
+      "expected_verdict": "PROVEN_FAULT",
+      "expected_causes": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "change_pct": 0.0455,
+      "receipts": {
+        "verdict": "PROVEN_FAULT",
+        "causes": [
+          "clock_shift",
+          "duplicate_key"
+        ],
+        "held": true,
+        "corrected_error_pct": 0.0
+      },
+      "detectors_only": {
+        "causes": [
+          "duplicate_key",
+          "clock_shift"
+        ],
+        "held": true,
+        "verdict": "PROVEN_FAULT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": false,
+        "verdict": "NO_INCIDENT"
+      },
+      "ms": 601.8,
+      "pass": true
+    },
+    {
+      "seed": 33,
+      "scenario": "unknown_discount",
+      "kind": "unknown",
+      "expected_verdict": "UNEXPLAINED",
+      "expected_causes": [],
+      "change_pct": -0.0882,
+      "receipts": {
+        "verdict": "NO_INCIDENT",
+        "causes": [],
+        "held": false,
+        "corrected_error_pct": null
+      },
+      "detectors_only": {
+        "causes": [],
+        "held": false,
+        "verdict": "NO_INCIDENT"
+      },
+      "threshold_alert": {
+        "causes": [],
+        "held": false,
+        "verdict": "NO_INCIDENT"
+      },
+      "ms": 396.8,
+      "pass": false
+    }
+  ]
+}

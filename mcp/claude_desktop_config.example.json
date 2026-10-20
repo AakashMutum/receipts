@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "exasol_receipts": {
+      "command": "uvx",
+      "args": ["exasol-mcp-server@latest"],
+      "env": {
+        "EXA_DSN": "localhost:8563",
+        "EXA_USER": "sys",
+        "EXA_PASSWORD": "exasol"
+      }
+    }
+  }
+}

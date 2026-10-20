@@ -1,0 +1,72 @@
+-- The revenue pipeline. Six views between the raw sources and the number on the
+-- finance dashboard. Rendered into PIPE for production and into sandbox schemas
+-- for undo tests, where one source at a time is swapped for a corrected one.
+--
+-- Contract: PAYMENTS.CAPTURED_AT is UTC and PAYMENTS.AMOUNT is in rupees.
+
+CREATE OR REPLACE VIEW {{ schema }}.STG_PAYMENTS AS
+SELECT
+  p.PAYMENT_ID,
+  p.ORDER_ID,
+  p.BATCH_DAY,
+  p.GATEWAY,
+  p.CURRENCY_CODE,
+  p.AMOUNT,
+  {{ add_minutes('p.CAPTURED_AT', 330) }} AS CAPTURED_AT_IST,
+  CAST({{ add_minutes('p.CAPTURED_AT', 330) }} AS DATE) AS TXN_DAY
+FROM {{ src.PAYMENTS }} p
+WHERE p.PAY_STATUS = 'CAPTURED';
+
+CREATE OR REPLACE VIEW {{ schema }}.STG_ORDERS AS
+SELECT
+  o.ORDER_ID,
+  o.MERCHANT_ID,
+  o.CITY,
+  o.CATEGORY_CODE,
+  o.CHANNEL
+FROM {{ src.ORDERS }} o;
+
+CREATE OR REPLACE VIEW {{ schema }}.DIM_MERCHANT AS
+SELECT
+  m.MERCHANT_ID,
+  m.MERCHANT_NAME,
+  m.TIER
+FROM {{ src.MERCHANTS }} m;
+
+CREATE OR REPLACE VIEW {{ schema }}.DIM_CATEGORY AS
+SELECT
+  c.CATEGORY_CODE,
+  c.CATEGORY_NAME
+FROM {{ src.CATEGORY_MAP }} c;
+
+CREATE OR REPLACE VIEW {{ schema }}.FX_DAILY AS
+SELECT
+  f.RATE_DAY,
+  f.CURRENCY_CODE,
+  f.INR_PER_UNIT
+FROM {{ src.FX_RATES }} f;
+
+CREATE OR REPLACE VIEW {{ schema }}.FCT_REVENUE AS
+SELECT
+  s.TXN_DAY,
+  s.PAYMENT_ID,
+  o.CITY,
+  c.CATEGORY_NAME,
+  o.CHANNEL,
+  s.GATEWAY,
+  s.CURRENCY_CODE,
+  m.TIER,
+  s.AMOUNT * COALESCE(f.INR_PER_UNIT, 1) AS REVENUE_INR
+FROM {{ schema }}.STG_PAYMENTS s
+JOIN {{ schema }}.STG_ORDERS o ON o.ORDER_ID = s.ORDER_ID
+JOIN {{ schema }}.DIM_MERCHANT m ON m.MERCHANT_ID = o.MERCHANT_ID
+JOIN {{ schema }}.DIM_CATEGORY c ON c.CATEGORY_CODE = o.CATEGORY_CODE
+LEFT JOIN {{ schema }}.FX_DAILY f ON f.RATE_DAY = s.TXN_DAY AND f.CURRENCY_CODE = s.CURRENCY_CODE;
+
+CREATE OR REPLACE VIEW {{ schema }}.DAILY_REVENUE AS
+SELECT
+  r.TXN_DAY,
+  SUM(r.REVENUE_INR) AS REVENUE_INR,
+  COUNT(*) AS TXN_COUNT
+FROM {{ schema }}.FCT_REVENUE r
+GROUP BY r.TXN_DAY;

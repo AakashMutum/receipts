@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Receipts</title>
+<meta name="description" content="Holds a moving number back, proves why it moved, and tells people and AI agents whether to trust it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230c3d51'/%3E%3Cpath d='M8 7h16v19l-2.7-2-2.6 2-2.7-2-2.7 2-2.6-2L8 26z' fill='%23f4f5ef'/%3E%3Crect x='11' y='12' width='10' height='2' fill='%236ab541'/%3E%3Crect x='11' y='16' width='7' height='2' fill='%230c3d51'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the case</a>
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="mark" href="/" aria-label="Receipts home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 4h18v24l-3-2.2-3 2.2-3-2.2-3 2.2-3-2.2-3 2.2z" fill="currentColor"/><rect x="11" y="10" width="10" height="2.4" fill="var(--green)"/><rect x="11" y="15" width="7" height="2.4" fill="var(--navy)"/></svg>
+      <span>Receipts</span>
+    </a>
+    <p class="bar-tag">Proof for the numbers your business runs on</p>
+    <div class="chips" id="chips"></div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero wrap" aria-labelledby="metric-title">
+    <div class="number-col">
+      <h1 id="metric-title" class="metric-title">Daily revenue on the finance dashboard, <span id="day-label">today</span></h1>
+      <div class="big" id="big" aria-live="polite">
+        <span class="big-value" id="big-value">&nbsp;</span>
+      </div>
+      <div class="status" id="status" role="status"></div>
+      <figure class="trend">
+        <div id="trend" class="trend-svg"></div>
+        <figcaption id="trend-cap" class="trend-cap"></figcaption>
+      </figure>
+    </div>
+
+    <aside class="break" aria-labelledby="break-title">
+      <h2 id="break-title">Land tonight's batch</h2>
+      <p class="hint">Pick what happens upstream. Receipts checks the batch before the dashboard sees it.</p>
+      <div class="scenarios" id="scenarios" role="radiogroup" aria-labelledby="break-title"></div>
+      <button class="go" id="go" type="button">Land batch and run the gate</button>
+    </aside>
+  </section>
+
+  <section class="case wrap" id="case" aria-labelledby="case-title" hidden>
+    <h2 id="case-title" class="sec-title">The receipt</h2>
+    <div class="case-grid">
+      <div class="slot">
+        <article class="paper" id="paper"></article>
+      </div>
+      <div class="proof">
+        <section class="card" aria-labelledby="where-title">
+          <h3 id="where-title">Where it moved</h3>
+          <p class="sub" id="where-sub"></p>
+          <div id="where"></div>
+        </section>
+        <section class="card" aria-labelledby="undo-title">
+          <h3 id="undo-title">Undo test</h3>
+          <p class="sub" id="undo-sub"></p>
+          <div id="undo"></div>
+        </section>
+        <section class="card" aria-labelledby="lineage-title">
+          <h3 id="lineage-title">Lineage, read from the database catalog</h3>
+          <p class="sub" id="lineage-sub"></p>
+          <div id="lineage" class="lineage"></div>
+        </section>
+        <section class="card" id="fix-card" aria-labelledby="fix-title" hidden>
+          <h3 id="fix-title">Proposed fix</h3>
+          <p class="sub">The exact change the undo test proved. Nothing is published until a person approves it.</p>
+          <pre class="diff" id="diff" tabindex="0"></pre>
+          <div class="approve-row">
+            <button class="approve" id="approve" type="button">Approve and publish corrected value</button>
+            <span class="approve-note" id="approve-note"></span>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <section class="agents wrap" aria-labelledby="agents-title">
+    <div class="agents-head">
+      <h2 id="agents-title" class="sec-title">Ask an AI agent</h2>
+      <p class="sub">Agents reach Exasol through the MCP server. One reads the pipeline. The other reads <code>PUB.METRIC_TRUST</code> first.</p>
+      <button class="ask" id="ask" type="button">Ask both agents</button>
+    </div>
+    <p class="question" id="question"></p>
+    <div class="agent-grid">
+      <article class="agent naive">
+        <h3>Reads the pipeline</h3>
+        <p class="answer" id="naive-answer">Ask a question to see the answer.</p>
+        <details><summary>SQL it ran</summary><pre id="naive-sql"></pre></details>
+      </article>
+      <article class="agent trusted">
+        <h3>Checks trust first</h3>
+        <p class="answer" id="trusted-answer">Ask a question to see the answer.</p>
+        <details><summary>SQL it ran</summary><pre id="trusted-sql"></pre></details>
+      </article>
+    </div>
+  </section>
+
+  <section class="evidence wrap" aria-labelledby="eval-title">
+    <div class="ev-grid">
+      <div>
+        <h2 id="eval-title" class="sec-title">Scored against ground truth</h2>
+        <p class="sub" id="eval-sub"></p>
+        <div class="table-scroll"><table class="score" id="score"></table></div>
+      </div>
+      <div>
+        <h2 class="sec-title">Where the time went</h2>
+        <p class="sub" id="time-sub"></p>
+        <ol class="timings" id="timings"></ol>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot wrap">
+  <p>Receipts is open source under the MIT licence. All data here is synthetic. The README covers the run guide, the evaluation and what Receipts does not solve.</p>
+</footer>
+
+<div class="toast" id="toast" role="alert" hidden></div>
+<script src="/static/app.js" defer></script>
+</body>
+</html>

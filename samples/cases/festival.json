@@ -1,0 +1,870 @@
+{
+  "case_id": "RC-20261020-4564CD",
+  "metric": "daily_revenue_inr",
+  "metric_label": "Daily revenue (INR)",
+  "day": "2026-10-20",
+  "day_label": "Tue 20 Oct 2026",
+  "opened_at": "2026-10-20T10:41:47",
+  "scenario": {
+    "id": "festival",
+    "title": "Real festival surge",
+    "story": "Demand really is up about 22% on a festival evening, with a burst of payment retries. The number is right, and Receipts must say so.",
+    "kind": "control"
+  },
+  "verdict": "REAL_CHANGE",
+  "trust_status": "REAL_CHANGE",
+  "anomaly": true,
+  "values": {
+    "candidate": 40252555.30537577,
+    "baseline": 33237698.514879707,
+    "sd": 671007.477114847,
+    "band_low": 31224676.083535165,
+    "band_high": 35250720.94622425,
+    "corrected": null,
+    "change_pct": 0.21105121906547417,
+    "z": 10.454215533719644,
+    "last_trusted_value": 32718706.384350058,
+    "last_trusted_day": "2026-10-19"
+  },
+  "checks": {
+    "volume": {
+      "volume_ratio": 1.1873,
+      "value_ratio": 1.2111,
+      "ticket_ratio": 1.02,
+      "ok": true
+    },
+    "reconciliation": {
+      "ratio_today": 1.0,
+      "ratio_baseline": 1.0,
+      "ok": true,
+      "sql": "SELECT r.BATCH_DAY, r.RAW_PAYMENTS, d.TXN_COUNT\nFROM (SELECT BATCH_DAY, COUNT(DISTINCT PAYMENT_ID) AS RAW_PAYMENTS FROM RAW.PAYMENTS\n      WHERE PAY_STATUS = 'CAPTURED' AND BATCH_DAY >= CAST(DATE '2026-10-20' + CAST(-14 AS INTEGER) AS DATE) AND BATCH_DAY <= DATE '2026-10-20'\n      GROUP BY BATCH_DAY) r\nLEFT JOIN PIPE.DAILY_REVENUE d ON d.TXN_DAY = r.BATCH_DAY\nORDER BY r.BATCH_DAY",
+      "ms": 145.8
+    }
+  },
+  "suspects": [
+    {
+      "id": "unit_scale",
+      "title": "Unit change",
+      "fired": false,
+      "summary": "Median payment amount per gateway is within the usual range everywhere.",
+      "engine": "sql",
+      "blamed": {
+        "table": "RAW.PAYMENTS",
+        "column": "AMOUNT"
+      },
+      "level": "value",
+      "slice": {},
+      "slice_text": "whole batch",
+      "metrics": {},
+      "sql": "SELECT p.GATEWAY, p.CURRENCY_CODE,\n  MEDIAN(CASE WHEN p.BATCH_DAY = DATE '2026-10-20' THEN p.AMOUNT END) AS MED_TODAY,\n  MEDIAN(CASE WHEN p.BATCH_DAY < DATE '2026-10-20' THEN p.AMOUNT END) AS MED_BASE,\n  SUM(CASE WHEN p.BATCH_DAY = DATE '2026-10-20' THEN 1 ELSE 0 END) AS N_TODAY\nFROM RAW.PAYMENTS p\nWHERE p.BATCH_DAY >= CAST(DATE '2026-10-20' + CAST(-14 AS INTEGER) AS DATE) AND p.BATCH_DAY <= DATE '2026-10-20' AND p.PAY_STATUS = 'CAPTURED'\nGROUP BY p.GATEWAY, p.CURRENCY_CODE\nORDER BY p.GATEWAY, p.CURRENCY_CODE",
+      "ms": 19.9,
+      "outcome": "NOT_FIRED",
+      "rules": [],
+      "undo": null,
+      "reason": "",
+      "correction_note": ""
+    },
+    {
+      "id": "duplicate_key",
+      "title": "Duplicate rows",
+      "fired": true,
+      "summary": "811 payment IDs appear more than once in today's batch, 6.8x the usual rate. Most repeats sit in F06, F03, F04.",
+      "engine": "sql",
+      "blamed": {
+        "table": "RAW.PAYMENTS",
+        "column": "PAYMENT_ID"
+      },
+      "level": "row",
+      "slice": {
+        "LOAD_FILE": "F06, F03, F04"
+      },
+      "slice_text": "load file F06, F03, F04",
+      "metrics": {
+        "dup_keys_today": 811,
+        "extra_rows_today": 813,
+        "dup_keys_per_day_baseline": 119.6,
+        "by_load_file": [
+          {
+            "load_file": "F06",
+            "dup_rows": 222
+          },
+          {
+            "load_file": "F03",
+            "dup_rows": 220
+          },
+          {
+            "load_file": "F04",
+            "dup_rows": 214
+          },
+          {
+            "load_file": "F05",
+            "dup_rows": 208
+          },
+          {
+            "load_file": "F08",
+            "dup_rows": 202
+          },
+          {
+            "load_file": "F02",
+            "dup_rows": 194
+          },
+          {
+            "load_file": "F01",
+            "dup_rows": 182
+          },
+          {
+            "load_file": "F07",
+            "dup_rows": 182
+          }
+        ]
+      },
+      "sql": "SELECT x.IS_TODAY, COUNT(*) AS DUP_KEYS, SUM(x.N - 1) AS EXTRA_ROWS\nFROM (\n  SELECT p.PAYMENT_ID, CASE WHEN p.BATCH_DAY = DATE '2026-10-20' THEN 1 ELSE 0 END AS IS_TODAY, COUNT(*) AS N\n  FROM RAW.PAYMENTS p\n  WHERE p.BATCH_DAY >= CAST(DATE '2026-10-20' + CAST(-14 AS INTEGER) AS DATE) AND p.BATCH_DAY <= DATE '2026-10-20'\n  GROUP BY p.PAYMENT_ID, CASE WHEN p.BATCH_DAY = DATE '2026-10-20' THEN 1 ELSE 0 END\n  HAVING COUNT(*) > 1\n) x\nGROUP BY x.IS_TODAY;\n\nSELECT p.LOAD_FILE, COUNT(*) AS DUP_ROWS\nFROM RAW.PAYMENTS p\nJOIN (SELECT PAYMENT_ID FROM RAW.PAYMENTS WHERE BATCH_DAY = DATE '2026-10-20' GROUP BY PAYMENT_ID HAVING COUNT(*) > 1) k\n  ON k.PAYMENT_ID = p.PAYMENT_ID\nWHERE p.BATCH_DAY = DATE '2026-10-20'\nGROUP BY p.LOAD_FILE\nORDER BY DUP_ROWS DESC",
+      "ms": 41.1,
+      "outcome": "REJECTED",
+      "rules": [
+        {
+          "rule": "Evidence names a column and a slice",
+          "passed": true,
+          "detail": "RAW.PAYMENTS.PAYMENT_ID, load file F06, F03, F04"
+        },
+        {
+          "rule": "That column feeds this metric",
+          "passed": true,
+          "detail": "RAW.PAYMENTS feeds the metric's rows"
+        },
+        {
+          "rule": "Undoing it moves today's number",
+          "passed": false,
+          "detail": "+0.00% when undone in the sandbox"
+        },
+        {
+          "rule": "History stays as published",
+          "passed": true,
+          "detail": "unchanged, max difference 0.000%"
+        }
+      ],
+      "undo": {
+        "value": 40252555.30537577,
+        "history_check": "UNCHANGED",
+        "history_max_diff_pct": 0.0,
+        "series": {
+          "2026-10-06": 33502340.208548084,
+          "2026-10-07": 33947257.3372962,
+          "2026-10-08": 32677325.63837435,
+          "2026-10-09": 32518149.700144026,
+          "2026-10-10": 34085025.104407035,
+          "2026-10-11": 32881261.210373968,
+          "2026-10-12": 34340298.34000002,
+          "2026-10-13": 33480477.027158044,
+          "2026-10-14": 32605543.91523795,
+          "2026-10-15": 33127196.878040127,
+          "2026-10-16": 34132195.91313197,
+          "2026-10-17": 32098996.917139962,
+          "2026-10-18": 33213004.634114094,
+          "2026-10-19": 32718706.384350058,
+          "2026-10-20": 40252555.30537577
+        },
+        "sources": {
+          "PAYMENTS": "RECEIPTS_SBX.FIX_PAYMENTS_1"
+        },
+        "ms": 104.6
+      },
+      "reason": "Undoing it changes today's revenue by +0.00%, so it cannot explain a +21.1% move.",
+      "correction_note": "Keep one row per PAYMENT_ID in today's batch, the latest attempt.",
+      "move_pct": 0.0,
+      "eligible": false
+    },
+    {
+      "id": "key_fanout",
+      "title": "Join fan-out",
+      "fired": false,
+      "summary": "Every dimension key the revenue joins on is unique.",
+      "engine": "sql",
+      "blamed": {
+        "table": "RAW.MERCHANTS",
+        "column": "MERCHANT_ID"
+      },
+      "level": "row",
+      "slice": {},
+      "slice_text": "whole batch",
+      "metrics": {},
+      "sql": "SELECT 'RAW.MERCHANTS' AS TABLE_NAME, 'MERCHANT_ID' AS KEY_COLUMN, COUNT(*) AS DUP_KEYS, COALESCE(SUM(x.N), 0) AS DIM_ROWS FROM (SELECT MERCHANT_ID, COUNT(*) AS N FROM RAW.MERCHANTS GROUP BY MERCHANT_ID HAVING COUNT(*) > 1) x\nUNION ALL\nSELECT 'RAW.CATEGORY_MAP' AS TABLE_NAME, 'CATEGORY_CODE' AS KEY_COLUMN, COUNT(*) AS DUP_KEYS, COALESCE(SUM(x.N), 0) AS DIM_ROWS FROM (SELECT CATEGORY_CODE, COUNT(*) AS N FROM RAW.CATEGORY_MAP GROUP BY CATEGORY_CODE HAVING COUNT(*) > 1) x",
+      "ms": 2.3,
+      "outcome": "NOT_FIRED",
+      "rules": [],
+      "undo": null,
+      "reason": "",
+      "correction_note": ""
+    },
+    {
+      "id": "stale_feed",
+      "title": "Stale reference feed",
+      "fired": false,
+      "summary": "Every foreign currency paid in today has a rate for today.",
+      "engine": "sql",
+      "blamed": {
+        "table": "RAW.FX_RATES",
+        "column": "RATE_DAY"
+      },
+      "level": "value",
+      "slice": {},
+      "slice_text": "whole batch",
+      "metrics": {},
+      "sql": "SELECT p.CURRENCY_CODE, COUNT(*) AS PAYMENTS_TODAY, MAX(f.LAST_RATE_DAY) AS LAST_RATE_DAY\nFROM RAW.PAYMENTS p\nLEFT JOIN (SELECT CURRENCY_CODE, MAX(RATE_DAY) AS LAST_RATE_DAY FROM RAW.FX_RATES GROUP BY CURRENCY_CODE) f\n  ON f.CURRENCY_CODE = p.CURRENCY_CODE\nWHERE p.BATCH_DAY = DATE '2026-10-20' AND p.CURRENCY_CODE <> 'INR' AND p.PAY_STATUS = 'CAPTURED'\nGROUP BY p.CURRENCY_CODE",
+      "ms": 4.1,
+      "outcome": "NOT_FIRED",
+      "rules": [],
+      "undo": null,
+      "reason": "",
+      "correction_note": ""
+    },
+    {
+      "id": "clock_shift",
+      "title": "Clock shift",
+      "fired": false,
+      "summary": "Each gateway's time-of-day profile matches its baseline.",
+      "engine": "same UDF source, local shim",
+      "blamed": {
+        "table": "RAW.PAYMENTS",
+        "column": "CAPTURED_AT"
+      },
+      "level": "value",
+      "slice": {},
+      "slice_text": "whole batch",
+      "metrics": {},
+      "sql": "SELECT x.SLICE_KEY, x.IS_TODAY, x.BIN_IDX, CAST(COUNT(*) AS DOUBLE) AS CNT\nFROM (\n  SELECT p.GATEWAY AS SLICE_KEY,\n    CASE WHEN p.BATCH_DAY = DATE '2026-10-20' THEN TRUE ELSE FALSE END AS IS_TODAY,\n    CAST(EXTRACT(HOUR FROM (p.CAPTURED_AT + to_minutes(CAST(330 AS BIGINT)))) * 2 + FLOOR(EXTRACT(MINUTE FROM (p.CAPTURED_AT + to_minutes(CAST(330 AS BIGINT)))) / 30) AS INTEGER) AS BIN_IDX\n  FROM RAW.PAYMENTS p\n  WHERE p.BATCH_DAY >= CAST(DATE '2026-10-20' + CAST(-14 AS INTEGER) AS DATE) AND p.BATCH_DAY <= DATE '2026-10-20' AND p.PAY_STATUS = 'CAPTURED'\n) x\nGROUP BY x.SLICE_KEY, x.IS_TODAY, x.BIN_IDX",
+      "ms": 32.6,
+      "outcome": "NOT_FIRED",
+      "rules": [],
+      "undo": null,
+      "reason": "",
+      "correction_note": ""
+    },
+    {
+      "id": "orphan_code",
+      "title": "Unmapped codes",
+      "fired": false,
+      "summary": "Every category code in today's orders exists in the mapping table.",
+      "engine": "sql",
+      "blamed": {
+        "table": "RAW.ORDERS",
+        "column": "CATEGORY_CODE"
+      },
+      "level": "value",
+      "slice": {},
+      "slice_text": "whole batch",
+      "metrics": {},
+      "sql": "SELECT o.CATEGORY_CODE, COUNT(*) AS ORDERS_TODAY\nFROM RAW.ORDERS o\nLEFT JOIN RAW.CATEGORY_MAP m ON m.CATEGORY_CODE = o.CATEGORY_CODE\nWHERE o.BATCH_DAY = DATE '2026-10-20' AND m.CATEGORY_CODE IS NULL\nGROUP BY o.CATEGORY_CODE\nORDER BY ORDERS_TODAY DESC",
+      "ms": 3.3,
+      "outcome": "NOT_FIRED",
+      "rules": [],
+      "undo": null,
+      "reason": "",
+      "correction_note": ""
+    }
+  ],
+  "confirmed": [],
+  "combined_undo": null,
+  "decomposition": {
+    "sql": "SELECT\n  GROUPING_ID(CITY, CATEGORY_NAME, CHANNEL, GATEWAY, CURRENCY_CODE, TIER) AS GID,\nf.CITY,\nf.CATEGORY_NAME,\nf.CHANNEL,\nf.GATEWAY,\nf.CURRENCY_CODE,\nf.TIER,\nSUM(CASE WHEN f.TXN_DAY = DATE '2026-10-20' THEN f.REVENUE_INR ELSE 0 END) AS CUR_VALUE,\n  SUM(CASE WHEN f.TXN_DAY < DATE '2026-10-20' THEN f.REVENUE_INR ELSE 0 END) / 14 AS BASE_VALUE,\n  COUNT(*) AS N_ROWS\nFROM PIPE.FCT_REVENUE f\nWHERE f.TXN_DAY >= CAST(DATE '2026-10-20' + CAST(-14 AS INTEGER) AS DATE) AND f.TXN_DAY <= DATE '2026-10-20'\nGROUP BY CUBE (f.CITY, f.CATEGORY_NAME, f.CHANNEL, f.GATEWAY, f.CURRENCY_CODE, f.TIER)",
+    "ms": 813.5,
+    "hypotheses": 11074,
+    "grouping_sets": 64,
+    "rows_in_scope": 304048,
+    "total": {
+      "cur": 40252555.30537577,
+      "base": 33237698.514879517,
+      "delta": 7014856.7904962525
+    },
+    "top_single": [
+      {
+        "dims": {
+          "CURRENCY_CODE": "INR"
+        },
+        "cur": 36702889.03,
+        "base": 30250130.23,
+        "delta": 6452758.8,
+        "n_rows": 276754,
+        "share": 0.9199,
+        "pct_change": 0.2133
+      },
+      {
+        "dims": {
+          "CHANNEL": "APP"
+        },
+        "cur": 24983812.9941,
+        "base": 20562804.6984,
+        "delta": 4421008.2957,
+        "n_rows": 188052,
+        "share": 0.6302,
+        "pct_change": 0.215
+      },
+      {
+        "dims": {
+          "GATEWAY": "GW_A"
+        },
+        "cur": 20141302.6,
+        "base": 16587555.8764,
+        "delta": 3553746.7236,
+        "n_rows": 151624,
+        "share": 0.5066,
+        "pct_change": 0.2142
+      },
+      {
+        "dims": {
+          "TIER": "BRONZE"
+        },
+        "cur": 19741487.3439,
+        "base": 16233005.0208,
+        "delta": 3508482.3231,
+        "n_rows": 148289,
+        "share": 0.5002,
+        "pct_change": 0.2161
+      },
+      {
+        "dims": {
+          "CATEGORY_NAME": "Electronics"
+        },
+        "cur": 14367892.2443,
+        "base": 11467179.8865,
+        "delta": 2900712.3578,
+        "n_rows": 45955,
+        "share": 0.4135,
+        "pct_change": 0.253
+      },
+      {
+        "dims": {
+          "GATEWAY": "GW_B"
+        },
+        "cur": 14818278.04,
+        "base": 12150964.2293,
+        "delta": 2667313.8107,
+        "n_rows": 111289,
+        "share": 0.3802,
+        "pct_change": 0.2195
+      },
+      {
+        "dims": {
+          "TIER": "SILVER"
+        },
+        "cur": 14267857.5951,
+        "base": 11961665.0288,
+        "delta": 2306192.5663,
+        "n_rows": 109536,
+        "share": 0.3288,
+        "pct_change": 0.1928
+      },
+      {
+        "dims": {
+          "CHANNEL": "WEB"
+        },
+        "cur": 11954407.8058,
+        "base": 10012061.6587,
+        "delta": 1942346.1471,
+        "n_rows": 91462,
+        "share": 0.2769,
+        "pct_change": 0.194
+      }
+    ],
+    "top_pairs": [
+      {
+        "dims": {
+          "CHANNEL": "APP",
+          "CURRENCY_CODE": "INR"
+        },
+        "cur": 22751558.15,
+        "base": 18724108.8229,
+        "delta": 4027449.3271,
+        "n_rows": 171243,
+        "share": 0.5741,
+        "pct_change": 0.2151
+      },
+      {
+        "dims": {
+          "GATEWAY": "GW_A",
+          "CURRENCY_CODE": "INR"
+        },
+        "cur": 20141302.6,
+        "base": 16587555.8764,
+        "delta": 3553746.7236,
+        "n_rows": 151624,
+        "share": 0.5066,
+        "pct_change": 0.2142
+      },
+      {
+        "dims": {
+          "CURRENCY_CODE": "INR",
+          "TIER": "BRONZE"
+        },
+        "cur": 17948066.13,
+        "base": 14793409.4557,
+        "delta": 3154656.6743,
+        "n_rows": 134968,
+        "share": 0.4497,
+        "pct_change": 0.2132
+      },
+      {
+        "dims": {
+          "GATEWAY": "GW_B",
+          "CURRENCY_CODE": "INR"
+        },
+        "cur": 14818278.04,
+        "base": 12150964.2293,
+        "delta": 2667313.8107,
+        "n_rows": 111289,
+        "share": 0.3802,
+        "pct_change": 0.2195
+      },
+      {
+        "dims": {
+          "CATEGORY_NAME": "Electronics",
+          "CURRENCY_CODE": "INR"
+        },
+        "cur": 13052262.27,
+        "base": 10435215.7357,
+        "delta": 2617046.5343,
+        "n_rows": 41804,
+        "share": 0.3731,
+        "pct_change": 0.2508
+      },
+      {
+        "dims": {
+          "CURRENCY_CODE": "INR",
+          "TIER": "SILVER"
+        },
+        "cur": 13151660.83,
+        "base": 10865887.9493,
+        "delta": 2285772.8807,
+        "n_rows": 99776,
+        "share": 0.3258,
+        "pct_change": 0.2104
+      },
+      {
+        "dims": {
+          "CHANNEL": "APP",
+          "GATEWAY": "GW_A"
+        },
+        "cur": 12511104.01,
+        "base": 10255023.1971,
+        "delta": 2256080.8129,
+        "n_rows": 93684,
+        "share": 0.3216,
+        "pct_change": 0.22
+      },
+      {
+        "dims": {
+          "CHANNEL": "APP",
+          "TIER": "BRONZE"
+        },
+        "cur": 12207186.012,
+        "base": 10067555.9085,
+        "delta": 2139630.1035,
+        "n_rows": 91920,
+        "share": 0.305,
+        "pct_change": 0.2125
+      }
+    ],
+    "by_dimension": {
+      "CITY": {
+        "value": "Hyderabad",
+        "share": 0.21350429076119043,
+        "pct_change": 0.2515171139153888,
+        "values": [
+          {
+            "value": "Hyderabad",
+            "delta": 1497702.023846223,
+            "cur": 7452374.453611997,
+            "base": 5954672.429765774,
+            "pct_change": 0.2515171139153888
+          },
+          {
+            "value": "Bengaluru",
+            "delta": 1329907.6188684646,
+            "cur": 7509246.5618309835,
+            "base": 6179338.942962519,
+            "pct_change": 0.21521842888761755
+          },
+          {
+            "value": "Delhi",
+            "delta": 1076469.1165975146,
+            "cur": 6988973.399994997,
+            "base": 5912504.283397483,
+            "pct_change": 0.1820665262975415
+          },
+          {
+            "value": "Mumbai",
+            "delta": 1023152.1860874128,
+            "cur": 6404364.559638989,
+            "base": 5381212.373551576,
+            "pct_change": 0.1901341398670978
+          },
+          {
+            "value": "Kolkata",
+            "delta": 624856.5207531387,
+            "cur": 2983359.7260429985,
+            "base": 2358503.20528986,
+            "pct_change": 0.26493774498658945
+          },
+          {
+            "value": "Chennai",
+            "delta": 606902.2147023515,
+            "cur": 3329408.4192789933,
+            "base": 2722506.204576642,
+            "pct_change": 0.22292041563840134
+          },
+          {
+            "value": "Pune",
+            "delta": 580390.5581657807,
+            "cur": 3413863.026174997,
+            "base": 2833472.4680092162,
+            "pct_change": 0.2048336677764017
+          },
+          {
+            "value": "Ahmedabad",
+            "delta": 275476.5514754299,
+            "cur": 2170965.158802001,
+            "base": 1895488.607326571,
+            "pct_change": 0.14533273922651885
+          }
+        ]
+      },
+      "CATEGORY_NAME": {
+        "value": "Electronics",
+        "share": 0.4135098469478802,
+        "pct_change": 0.25295777920300366,
+        "values": [
+          {
+            "value": "Electronics",
+            "delta": 2900712.3577994034,
+            "cur": 14367892.244255966,
+            "base": 11467179.886456562,
+            "pct_change": 0.25295777920300366
+          },
+          {
+            "value": "Fashion",
+            "delta": 1652720.0293652704,
+            "cur": 9185078.107463988,
+            "base": 7532358.078098717,
+            "pct_change": 0.2194160198213044
+          },
+          {
+            "value": "Home",
+            "delta": 1253387.2117693545,
+            "cur": 7999070.245354014,
+            "base": 6745683.03358466,
+            "pct_change": 0.18580582656035408
+          },
+          {
+            "value": "Grocery",
+            "delta": 680862.3709280351,
+            "cur": 4744010.438221017,
+            "base": 4063148.067292982,
+            "pct_change": 0.16757015980016957
+          },
+          {
+            "value": "Beauty",
+            "delta": 354280.5446955059,
+            "cur": 2874374.8141140067,
+            "base": 2520094.269418501,
+            "pct_change": 0.14058225876496847
+          },
+          {
+            "value": "Books",
+            "delta": 172894.27593878738,
+            "cur": 1082129.455967,
+            "base": 909235.1800282126,
+            "pct_change": 0.1901535265424097
+          }
+        ]
+      },
+      "CHANNEL": {
+        "value": "APP",
+        "share": 0.6302350037498489,
+        "pct_change": 0.21500025704209677,
+        "values": [
+          {
+            "value": "APP",
+            "delta": 4421008.295663059,
+            "cur": 24983812.99406596,
+            "base": 20562804.6984029,
+            "pct_change": 0.21500025704209677
+          },
+          {
+            "value": "WEB",
+            "delta": 1942346.147073213,
+            "cur": 11954407.805776937,
+            "base": 10012061.658703724,
+            "pct_change": 0.1940006177833199
+          },
+          {
+            "value": "POS",
+            "delta": 651502.3477602252,
+            "cur": 3314334.50553301,
+            "base": 2662832.1577727846,
+            "pct_change": 0.24466519448418683
+          }
+        ]
+      },
+      "GATEWAY": {
+        "value": "GW_A",
+        "share": 0.5066028900812487,
+        "pct_change": 0.21424173338408853,
+        "values": [
+          {
+            "value": "GW_A",
+            "delta": 3553746.7235714737,
+            "cur": 20141302.600000013,
+            "base": 16587555.876428539,
+            "pct_change": 0.21424173338408853
+          },
+          {
+            "value": "GW_B",
+            "delta": 2667313.8107142225,
+            "cur": 14818278.03999996,
+            "base": 12150964.229285737,
+            "pct_change": 0.2195145801092539
+          },
+          {
+            "value": "GW_INTL",
+            "delta": 562097.9904963551,
+            "cur": 3549666.2753760065,
+            "base": 2987568.2848796514,
+            "pct_change": 0.18814565455831855
+          },
+          {
+            "value": "GW_C",
+            "delta": 231698.26571428287,
+            "cur": 1743308.3899999983,
+            "base": 1511610.1242857154,
+            "pct_change": 0.1532791174071871
+          }
+        ]
+      },
+      "CURRENCY_CODE": {
+        "value": "INR",
+        "share": 0.9198703541235824,
+        "pct_change": 0.2133134221551428,
+        "values": [
+          {
+            "value": "INR",
+            "delta": 6452758.8000000045,
+            "cur": 36702889.02999985,
+            "base": 30250130.229999848,
+            "pct_change": 0.2133134221551428
+          },
+          {
+            "value": "USD",
+            "delta": 562097.9904963551,
+            "cur": 3549666.2753760065,
+            "base": 2987568.2848796514,
+            "pct_change": 0.18814565455831855
+          }
+        ]
+      },
+      "TIER": {
+        "value": "BRONZE",
+        "share": 0.5001502422460541,
+        "pct_change": 0.21613264571704344,
+        "values": [
+          {
+            "value": "BRONZE",
+            "delta": 3508482.323088078,
+            "cur": 19741487.34390901,
+            "base": 16233005.020820932,
+            "pct_change": 0.21613264571704344
+          },
+          {
+            "value": "SILVER",
+            "delta": 2306192.5663129855,
+            "cur": 14267857.595124979,
+            "base": 11961665.028811993,
+            "pct_change": 0.19279862466956504
+          },
+          {
+            "value": "GOLD",
+            "delta": 1200181.9010953559,
+            "cur": 6243210.366342003,
+            "base": 5043028.465246648,
+            "pct_change": 0.23798832573844228
+          }
+        ]
+      }
+    }
+  },
+  "where_text": "currency code INR carries 92% of the change",
+  "lineage": {
+    "metric": "PIPE.DAILY_REVENUE.REVENUE_INR",
+    "edges": [
+      [
+        "PIPE.DIM_CATEGORY",
+        "PIPE.FCT_REVENUE"
+      ],
+      [
+        "PIPE.DIM_MERCHANT",
+        "PIPE.FCT_REVENUE"
+      ],
+      [
+        "PIPE.FCT_REVENUE",
+        "PIPE.DAILY_REVENUE"
+      ],
+      [
+        "PIPE.FX_DAILY",
+        "PIPE.FCT_REVENUE"
+      ],
+      [
+        "PIPE.STG_ORDERS",
+        "PIPE.FCT_REVENUE"
+      ],
+      [
+        "PIPE.STG_PAYMENTS",
+        "PIPE.FCT_REVENUE"
+      ],
+      [
+        "RAW.CATEGORY_MAP",
+        "PIPE.DIM_CATEGORY"
+      ],
+      [
+        "RAW.FX_RATES",
+        "PIPE.FX_DAILY"
+      ],
+      [
+        "RAW.MERCHANTS",
+        "PIPE.DIM_MERCHANT"
+      ],
+      [
+        "RAW.ORDERS",
+        "PIPE.STG_ORDERS"
+      ],
+      [
+        "RAW.PAYMENTS",
+        "PIPE.STG_PAYMENTS"
+      ]
+    ],
+    "raw_tables": [
+      "RAW.CATEGORY_MAP",
+      "RAW.FX_RATES",
+      "RAW.MERCHANTS",
+      "RAW.ORDERS",
+      "RAW.PAYMENTS"
+    ],
+    "value_columns": [
+      "RAW.FX_RATES.INR_PER_UNIT",
+      "RAW.PAYMENTS.AMOUNT"
+    ],
+    "row_columns": [
+      "RAW.CATEGORY_MAP.CATEGORY_CODE",
+      "RAW.FX_RATES.CURRENCY_CODE",
+      "RAW.FX_RATES.RATE_DAY",
+      "RAW.MERCHANTS.MERCHANT_ID",
+      "RAW.ORDERS.CATEGORY_CODE",
+      "RAW.ORDERS.MERCHANT_ID",
+      "RAW.ORDERS.ORDER_ID",
+      "RAW.PAYMENTS.CAPTURED_AT",
+      "RAW.PAYMENTS.CURRENCY_CODE",
+      "RAW.PAYMENTS.ORDER_ID",
+      "RAW.PAYMENTS.PAY_STATUS"
+    ],
+    "views_parsed": 7,
+    "ms": 12.1
+  },
+  "series": {
+    "published": {
+      "2026-10-06": 33502340.208548076,
+      "2026-10-07": 33947257.3372962,
+      "2026-10-08": 32677325.63837435,
+      "2026-10-09": 32518149.700144026,
+      "2026-10-10": 34085025.104407035,
+      "2026-10-11": 32881261.210373968,
+      "2026-10-12": 34340298.34000002,
+      "2026-10-13": 33480477.027158044,
+      "2026-10-14": 32605543.91523795,
+      "2026-10-15": 33127196.878040127,
+      "2026-10-16": 34132195.91313197,
+      "2026-10-17": 32098996.917139962,
+      "2026-10-18": 33213004.63411414,
+      "2026-10-19": 32718706.384350058
+    },
+    "candidate": {
+      "2026-10-06": 33502340.208548084,
+      "2026-10-07": 33947257.3372962,
+      "2026-10-08": 32677325.63837435,
+      "2026-10-09": 32518149.700144026,
+      "2026-10-10": 34085025.104407035,
+      "2026-10-11": 32881261.210373968,
+      "2026-10-12": 34340298.34000002,
+      "2026-10-13": 33480477.027158044,
+      "2026-10-14": 32605543.91523795,
+      "2026-10-15": 33127196.878040127,
+      "2026-10-16": 34132195.91313197,
+      "2026-10-17": 32098996.917139962,
+      "2026-10-18": 33213004.634114094,
+      "2026-10-19": 32718706.384350058,
+      "2026-10-20": 40252555.30537577
+    },
+    "corrected": null
+  },
+  "spill": {},
+  "fix_diff": "",
+  "backend": {
+    "backend": "duckdb",
+    "standin": true,
+    "udf": "local-shim"
+  },
+  "statements": 23,
+  "db_ms": 1239.3,
+  "explanation": {
+    "source": "template",
+    "text": "Revenue for Tue 20 Oct 2026 moved +21.1%, outside the normal range, and Receipts found no data fault behind it. Transaction volume moved with the value and every raw payment reconciles to one revenue row. One check did raise a flag (duplicate rows), but undoing it did not move the number, so it was ruled out. It was published as a verified real change."
+  },
+  "timings": [
+    {
+      "step": "Read candidate and trusted history",
+      "ms": 94.6,
+      "rows": 15,
+      "detail": null
+    },
+    {
+      "step": "Run six detectors on the incoming batch",
+      "ms": 108.9,
+      "rows": null,
+      "detail": "clock check: same UDF source, local shim"
+    },
+    {
+      "step": "Read lineage from view definitions",
+      "ms": 12.1,
+      "rows": 7,
+      "detail": null
+    },
+    {
+      "step": "Test 11,074 slices in one GROUP BY CUBE",
+      "ms": 841.2,
+      "rows": 304048,
+      "detail": null
+    },
+    {
+      "step": "Reconcile raw payments to revenue rows",
+      "ms": 146.0,
+      "rows": null,
+      "detail": null
+    },
+    {
+      "step": "Undo each suspect in a sandbox schema",
+      "ms": 104.8,
+      "rows": 1,
+      "detail": null
+    },
+    {
+      "step": "Evidence gate: find the causes that bring it back",
+      "ms": 0.0,
+      "rows": 0,
+      "detail": null
+    },
+    {
+      "step": "Write receipts back to the database",
+      "ms": 15.0,
+      "rows": null,
+      "detail": null
+    }
+  ],
+  "total_ms": 1323.1
+}
