@@ -60,7 +60,9 @@ The header now shows **Exasol** and **Python UDF in the database**. Every receip
 
 TLS: local deployments use a self-signed certificate, so certificate checks are off by default (`EXA_INSECURE=1`). Set `EXA_INSECURE=0` and use a DSN with a fingerprint for anything shared.
 
-Measured on Exasol Personal 2026.2.0-nano.3 (Windows 11, Podman on WSL2 with 6 CPUs and 2 GiB RAM, 20,000 orders a day): `receipts init` loads in about 14 s, and `receipts run ist_utc` reaches `PROVEN_FAULT` in 4.7 s end to end (3.7 s inside the database, 24 statements). The slowest steps are the `GROUP BY CUBE` over 11,074 slices (1.3 s) and the sandbox undo test (1.3 s). The full evaluation on Exasol (`receipts eval --backend exasol`, 50 runs) passes 50 of 50 with a median gate latency of 3.0 s and takes about 7 minutes. It rebuilds the database once per seed, so run `receipts init` afterwards to get the demo data back.
+Measured on Exasol Personal 2026.2.0-nano.3 (Windows 11, Podman on WSL2 with 6 CPUs and 7.7 GiB RAM visible to the VM, 20,000 orders a day): `receipts init` loads in 12 to 18 s, and `receipts run ist_utc` reaches `PROVEN_FAULT` in 4.2 s end to end (3.2 s inside the database, 26 statements; the first run after a fresh load takes about 8 s). The slowest steps are the `GROUP BY CUBE` over 11,074 slices (1.1 s) and the sandbox undo test (1.0 s). The full evaluation on Exasol (`receipts eval --backend exasol --out samples/exasol`, 50 runs) passes 50 of 50 with a median gate latency of 3.4 s and takes about 9 minutes. `receipts variants --backend exasol --seeds 11 --out samples/exasol` takes about 2 minutes. Both rebuild the database once per seed, so run `receipts init --fresh` afterwards to get the demo data back.
+
+At 100,000 orders a day (`receipts init --fresh --orders-per-day 100000`, 4.2 million payment rows, about 40 s to load and 2.5 minutes including data generation) `ist_utc` takes 6.8 s and `masked_pair` 9.7 s on the same laptop.
 
 If Exasol refuses connections after the computer has slept, the Podman machine has usually stopped. Run `podman machine start`, then `exasol start`, then `receipts doctor`.
 

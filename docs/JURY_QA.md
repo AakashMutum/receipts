@@ -45,4 +45,4 @@ On the ten scripted scenarios it shows consistency, not generality, and we say t
 A flat 14-day baseline would. The gate now learns each weekday's index from five weeks of trusted history, but only when a statistical test says the weekly pattern is real. On data with a weekday pattern it gave 63 of 63 correct verdicts across all seven weekdays. With the flat baseline the same data hid an undetected 9% fault on every weekday.
 
 **Is it fast on big data? Your demo is small.**
-A 4.3 million payment run (100,000 orders a day) on a laptop DuckDB stand-in takes 7 to 10 seconds per case with every scenario correct. We have Exasol timings on a small local install and have not claimed anything about billion-row scale.
+At 100,000 orders a day (4.2 million payment rows) on Exasol Personal on a laptop, the IST case takes 6.8 seconds (5.9 in the database, the CUBE over 1.48 million rows in 1.9) and the two-fault case 9.7 seconds, both with the right verdict. The DuckDB stand-in at the same size takes 7 to 10 seconds per case. That is the largest size we have measured, and we have not claimed anything about billion-row scale.

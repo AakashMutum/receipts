@@ -227,25 +227,40 @@ Scored against ground truth on Exasol Personal, on freshly generated data: 10 sc
 * Without the undo test, the festival retry burst gets blamed as a duplicate load every time.
 * The threshold alert never names a cause and misses the masked pair because the total looks normal.
 * The tenth scenario has no detector on purpose. Receipts holds it as `UNEXPLAINED` and names no cause, which is scored as correct.
-* Gate latency on Exasol, from batch landing to written receipt: median 3.0 s, max 6.2 s per run (the masked pair is the slowest, because it undoes two suspects).
+* Gate latency on Exasol, from batch landing to written receipt: median 3.4 s per run. 45 of 50 runs finished within 7 s; five took 7 to 27 s, spread over different seeds and scenarios, which we put down to the local container on a laptop rather than to the query plan.
+* The same 50 runs with the current code (weekday baseline included) are in [`samples/exasol/eval_report.md`](samples/exasol/eval_report.md): 50 of 50 again.
 
 ### Exasol timings for one incident
 
-`receipts run ist_utc` on Exasol Personal 2026.2.0-nano.3 (Windows 11 laptop, Podman on WSL2 with 6 CPUs and 2 GiB RAM, 20,000 orders a day, about 864,000 payment rows). Verdict `PROVEN_FAULT`, cause `clock_shift`, 24 SQL statements, 4.7 s end to end, 3.7 s of it inside the database.
+`receipts run ist_utc` on Exasol Personal 2026.2.0-nano.3 (Windows 11 laptop, Podman on WSL2 with 6 CPUs and 7.7 GiB RAM visible to the VM, 20,000 orders a day, about 844,000 payment rows). Verdict `PROVEN_FAULT`, cause `clock_shift`, 26 SQL statements, 4.2 s end to end, 3.2 s of it inside the database. The first run right after a fresh load is slower (7.8 s).
 
 | Step | Time |
 |---|---|
-| Read candidate and trusted history | 134 ms |
-| Run six detectors on the incoming batch (clock check is a Python UDF inside Exasol) | 900 ms |
-| Read lineage from view definitions (`EXA_ALL_VIEWS`) | 52 ms |
-| Test 11,074 slices over 296,484 rows in one `GROUP BY CUBE` | 1,337 ms |
-| Reconcile raw payments to revenue rows | 206 ms |
-| Undo each suspect in a sandbox schema | 1,262 ms |
-| Write receipts back to the database | 734 ms |
+| Read candidate and five weeks of trusted history | 192 ms |
+| Run six detectors on the incoming batch (clock check is a Python UDF inside Exasol) | 692 ms |
+| Read lineage from view definitions (`EXA_ALL_VIEWS`) | 44 ms |
+| Test 11,074 slices over 296,484 rows in one `GROUP BY CUBE` | 1,091 ms |
+| Reconcile raw payments to revenue rows | 354 ms |
+| Undo each suspect in a sandbox schema | 997 ms |
+| Write receipts back to the database | 761 ms |
 
-Loading the full dataset with `receipts init` takes about 14 s.
+Loading the full dataset with `receipts init` takes 12 to 18 s.
+
+At five times the volume (`receipts init --fresh --orders-per-day 100000`, 4.2 million payment rows, loaded in 40 s) on the same laptop, both cases still reach the right verdict. `ist_utc` takes 6.8 s (5.9 s in the database, CUBE over 1.48 million rows in 1.9 s) and `masked_pair` 9.7 s (8.6 s in the database, two suspects undone). Nothing larger has been measured.
 
 At a smaller sample (3,000 orders a day) Receipts passes 29 of 30. It misses the no-detector fault on one seed, because daily noise there is wider than the fault. See [`samples/eval_quick.md`](samples/eval_quick.md).
+
+## Beyond the scripted scenarios
+
+The ten scenarios were used to build and tune the detectors, so a perfect score on them shows the system is consistent, not that it generalises. To test that, `receipts variants` runs 17 held-out variants: other gateways, other factors, partial row coverage, other file counts, and two faults at once. Each run is judged against the clean value, so the question is how a miss fails, not whether the score is 100%. Full table: [`samples/variants_report.md`](samples/variants_report.md).
+
+* **Result: 26 caught, 6 held for a person, 2 published as harmless, 0 published wrong** (17 variants on 2 seeds, 34 runs). Nothing that was wrong by more than 4% was published as trusted.
+* **On Exasol** (`receipts variants --backend exasol --seeds 11`): caught 13, held 3, small 1, wrong 0, the same outcome for every variant as the stand-in on that seed. Table: [`samples/exasol/variants_report.md`](samples/exasol/variants_report.md).
+* **Known gaps, all held for a person with no cause named:** a unit change on only part of a gateway's rows (the median does not move), and a clock shift of 12 hours.
+* **One variant is published on purpose:** a one-hour clock shift on one gateway moves revenue by 1.5%, inside normal noise.
+* Writing the variants found a real bug. The unit check only recognised a factor of about 100, while the README claimed 10, 100 and 1000. It now accepts any power of ten up to 1000.
+
+Weekly pattern: real revenue has weekday and weekend levels. With five weeks of trusted history the gate learns each weekday's index when (and only when) a one-way ANOVA says the pattern is real, and compares today with what that weekday should look like. On data with a weekly pattern of up to 16% above average, the gate gave 63 of 63 correct verdicts across all seven weekdays. With the old flat 14-day baseline the same data gave 56 of 63: no false alarms, but the wider range let an undetected fault of about 9% through unnoticed on every weekday.
 
 ## Technical Notes
 
@@ -260,6 +275,7 @@ At a smaller sample (3,000 orders a day) Receipts passes 29 of 30. It misses the
 * One metric, one pipeline. Lineage parsing handles joins, filters, group by and simple expressions, not deeply nested SQL or stored procedures.
 * Corrections are hotfixes. The real fix is upstream, and Receipts records the evidence for that conversation.
 * Access control is a convention on Exasol Personal because it is single-user. On Enterprise it is a role grant.
+* Exasol itself is not started in CI, so the Exasol path is verified by hand on Exasol Personal 2026.2.0-nano.3 and by the stand-in tests.
 
 ## License
 
