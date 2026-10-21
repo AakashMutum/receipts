@@ -34,3 +34,15 @@ Seasonality in the baseline, fault classes beyond six, metrics beyond one, and t
 
 **Is any of this real data?**
 No. All data is synthetic and generated from a seed. The queries, timings, UDF and evaluation are real.
+
+**Isn't the undo test circular? The same detector nominates the cause and writes the fix.**
+Partly, and we say so. For fixes limited to today's batch, rule 4 (history unchanged) holds by construction, so the rule that really discriminates is rule 3: undoing the cause must bring the number back into its normal range. That is a real test, because a wrong suspect's fix does not move the number (the festival retry burst is the example). Rule 4 matters for fixes that touch shared tables, like the merchant fan-out, where it passes only if history returns to exactly what was published.
+
+**You wrote the faults and the detectors. Is 100% meaningful?**
+On the ten scripted scenarios it shows consistency, not generality, and we say that. So there is a second test, `receipts variants`: 17 held-out variants (other gateways, other factors, partial row coverage, two faults at once) across two seeds. Result: 26 caught, 6 held for a person with no cause named, 2 published because the real error was under 2%, and 0 published wrong. Writing it found a real bug: the unit check only recognised a factor of 100.
+
+**Real revenue has weekly cycles. Does the baseline break?**
+A flat 14-day baseline would. The gate now learns each weekday's index from five weeks of trusted history, but only when a statistical test says the weekly pattern is real. On data with a weekday pattern it gave 63 of 63 correct verdicts across all seven weekdays. With the flat baseline the same data hid an undetected 9% fault on every weekday.
+
+**Is it fast on big data? Your demo is small.**
+A 4.3 million payment run (100,000 orders a day) on a laptop DuckDB stand-in takes 7 to 10 seconds per case with every scenario correct. We have Exasol timings on a small local install and have not claimed anything about billion-row scale.

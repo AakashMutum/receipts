@@ -225,7 +225,7 @@
       </div>
       <hr class="r-rule">
       <div class="r-row big-row"><span>Pipeline value</span><span class="v">${esc(inr(v.candidate))}</span></div>
-      <div class="r-row"><span>Usual, last 14 days</span><span class="v">${esc(inr(v.baseline))}</span></div>
+      <div class="r-row"><span>${v.seasonal ? "Usual for this weekday" : "Usual, last 14 days"}</span><span class="v">${esc(inr(v.baseline))}</span></div>
       <div class="r-row"><span>Normal range</span><span class="v">${esc(inrShort(v.band_low))} to ${esc(inrShort(v.band_high))}</span></div>
       <div class="r-row"><span>Change</span><span class="v">${esc(pct(v.change_pct))}</span></div>
       <hr class="r-rule">

@@ -98,8 +98,10 @@ ORDER BY p.GATEWAY, p.CURRENCY_CODE""")
             continue
         ratio = r["med_today"] / r["med_base"]
         r["ratio"] = round(ratio, 3)
-        if 30 <= ratio <= 300 or 1 / 300 <= ratio <= 1 / 30:
-            r["factor"] = 10 ** round(math.log10(ratio))
+        k = math.log10(ratio)
+        # a unit change moves the median by a power of ten (10, 100, 1000, or the inverse), within about 40%
+        if 1 <= abs(round(k)) <= 3 and abs(k - round(k)) <= 0.15:
+            r["factor"] = 10 ** round(k)
             hits.append(r)
     f = Finding("unit_scale", DETECTOR_TITLES["unit_scale"], bool(hits), "", "RAW.PAYMENTS", "AMOUNT", "value",
                 rows=rows, sql=sql, ms=ms)

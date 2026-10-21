@@ -158,6 +158,57 @@ def cmd_export_sql(a):
     print(f"wrote Exasol SQL to {out}")
 
 
+def cmd_variants(a):
+    """Run the held-out fault variants on fresh data and write samples/variants_report.md."""
+    import tempfile
+    import time
+
+    from . import gate
+    from .datagen import GenConfig, generate
+    from .db import DuckDBBackend
+    from .load import ingest, init_database
+    from .variants import VARIANTS, classify
+
+    rows = []
+    t0 = time.perf_counter()
+    for seed in a.seeds:
+        tmp = Path(tempfile.mkdtemp(prefix=f"receipts_var_{seed}_"))
+        cfg = GenConfig(seed=seed, orders_per_day=a.orders_per_day)
+        generate(tmp, cfg)
+        be = DuckDBBackend(":memory:") if a.backend == "duckdb" else _be()
+        init_database(be, tmp, log=lambda *x: None)
+        day = cfg.incoming_day
+        ingest(be, day, "healthy")
+        truth = be.scalar(f"SELECT REVENUE_INR FROM PIPE.DAILY_REVENUE WHERE TXN_DAY = {be.dialect.day(day)}")
+        for sc in VARIANTS:
+            ingest(be, day, sc)
+            c = gate.run(be, day, {"id": sc.id, "title": sc.title}, write_back=False)
+            outcome, err = classify(sc, c, truth)
+            rows.append((seed, sc, outcome, err, c))
+            print(f"seed {seed} {sc.id:18s} {outcome:6s} error {err:+8.1f}%  {c['verdict']:13s} {','.join(c['confirmed']) or '-'}")
+        be.close()
+    from collections import Counter
+    n = Counter(r[2] for r in rows)
+    lines = ["# Held-out fault variants", "",
+             f"{len(VARIANTS)} variants x {len(a.seeds)} seeds, {a.orders_per_day:,} orders a day, backend {a.backend}. "
+             "Written after the detectors were fixed. See `receipts/variants.py`.", "",
+             f"caught {n['caught']}, held {n['held']}, small (published, under 4% error) {n['small']}, "
+             f"**published a wrong number {n['WRONG']}** of {len(rows)} runs.", "",
+             "| Variant | Real error | Outcome | Verdict | Causes named |", "|---|---|---|---|---|"]
+    for sc in VARIANTS:
+        mine = [r for r in rows if r[1].id == sc.id]
+        outs = "/".join(sorted({r[2] for r in mine}))
+        err = f"{min(r[3] for r in mine):+.1f}% to {max(r[3] for r in mine):+.1f}%" if len(mine) > 1 else f"{mine[0][3]:+.1f}%"
+        causes = "; ".join(sorted({",".join(r[4]['confirmed']) or "none" for r in mine}))
+        lines.append(f"| {sc.title} | {err} | {outs} | {mine[0][4]['verdict']} | {causes} |")
+    out = Path(a.out)
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "variants_report.md").write_text("\n".join(lines) + "\n")
+    print(f"\ncaught {n['caught']}, held {n['held']}, small {n['small']}, WRONG {n['WRONG']} "
+          f"in {time.perf_counter() - t0:.0f}s. Report: {out / 'variants_report.md'}")
+    return 1 if n["WRONG"] else 0
+
+
 def cmd_doctor(a):
     """Check the environment, and on Exasol check identifiers against reserved words."""
     from .doctor import run_doctor
@@ -201,6 +252,12 @@ def main(argv=None):
     x = sub.add_parser("export-sql", help="render all Exasol SQL to files")
     x.add_argument("--out", default=str(ROOT / "sql" / "exasol"))
     x.set_defaults(fn=cmd_export_sql)
+    vr = sub.add_parser("variants", help="held-out fault variants, scored against the clean value")
+    vr.add_argument("--seeds", type=int, nargs="+", default=[11, 22])
+    vr.add_argument("--orders-per-day", type=int, default=8000)
+    vr.add_argument("--backend", choices=["duckdb", "exasol"], default="duckdb")
+    vr.add_argument("--out", default=str(ROOT / "samples"))
+    vr.set_defaults(fn=cmd_variants)
     dct = sub.add_parser("doctor", help="check the setup")
     dct.set_defaults(fn=cmd_doctor)
     sv = sub.add_parser("serve", help="start the command center")

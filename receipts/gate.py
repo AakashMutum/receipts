@@ -46,6 +46,69 @@ class Timer:
         return round((time.perf_counter() - self.t0) * 1000, 1)
 
 
+SEASON_DAYS = 35   # five weeks of trusted history, so every weekday is seen five times
+SEASON_MIN = 21    # with less history than this, fall back to the plain 14-day baseline
+
+
+def _history(be: Backend, day: date, days: int = SEASON_DAYS) -> dict[date, float]:
+    D = be.dialect.day(day)
+    rows = be.query(f"SELECT TXN_DAY, METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY < {D} "
+                    f"AND TXN_DAY >= {be.dialect.add_days(D, -days)} "
+                    f"AND TRUST_STATUS IN ('TRUSTED', 'REAL_CHANGE', 'CORRECTED') ORDER BY TXN_DAY")
+    return {to_date(r["txn_day"]): r["metric_value"] for r in rows}
+
+
+def _counts(be: Backend, day: date, days: int = SEASON_DAYS) -> dict[date, float]:
+    D = be.dialect.day(day)
+    rows = be.query(f"SELECT TXN_DAY, TXN_COUNT FROM PIPE.DAILY_REVENUE WHERE TXN_DAY < {D} "
+                    f"AND TXN_DAY >= {be.dialect.add_days(D, -days)} ORDER BY TXN_DAY")
+    return {to_date(r["txn_day"]): r["txn_count"] for r in rows}
+
+
+def _weekly_pattern(by_wd: dict[int, list[float]]) -> bool:
+    """One-way ANOVA: do the weekday means differ by more than day-to-day noise explains?
+
+    Without this test, a flat series would still get noisy weekday indices from five samples each,
+    and the expected value would wobble for no reason. F above 3.5 is roughly a 1 percent chance
+    of seeing such a pattern in noise.
+    """
+    groups = list(by_wd.values())
+    n = sum(len(g) for g in groups)
+    grand = sum(sum(g) for g in groups) / n
+    ssb = sum(len(g) * (statistics.mean(g) - grand) ** 2 for g in groups)
+    ssw = sum(sum((x - statistics.mean(g)) ** 2 for x in g) for g in groups)
+    dfw = n - len(groups)
+    if ssw <= 0:
+        return ssb > 0
+    return (ssb / (len(groups) - 1)) / (ssw / dfw) > 3.5
+
+
+def expected(hist: dict[date, float], day: date) -> tuple[float, float, bool]:
+    """What this metric should be on `day`, the spread around it, and whether the weekday was used.
+
+    Real business numbers have a weekly shape. With five weeks of trusted history we learn each
+    weekday's index (its mean over the overall mean), remove it from the history, and put it back
+    for `day`. The band then measures noise around the weekly shape, not the weekly shape itself.
+    With less history, or too few of some weekday, we use the plain mean of the last 14 days.
+    """
+    days = sorted(hist)
+    vals = [hist[d] for d in days]
+    by_wd: dict[int, list[float]] = {}
+    overall = statistics.mean(vals) if vals else 0.0
+    if len(days) >= SEASON_MIN and overall:
+        for d in days:
+            by_wd.setdefault(d.weekday(), []).append(hist[d] / overall)
+    if len(by_wd) == 7 and all(len(x) >= 3 for x in by_wd.values()) and _weekly_pattern(by_wd):
+        idx = {w: statistics.mean(x) for w, x in by_wd.items()}
+        flat = [hist[d] / idx[d.weekday()] for d in days]
+        level = statistics.mean(flat)
+        sd = statistics.pstdev(flat) * idx[day.weekday()]
+        return level * idx[day.weekday()], sd, True
+    recent = vals[-BASELINE_DAYS:]
+    return (statistics.mean(recent) if recent else 0.0,
+            statistics.pstdev(recent) if len(recent) > 1 else 0.0, False)
+
+
 def _published(be: Backend, day: date) -> dict[date, float]:
     D = be.dialect.day(day)
     rows = be.query(f"SELECT TXN_DAY, METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY < {D} "
@@ -107,10 +170,10 @@ def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool =
     published = _published(be, day)
     cand_series, counts, spill = _candidate(be, day)
     A = cand_series.get(day, 0.0)
-    hist = [published[d] for d in sorted(published)]
-    B = statistics.mean(hist)
-    sd = statistics.pstdev(hist) if len(hist) > 1 else 0.0
+    hist_long = _history(be, day)
+    B, sd, seasonal = expected(hist_long, day)
     band = max(3 * sd, 0.04 * B)
+    hist = list(hist_long.values())
     anomaly = abs(A - B) > band
     chg = (A - B) / B if B else 0.0
     tm.step("Read candidate and trusted history", t, rows=len(hist) + 1)
@@ -137,7 +200,8 @@ def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool =
     # 4. volume and reconciliation checks ------------------------------------------------------
     t = time.perf_counter()
     recon = _reconciliation(be, day)
-    base_cnt = statistics.mean(counts[d] for d in counts if d < day) if len(counts) > 1 else 1
+    prior_counts = _counts(be, day)
+    base_cnt = expected(prior_counts, day)[0] if len(prior_counts) > 1 else 1
     vol_ratio = counts.get(day, 0) / base_cnt if base_cnt else 0
     val_ratio = A / B if B else 0
     ticket_ratio = val_ratio / vol_ratio if vol_ratio else 0
@@ -259,7 +323,7 @@ def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool =
         "trust_status": trust,
         "anomaly": anomaly,
         "values": {
-            "candidate": A, "baseline": B, "sd": sd, "band_low": B - band, "band_high": B + band,
+            "candidate": A, "baseline": B, "seasonal": seasonal, "sd": sd, "band_low": B - band, "band_high": B + band,
             "corrected": corrected, "change_pct": chg, "z": (A - B) / sd if sd else None,
             "last_trusted_value": published.get(last_trusted_day), "last_trusted_day":
                 last_trusted_day.isoformat() if last_trusted_day else None,

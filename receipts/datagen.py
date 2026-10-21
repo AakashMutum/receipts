@@ -47,6 +47,7 @@ class GenConfig:
     incoming_day: date = INCOMING_DAY
     n_merchants: int = 1500
     festival_uplift: float = 0.22
+    weekday_factors: tuple | None = None  # Monday..Sunday volume multipliers; None means no weekly pattern
 
 
 def _ts(arr_seconds: np.ndarray) -> list[str]:
@@ -142,7 +143,8 @@ class Generator:
         return orders, payments + retries
 
     def daily(self, d: date):
-        n = int(round(self.cfg.orders_per_day * np.exp(self.rng.normal(0, 0.015))))
+        f = self.cfg.weekday_factors[d.weekday()] if self.cfg.weekday_factors else 1.0
+        n = int(round(self.cfg.orders_per_day * f * np.exp(self.rng.normal(0, 0.015))))
         return self._orders_and_payments(d, n)
 
     def festival_extra(self, d: date, base_payments):
