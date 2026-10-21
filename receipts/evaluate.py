@@ -16,9 +16,11 @@ from __future__ import annotations
 import json
 import tempfile
 import time
+from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
+from .config import settings
 from .datagen import GenConfig, generate
 from .db import DuckDBBackend, connect
 from .faults import SCENARIOS
@@ -54,7 +56,7 @@ def evaluate(seeds=(11, 22, 33), orders_per_day=3000, history_days=42, backend: 
         tmp = Path(tempfile.mkdtemp(prefix=f"receipts_eval_{seed}_"))
         cfg = GenConfig(seed=seed, orders_per_day=orders_per_day, history_days=history_days)
         generate(tmp, cfg)
-        be = DuckDBBackend(":memory:") if backend == "duckdb" else connect()
+        be = DuckDBBackend(":memory:") if backend == "duckdb" else connect(replace(settings(), backend=backend))
         init_database(be, tmp, log=lambda *a: None)
         day = cfg.incoming_day
         truth = {}

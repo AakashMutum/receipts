@@ -70,7 +70,7 @@ def cmd_eval(a):
     from .evaluate import evaluate, save, to_markdown
     seeds = (11, 22, 33) if a.quick else (11, 22, 33, 44, 55)
     opd = 3000 if a.quick else 20000
-    rep = evaluate(seeds=seeds, orders_per_day=a.orders_per_day or opd, backend="duckdb")
+    rep = evaluate(seeds=seeds, orders_per_day=a.orders_per_day or opd, backend=a.backend)
     out = Path(a.out)
     if a.quick:
         out.mkdir(parents=True, exist_ok=True)
@@ -189,6 +189,8 @@ def main(argv=None):
     e = sub.add_parser("eval", help="scored evaluation against ground truth")
     e.add_argument("--quick", action="store_true")
     e.add_argument("--orders-per-day", type=int)
+    e.add_argument("--backend", choices=("duckdb", "exasol"), default="duckdb",
+                   help="exasol rebuilds the database at EXA_DSN once per seed")
     e.add_argument("--out", default=str(ROOT / "samples"))
     e.set_defaults(fn=cmd_eval)
     j = sub.add_parser("judge-check", help="reproduce the headline claims, no key or Exasol needed")
