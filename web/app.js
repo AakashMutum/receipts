@@ -273,8 +273,18 @@
           <span class="pct">${esc(pct(v.pct_change, 0))}</span></div>`;
       }).join("")}</div>`).join("");
     const pair = d.top_pairs[0];
-    const pairTxt = pair && Math.abs(d.total.delta) > 0 ? `<p class="top-pair">Largest two-way slice: <b>${Object.entries(pair.dims).map(([k, v]) => `${esc((DIM_NAMES[k] || k).toLowerCase())} ${esc(v)}`).join(" and ")}</b>, ${Math.round(pair.share * 100)}% of the total change.</p>` : "";
+    const pairTxt = pair && Math.abs(d.total.delta) > 0 ? `<p class="top-pair">${pairText(pair, c.values.change_pct)}</p>` : "";
     $("#where").innerHTML = `<div class="dims">${html}</div>${pairTxt}`;
+  }
+
+  // a share of a small total is meaningless (two faults that cancel give -620%), so below 5% use the slice's own change
+  function pairText(pair, totalChange) {
+    const name = Object.entries(pair.dims).map(([k, v]) => `${esc((DIM_NAMES[k] || k).toLowerCase())} ${esc(v)}`).join(" and ");
+    if (Math.abs(totalChange || 0) >= 0.05) return `Largest two-way slice: <b>${name}</b>, ${Math.round(pair.share * 100)}% of the total change.`;
+    if (pair.pct_change == null) return `Largest two-way slice: <b>${name}</b>, new today with no usual level.`;
+    const p = Math.round(Math.abs(pair.pct_change) * 100);
+    const how = p === 0 ? "level with" : `${pair.pct_change > 0 ? "up" : "down"} ${p}% against`;
+    return `Largest two-way slice: <b>${name}</b>, ${how} its usual level.`;
   }
 
   // undo test chart ----------------------------------------------------------------------------------------
