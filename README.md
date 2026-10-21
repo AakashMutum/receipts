@@ -197,6 +197,7 @@ receipts run unit_paise       a gateway sends paise
 receipts run festival         the real-change control
 receipts run masked_pair      two faults that cancel out
 receipts eval                 full scored evaluation, writes samples/eval_report.md
+receipts eval --backend exasol  the same evaluation on Exasol (rebuilds the database once per seed)
 ```
 
 Others: `healthy`, `duplicate_load`, `join_fanout`, `stale_fx`, `new_code`, `unknown_discount`.
@@ -213,7 +214,7 @@ pytest -q
 
 ## Results
 
-Scored against ground truth on freshly generated data: 10 scenarios on each of 5 seeds, 20,000 orders a day. Full report: [`samples/eval_report.md`](samples/eval_report.md).
+Scored against ground truth on Exasol Personal, on freshly generated data: 10 scenarios on each of 5 seeds, 20,000 orders a day (`receipts eval --backend exasol`). Full report: [`samples/eval_report.md`](samples/eval_report.md).
 
 | System | Right call to hold or publish | Cause precision | Cause recall | Wrong causes named |
 |---|---|---|---|---|
@@ -226,6 +227,23 @@ Scored against ground truth on freshly generated data: 10 scenarios on each of 5
 * Without the undo test, the festival retry burst gets blamed as a duplicate load every time.
 * The threshold alert never names a cause and misses the masked pair because the total looks normal.
 * The tenth scenario has no detector on purpose. Receipts holds it as `UNEXPLAINED` and names no cause, which is scored as correct.
+* Gate latency on Exasol, from batch landing to written receipt: median 3.0 s, max 6.2 s per run (the masked pair is the slowest, because it undoes two suspects).
+
+### Exasol timings for one incident
+
+`receipts run ist_utc` on Exasol Personal 2026.2.0-nano.3 (Windows 11 laptop, Podman on WSL2 with 6 CPUs and 2 GiB RAM, 20,000 orders a day, about 864,000 payment rows). Verdict `PROVEN_FAULT`, cause `clock_shift`, 24 SQL statements, 4.7 s end to end, 3.7 s of it inside the database.
+
+| Step | Time |
+|---|---|
+| Read candidate and trusted history | 134 ms |
+| Run six detectors on the incoming batch (clock check is a Python UDF inside Exasol) | 900 ms |
+| Read lineage from view definitions (`EXA_ALL_VIEWS`) | 52 ms |
+| Test 11,074 slices over 296,484 rows in one `GROUP BY CUBE` | 1,337 ms |
+| Reconcile raw payments to revenue rows | 206 ms |
+| Undo each suspect in a sandbox schema | 1,262 ms |
+| Write receipts back to the database | 734 ms |
+
+Loading the full dataset with `receipts init` takes about 14 s.
 
 At a smaller sample (3,000 orders a day) Receipts passes 29 of 30. It misses the no-detector fault on one seed, because daily noise there is wider than the fault. See [`samples/eval_quick.md`](samples/eval_quick.md).
 
@@ -242,7 +260,6 @@ At a smaller sample (3,000 orders a day) Receipts passes 29 of 30. It misses the
 * One metric, one pipeline. Lineage parsing handles joins, filters, group by and simple expressions, not deeply nested SQL or stored procedures.
 * Corrections are hotfixes. The real fix is upstream, and Receipts records the evidence for that conversation.
 * Access control is a convention on Exasol Personal because it is single-user. On Enterprise it is a role grant.
-* Latency numbers in the eval come from the DuckDB stand-in. Run on Exasol to see database timings.
 
 ## License
 

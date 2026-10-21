@@ -36,9 +36,9 @@ Scroll to the scoreboard. "50 runs on fresh data. 100% right calls, zero wrong c
 2. **Why today fails:** every check is green; the faults are unit changes, double loads, fan-outs, stale feeds, clock shifts, new codes. One line each.
 3. **Three layers:** gate, investigate, explain. The LLM never decides.
 4. **Prove by undoing:** the four rules and the undo chart from the IST case.
-5. **Exasol at the centre:** CUBE over 11,000 slices, Python SET UDF, lineage from `EXA_ALL_VIEWS`, sandbox schemas, write-back, MCP. Real timings from your Exasol run.
+5. **Exasol at the centre:** CUBE over 11,000 slices, Python SET UDF, lineage from `EXA_ALL_VIEWS`, sandbox schemas, write-back, MCP. Real timings from Exasol Personal: the IST incident is proven in 4.7 s end to end, with the CUBE over 11,074 slices in 1.3 s and the sandbox undo in 1.3 s.
 6. **Agents:** the two answers side by side.
-7. **Results:** the three-row scoreboard and the masked-pair and festival examples.
-8. **Limitations and next steps:** the six honest bullets from the README, then: more detector classes, seasonality-aware baseline, a second metric.
+7. **Results:** the three-row scoreboard from the Exasol evaluation (50 of 50 runs, median gate latency 3.0 s, max 6.2 s) and the masked-pair and festival examples.
+8. **Limitations and next steps:** the five honest bullets from the README, then: more detector classes, seasonality-aware baseline, a second metric.
 
-Fill the timing numbers on slides 5 and 7 from a run on Exasol, not from the stand-in.
+The timings on slides 5 and 7 come from `receipts run ist_utc` and `receipts eval --backend exasol` on Exasol Personal; see the README Results section.

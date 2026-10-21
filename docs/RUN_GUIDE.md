@@ -60,6 +60,10 @@ The header now shows **Exasol** and **Python UDF in the database**. Every receip
 
 TLS: local deployments use a self-signed certificate, so certificate checks are off by default (`EXA_INSECURE=1`). Set `EXA_INSECURE=0` and use a DSN with a fingerprint for anything shared.
 
+Measured on Exasol Personal 2026.2.0-nano.3 (Windows 11, Podman on WSL2 with 6 CPUs and 2 GiB RAM, 20,000 orders a day): `receipts init` loads in about 14 s, and `receipts run ist_utc` reaches `PROVEN_FAULT` in 4.7 s end to end (3.7 s inside the database, 24 statements). The slowest steps are the `GROUP BY CUBE` over 11,074 slices (1.3 s) and the sandbox undo test (1.3 s). The full evaluation on Exasol (`receipts eval --backend exasol`, 50 runs) passes 50 of 50 with a median gate latency of 3.0 s and takes about 7 minutes. It rebuilds the database once per seed, so run `receipts init` afterwards to get the demo data back.
+
+If Exasol refuses connections after the computer has slept, the Podman machine has usually stopped. Run `podman machine start`, then `exasol start`, then `receipts doctor`.
+
 Bigger data for timing claims: `receipts init --fresh --orders-per-day 200000` gives about 8.6 million payment rows.
 
 ## 3. The command line
@@ -69,6 +73,7 @@ receipts run ist_utc          # land a batch with a planted fault and run the ga
 receipts run festival         # the real-change control
 receipts run masked_pair      # two faults that cancel out
 receipts eval                 # full scored evaluation, 5 seeds, writes samples/eval_report.md
+receipts eval --backend exasol  # the same evaluation on Exasol
 receipts sample               # writes an unedited case file per scenario to samples/cases
 receipts export-sql           # writes all Exasol SQL to sql/exasol for reading
 ```
