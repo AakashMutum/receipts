@@ -212,7 +212,7 @@
     const stamp = c.trust_status === "HELD" ? `<div class="stamp held">HELD</div>` :
       c.trust_status === "CORRECTED" ? `<div class="stamp ok">CORRECTED</div>` : `<div class="stamp ok">PUBLISHED</div>`;
     const d = c.decomposition;
-    const llmBtn = state.overview.llm ? `<button type="button" id="explain-btn">Explain with Claude</button>` : "";
+    const llmBtn = state.overview.llm ? `<button type="button" id="explain-btn">Explain with AI</button>` : "";
     const src = c.explanation.source === "llm" ? `Written by ${esc(c.explanation.model || "an LLM")} from the aggregated case. The verdict above is not its decision.` :
       (state.overview.llm ? "Template text." : "Template text. Set ANTHROPIC_API_KEY for a written explanation.");
     const p = $("#paper");
@@ -250,7 +250,7 @@
       try {
         const r = await api(`/api/case/${c.case_id}/explain`, { method: "POST" });
         $("#explain-text").innerHTML = `${esc(r.text)}<span class="src">${r.source === "llm" ? `Written by ${esc(r.model)} from the aggregated case. The verdict is not its decision.` : esc(r.note || "Template text.")}</span>`;
-      } catch (e) { toast(e.message); eb.disabled = false; eb.textContent = "Explain with Claude"; }
+      } catch (e) { toast(e.message); eb.disabled = false; eb.textContent = "Explain with AI"; }
     });
   }
 
