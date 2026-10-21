@@ -56,6 +56,9 @@ def parse_view(name: str, sql: str, dialect: str, schema: str) -> ViewInfo:
     for e in sel.expressions:
         columns[e.alias_or_name.upper()] = refs(e)
     row_refs = set()
+    # newer DuckDB prints joins nested in parentheses, so the ON conditions are not all in sel.args["joins"]
+    for j in sel.find_all(exp.Join):
+        row_refs |= refs(j)
     for key in ("joins", "where", "group", "having", "qualify"):
         v = sel.args.get(key)
         if v is None:
