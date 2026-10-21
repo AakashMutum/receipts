@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import date
 from pathlib import Path
 
 from .config import ROOT, settings
@@ -21,19 +22,39 @@ def cmd_generate(a):
     print(json.dumps(m["rows"], indent=2))
 
 
-def cmd_init(a):
+def _day(s: str) -> date:
+    try:
+        return date.fromisoformat(s)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"expected YYYY-MM-DD, got {s!r}")
+
+
+def _manifest() -> dict | None:
+    f = settings().data_dir / "manifest.json"
+    return json.loads(f.read_text()) if f.exists() else None
+
+
+def _build(day: date, seed: int, orders_per_day: int, fresh: bool) -> None:
+    """Generate data for `day` if needed (fresh, missing, or for another day), then build the database."""
     from .datagen import GenConfig, generate
     from .load import init_database
     cfg = settings()
-    if a.fresh or not (cfg.data_dir / "manifest.json").exists():
-        print(f"generating data ({a.orders_per_day:,} orders a day, seed {a.seed})")
-        generate(cfg.data_dir, GenConfig(seed=a.seed, orders_per_day=a.orders_per_day))
+    m = _manifest()
+    if fresh or m is None or m["incoming_day"] != day.isoformat():
+        print(f"generating data for {day} ({orders_per_day:,} orders a day, seed {seed})")
+        generate(cfg.data_dir, GenConfig(seed=seed, orders_per_day=orders_per_day, incoming_day=day))
     if cfg.backend == "duckdb":
         Path(cfg.duckdb_path).unlink(missing_ok=True)
     be = _be()
     print(f"backend: {be.name}{' (local stand-in)' if be.is_standin else ''}")
     meta = init_database(be, cfg.data_dir)
+    be.close()
     print(f"ready in {meta['seconds']}s. incoming batch day {meta['incoming_day']}. udf: {meta['udf']['detail']}")
+
+
+def cmd_init(a):
+    from .model import default_incoming_day
+    _build(a.day or default_incoming_day(), a.seed, a.orders_per_day, a.fresh)
 
 
 def _print_case(c):
@@ -217,6 +238,23 @@ def cmd_doctor(a):
 
 def cmd_serve(a):
     import uvicorn
+
+    from .load import incoming_day
+    from .model import default_incoming_day
+    day = a.day or default_incoming_day()
+    current = be = None
+    try:
+        be = _be()
+        current = incoming_day(be)
+    except Exception:  # database not built yet
+        pass
+    finally:
+        if be is not None:
+            be.close()  # DuckDB keeps a file lock, and the rebuild below may need to delete the file
+    if current != day:
+        print(f"database holds {current or 'no data'}, building it for {day}")
+        conf = (_manifest() or {}).get("config", {})
+        _build(day, conf.get("seed", 7), conf.get("orders_per_day", 20000), fresh=False)
     print(f"Receipts command center on http://{a.host}:{a.port}")
     uvicorn.run("receipts.api:app", host=a.host, port=a.port, log_level="warning")
 
@@ -232,6 +270,8 @@ def main(argv=None):
     i.add_argument("--seed", type=int, default=7)
     i.add_argument("--orders-per-day", type=int, default=20000)
     i.add_argument("--fresh", action="store_true", help="regenerate data even if it exists")
+    i.add_argument("--day", type=_day, help="incoming batch day, YYYY-MM-DD (default: yesterday in India). "
+                                             "Use 2026-10-20 to reproduce the screenshots")
     i.set_defaults(fn=cmd_init)
     r = sub.add_parser("run", help="ingest a scenario's batch and run the gate")
     r.add_argument("scenario")
@@ -263,6 +303,8 @@ def main(argv=None):
     sv = sub.add_parser("serve", help="start the command center")
     sv.add_argument("--host", default="127.0.0.1")
     sv.add_argument("--port", type=int, default=8000)
+    sv.add_argument("--day", type=_day, help="incoming batch day, YYYY-MM-DD (default: yesterday in India). "
+                                              "Rebuilds the database first if it holds another day")
     sv.set_defaults(fn=cmd_serve)
     a = p.parse_args(argv)
     rc = a.fn(a)

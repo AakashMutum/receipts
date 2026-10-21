@@ -157,6 +157,8 @@ make demo
 
 The header chip on the page says **Local stand-in** so nobody mistakes it for Exasol.
 
+The incoming batch is dated yesterday (in India), with 42 days of history before it, so the page always shows a recent date. To reproduce the screenshots and the numbers in this README exactly, pin the day: `receipts init --day 2026-10-20` and `receipts serve --day 2026-10-20` (or `make demo DAY=2026-10-20`). `judge-check`, `eval` and the tests always use 20 Oct 2026.
+
 ### 2. Run it on Exasol Personal
 
 1. **Install the launcher.**
@@ -204,7 +206,7 @@ Others: `healthy`, `duplicate_load`, `join_fanout`, `stale_fx`, `new_code`, `unk
 
 ### 4. Connect an AI agent (optional)
 
-Add the Exasol MCP server using [`mcp/claude_desktop_config.example.json`](mcp/claude_desktop_config.example.json) and paste [`mcp/AGENT_INSTRUCTIONS.md`](mcp/AGENT_INSTRUCTIONS.md) into the agent's instructions. Full steps, an optional LLM explanation key, and troubleshooting are in [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md).
+Add the Exasol MCP server to any MCP client (for example a desktop AI assistant) using [`mcp/mcp_client_config.example.json`](mcp/mcp_client_config.example.json) and paste [`mcp/AGENT_INSTRUCTIONS.md`](mcp/AGENT_INSTRUCTIONS.md) into the agent's instructions. Full steps, an optional LLM explanation key, and troubleshooting are in [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md).
 
 ### Running Tests
 

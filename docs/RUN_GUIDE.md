@@ -21,6 +21,15 @@ make demo        # same as: receipts init && receipts serve
 
 Open http://127.0.0.1:8000. The header chip says **Local stand-in** so nobody mistakes it for Exasol.
 
+The incoming batch day is yesterday in India (Asia/Kolkata), with 42 days of history generated before it. Every date on the page, the agent's question and the case IDs follow it. `receipts serve` rebuilds the database first if it holds another day. To reproduce the screenshots, pin the day on both commands:
+
+```bash
+receipts init --day 2026-10-20
+receipts serve --day 2026-10-20     # or: make demo DAY=2026-10-20
+```
+
+`receipts judge-check`, `receipts eval`, `receipts variants` and the tests always use 20 Oct 2026, so their results do not change with the calendar.
+
 ## 2. On Exasol Personal (the real target)
 
 Exasol Personal runs locally on macOS (Apple Silicon), on Linux with Podman, and on Windows (amd64) with Podman.
@@ -84,9 +93,9 @@ Scenarios: `healthy`, `festival`, `unit_paise`, `duplicate_load`, `join_fanout`,
 
 ## 4. Connect a real AI agent (MCP)
 
-1. Install `uv`, then add the Exasol MCP server to Claude Desktop (or any MCP client) using [`mcp/claude_desktop_config.example.json`](../mcp/claude_desktop_config.example.json).
+1. Install `uv`, then add the Exasol MCP server to any MCP client (for example a desktop AI assistant) using [`mcp/mcp_client_config.example.json`](../mcp/mcp_client_config.example.json).
 2. Put [`mcp/AGENT_INSTRUCTIONS.md`](../mcp/AGENT_INSTRUCTIONS.md) into the agent's instructions.
-3. Run `receipts run unit_paise`, then ask the agent "What was revenue on 20 October?". With the instructions it reads `PUB.METRIC_TRUST`, sees the value is held, and quotes the last trusted day instead. Remove the instructions and ask again to see it quote the broken number.
+3. Run `receipts run unit_paise`, then ask the agent for revenue on the incoming day (the date `receipts init` printed; yesterday unless you passed `--day`), for example "What was revenue on 20 October?" after `--day 2026-10-20`. With the instructions it reads `PUB.METRIC_TRUST`, sees the value is held, and quotes the last trusted day instead. Remove the instructions and ask again to see it quote the broken number.
 
 The command center's "Ask an AI agent" panel shows the same contrast with two deterministic agents, so the demo does not depend on a live model.
 

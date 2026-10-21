@@ -7,16 +7,24 @@ against SYS.EXA_SQL_KEYWORDS on a live Exasol database.
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 
 METRIC_NAME = "daily_revenue_inr"
 METRIC_LABEL = "Daily revenue (INR)"
 
-# history days published before the incoming batch, and the incoming batch day
+# history days published before the incoming batch, and the fixed incoming batch day that tests,
+# judge-check, eval and the exported SQL use so their results stay reproducible
 DEFAULT_HISTORY_DAYS = 42
 INCOMING_DAY = date(2026, 10, 20)
 BASELINE_DAYS = 14
 IST_OFFSET_MIN = 330
+IST = timezone(timedelta(minutes=IST_OFFSET_MIN))  # India has no daylight saving, so a fixed offset is exact
+
+
+def default_incoming_day(now: datetime | None = None) -> date:
+    """Yesterday in India: the latest full day a nightly batch would have landed for. Used by init and serve."""
+    now = now or datetime.now(IST)
+    return now.astimezone(IST).date() - timedelta(days=1)
 
 # schema -> table -> [(column, type)]
 SOURCE_TABLES: dict[str, list[tuple[str, str]]] = {
