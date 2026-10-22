@@ -11,6 +11,7 @@ def client(data_dir, tmp_path_factory, monkeypatch_module):
     monkeypatch_module.setenv("RECEIPTS_DUCKDB", str(db))
     monkeypatch_module.setenv("RECEIPTS_DATA", str(data_dir))
     monkeypatch_module.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch_module.setenv("RECEIPTS_ALERTS", str(tmp_path_factory.mktemp("alerts")))
     from receipts.db import connect
     from receipts.load import init_database
     be = connect()
@@ -49,3 +50,8 @@ def test_run_agent_approve(client):
 
 def test_unknown_scenario(client):
     assert client.post("/api/run", json={"scenario": "nope"}).status_code == 404
+
+
+def test_alerts_endpoint_and_dismiss(client):
+    assert client.get("/api/alerts").json() == []
+    assert client.post("/api/alerts/RC-NOPE/dismiss").status_code == 404

@@ -12,7 +12,7 @@ Download or clone the repository, then:
 
 Every script finds Python 3.10 or newer (and says where to get it if missing), creates `.venv` the first time, installs Receipts only if it is not installed yet, then runs `receipts demo`: build the data if needed, start the command center, open the browser. The window stays open with a message if anything fails. Press Ctrl+C in it to stop.
 
-The `run-exasol` scripts look for the launcher on `PATH`, then in `EXASOL_HOME`, then in your Downloads folder. If Exasol is not running they say "Exasol is not running. Run: exasol start" and stop; they never install Podman or Exasol. Then they run `receipts init`, `receipts doctor` and `receipts demo` against it. Exasol Personal runs locally on Windows (amd64), on Apple Silicon Macs and on Linux with Podman; Intel Macs are not supported.
+The `run-exasol` scripts look for the launcher on `PATH`, then in `EXASOL_HOME`, then in your Downloads folder. If Exasol is not running they say "Exasol is not running. Run: exasol start" and stop; they never install Podman or Exasol. Then they run `receipts init`, `receipts doctor` and `receipts demo --watch` against it, so newly landed batches raise alerts (section 7). Exasol Personal runs locally on Windows (amd64), on Apple Silicon Macs and on Linux with Podman; Intel Macs are not supported.
 
 On macOS, the first double-click on a downloaded `.command` file may be blocked as coming from an unidentified developer: right-click it and choose Open once. If the repository came as a ZIP and the file will not run, make it executable with `chmod +x run.command run-exasol.command run.sh run-exasol.sh`.
 
@@ -133,6 +133,32 @@ make test
 ```
 
 35 tests. `tests/test_scenarios.py` runs all ten scenarios twice: once on the DuckDB stand-in and once on the Exasol SQL path, where every statement is rendered for Exasol, parsed by sqlglot's Exasol grammar, translated and executed.
+
+## 7. Watch for new batches and get alerts
+
+`receipts serve --watch` (or `receipts demo --watch`) runs the command center and a light watcher in one process. Closing the window or pressing Ctrl+C stops both.
+
+* Every 60 seconds (`--interval` to change it) the watcher runs one cheap query: is the newest day in RAW later than the newest published day? Only then does it run the gate. Between checks it sleeps; measured on a laptop it used 0.26% of one core with a 5 second interval and the page open.
+* It also reads an inbox folder (`inbox/` by default, `--inbox` or `RECEIPTS_INBOX` to change it). A file named after a scenario, such as `ist_utc.batch`, lands that scenario's batch on the next check and is moved to `inbox/processed/`. Other files are moved to `inbox/ignored/`.
+* When the gate holds a batch (`PROVEN_FAULT` or `UNEXPLAINED`) it prints an `ALERT` line, writes `alerts/<case>.txt` and `alerts/<case>.json` (verdict, one-line cause, last trusted value, receipt link), and shows an orange **ALERTS** banner in the command center until the case is approved, a new batch replaces it, or someone clicks Dismiss.
+* If `SLACK_WEBHOOK_URL` is set it also posts a short message to that Slack incoming webhook, with a 5 second timeout. If Slack is down the alert file is still written and the watcher keeps going.
+* A published batch prints one quiet line. A failed check prints one line and the watcher tries again next time; it never stops the server.
+
+Try it:
+
+```bash
+receipts demo --watch --interval 5
+```
+
+Then, in a second terminal or in your file manager, drop a bad batch into the inbox:
+
+```bash
+touch inbox/ist_utc.batch          # Windows PowerShell: New-Item inbox\ist_utc.batch
+```
+
+Within a few seconds the console prints `ALERT RC-... held (PROVEN_FAULT). Proven cause: clock shift in RAW.PAYMENTS.CAPTURED_AT (gateway GW_B) ...`, `alerts/` holds the receipt, and the page shows the banner. Drop `inbox/healthy.batch` to land a clean batch: one quiet line, no alert.
+
+Without the web server, `receipts watch --once` processes any new batch once and exits (handy in a scheduler); `receipts watch` keeps checking. On the DuckDB stand-in only one process can open the database file, so stop `receipts serve` before running `receipts watch` there; on Exasol both can run at once.
 
 ## Troubleshooting
 

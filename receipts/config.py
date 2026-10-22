@@ -8,6 +8,9 @@ EXA_INSECURE       1 to skip TLS certificate checks (self-signed local deploymen
 RECEIPTS_DUCKDB    path of the DuckDB file in stand-in mode
 RECEIPTS_DATA      directory for generated CSV files
 ANTHROPIC_API_KEY  optional, enables the LLM explanation layer
+RECEIPTS_ALERTS    folder for alert files written by the watcher (default alerts/)
+RECEIPTS_INBOX     folder the watcher reads batch files from (default inbox/)
+SLACK_WEBHOOK_URL  optional, the watcher posts a short message here when it holds a batch
 """
 
 from __future__ import annotations
@@ -31,6 +34,9 @@ class Settings:
         "RECEIPTS_DUCKDB", str(ROOT / "data" / "standin.duckdb")))
     data_dir: Path = field(default_factory=lambda: Path(os.environ.get("RECEIPTS_DATA", str(ROOT / "data"))))
     llm_key: str | None = field(default_factory=lambda: os.environ.get("ANTHROPIC_API_KEY"))
+    alerts_dir: Path = field(default_factory=lambda: Path(os.environ.get("RECEIPTS_ALERTS", str(ROOT / "alerts"))))
+    inbox_dir: Path = field(default_factory=lambda: Path(os.environ.get("RECEIPTS_INBOX", str(ROOT / "inbox"))))
+    slack_url: str | None = field(default_factory=lambda: os.environ.get("SLACK_WEBHOOK_URL") or None)
     llm_model: str = field(default_factory=lambda: os.environ.get("RECEIPTS_LLM_MODEL", "claude-sonnet-5-5"))
 
 

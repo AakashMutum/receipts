@@ -154,6 +154,23 @@ def trust():
     return rows
 
 
+@app.get("/api/alerts")
+def alerts():
+    """Holds raised by the watcher that nobody has approved or dismissed yet."""
+    from .watch import open_alerts
+    b = be()
+    with _lock:
+        return open_alerts(b, settings().alerts_dir)
+
+
+@app.post("/api/alerts/{case_id}/dismiss")
+def dismiss_alert(case_id: str):
+    from .watch import dismiss
+    if not dismiss(settings().alerts_dir, case_id):
+        raise HTTPException(404, "No such alert")
+    return {"dismissed": case_id}
+
+
 @app.get("/api/health")
 def health():
     try:

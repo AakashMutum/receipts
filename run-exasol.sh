@@ -93,4 +93,4 @@ echo
 echo "  Starting the command center. Your browser opens when it is ready."
 echo "  Keep this window open while you use it. Press Ctrl+C here to stop."
 echo
-"$VBIN/receipts" demo || fail "Receipts stopped with an error. The messages above say why."
+"$VBIN/receipts" demo --watch || fail "Receipts stopped with an error. The messages above say why."

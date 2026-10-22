@@ -285,7 +285,34 @@ def _serve(a, browser: bool) -> None:
     print(f"Receipts command center on {url}  (press Ctrl+C to stop)")
     if browser:
         _open_browser_when_up(url)
+    if a.watch:
+        import threading
+
+        from . import api
+        w = _watcher(a, connect=api.be, lock=api._lock, base_url=url)
+        threading.Thread(target=w.run_forever, args=(a.interval,), daemon=True, name="receipts-watch").start()
     uvicorn.run("receipts.api:app", host=a.host, port=a.port, log_level="warning")
+
+
+def _watcher(a, connect, lock=None, base_url: str = "http://127.0.0.1:8000/"):
+    from .watch import Watcher
+    cfg = settings()
+    inbox = Path(a.inbox) if a.inbox else cfg.inbox_dir
+    inbox.mkdir(parents=True, exist_ok=True)
+    return Watcher(connect, lock=lock, alerts_dir=cfg.alerts_dir, inbox_dir=inbox, base_url=base_url,
+                   slack_url=cfg.slack_url, log=lambda m: print(m, flush=True))
+
+
+def cmd_watch(a):
+    """Process new batches without the web server: once with --once, otherwise every --interval seconds."""
+    be = _be()
+    w = _watcher(a, connect=lambda: be)
+    if a.once:
+        cases = w.check_once()
+        if not cases:
+            print("watch: no new batch")
+        return 0
+    w.run_forever(a.interval)
 
 
 def cmd_serve(a):
@@ -350,6 +377,14 @@ def main(argv=None):
     dm.add_argument("--day", type=_day, help="incoming batch day, YYYY-MM-DD (default: yesterday in India)")
     dm.add_argument("--no-browser", action="store_true", help="do not open a browser window")
     dm.set_defaults(fn=cmd_demo)
+    for sp in (sv, dm):
+        sp.add_argument("--watch", action="store_true", help="also watch for new batches and raise alerts")
+    wt = sub.add_parser("watch", help="judge new batches and raise alerts, without the web server")
+    wt.add_argument("--once", action="store_true", help="process any new batch once and exit")
+    for sp in (sv, dm, wt):
+        sp.add_argument("--interval", type=float, default=60, help="seconds between checks (default 60)")
+        sp.add_argument("--inbox", help="folder to read batch files from (default inbox/, or RECEIPTS_INBOX)")
+    wt.set_defaults(fn=cmd_watch)
     a = p.parse_args(argv)
     try:
         rc = a.fn(a)

@@ -448,6 +448,45 @@
     renderEval(o.eval);
   }
 
+  // alerts raised by the watcher (receipts serve --watch) ---------------------------------------------------------
+  const seenAlerts = new Set();
+  async function loadAlerts() {
+    let list;
+    try { list = await api("/api/alerts"); } catch (e) { return; }
+    const box = $("#alerts");
+    box.hidden = list.length === 0;
+    box.innerHTML = list.length ? `<div class="wrap alerts-in"><span class="flag">ALERTS</span><ul>${list.map((a) => `
+      <li><b>${esc(a.day_label)} held</b> (${esc(VERDICT_TEXT[a.verdict] || a.verdict)}). ${esc(a.cause)}
+        Last trusted value: ${esc(a.last_trusted_value == null ? "none yet" : inr(a.last_trusted_value))}.
+        <button type="button" data-open="${esc(a.case_id)}">Open receipt</button><button type="button" data-dismiss="${esc(a.case_id)}">Dismiss</button></li>`).join("")}</ul></div>` : "";
+    const fresh = list.some((a) => !seenAlerts.has(a.case_id));
+    list.forEach((a) => seenAlerts.add(a.case_id));
+    if (fresh && state.overview && !state.busy) {  // the watcher judged a batch: show it without a reload
+      try {
+        const o = await api("/api/overview");
+        state.overview = o;
+        state.case = o.case;
+        renderAll(false);
+      } catch (e) { /* keep the page as it is */ }
+    }
+  }
+  async function openCase(id) {
+    try {
+      const c = await api(`/api/case/${encodeURIComponent(id)}`);
+      state.overview = await api("/api/overview");
+      state.case = c;
+      renderAll(true);
+    } catch (e) { toast(e.message); }
+  }
+  $("#alerts").addEventListener("click", async (e) => {
+    const open = e.target.closest("[data-open]"), dis = e.target.closest("[data-dismiss]");
+    if (open) await openCase(open.dataset.open);
+    if (dis) {
+      try { await api(`/api/alerts/${encodeURIComponent(dis.dataset.dismiss)}/dismiss`, { method: "POST" }); } catch (err) { toast(err.message); }
+      loadAlerts();
+    }
+  });
+
   async function boot() {
     try {
       const o = await api("/api/overview");
@@ -457,6 +496,10 @@
       renderChips(o);
       renderScenarios(o.scenarios);
       renderAll(false);
+      const linked = new URLSearchParams(location.search).get("case");  // the link in an alert file
+      if (linked) await openCase(linked);
+      await loadAlerts();
+      setInterval(loadAlerts, 20000);
     } catch (e) {
       $("#status").innerHTML = `<span class="flag">OFFLINE</span><span class="msg">${esc(e.message)}</span>`;
     }

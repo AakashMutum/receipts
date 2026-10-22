@@ -268,6 +268,7 @@ receipts/
 │   ├── variants.py      held-out fault variants
 │   ├── faults.py        planted faults and ground truth (the engine never imports it)
 │   ├── datagen.py       seeded synthetic marketplace data
+│   ├── watch.py         the batch watcher behind serve --watch, and its alerts
 │   └── api.py           FastAPI endpoints for the command center
 ├── web/                 command center: index.html, app.css, app.js
 ├── tests/               54 tests, including every scenario on the Exasol SQL path
@@ -351,6 +352,10 @@ Others: `healthy`, `duplicate_load`, `join_fanout`, `stale_fx`, `new_code`, `unk
 ### 4. Connect an AI agent (optional)
 
 Add the Exasol MCP server to any MCP client (for example a desktop AI assistant) using [`mcp/mcp_client_config.example.json`](mcp/mcp_client_config.example.json) and paste [`mcp/AGENT_INSTRUCTIONS.md`](mcp/AGENT_INSTRUCTIONS.md) into the agent's instructions. Full steps, an optional LLM explanation key, and troubleshooting are in [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md).
+
+### 5. Get alerts when a batch is held (optional)
+
+`receipts demo --watch` (the `run-exasol` scripts use it) adds a light watcher to the command center. Once a minute it runs one cheap query for a newly landed batch and only then runs the gate. A hold prints an `ALERT` line, writes `alerts/<case>.txt` with the verdict, the cause, the last trusted value and the receipt link, shows an **ALERTS** banner on the page until someone approves or dismisses it, and posts to Slack if `SLACK_WEBHOOK_URL` is set. To try it, start `receipts demo --watch --interval 5` and drop an empty file named `ist_utc.batch` into the `inbox/` folder. Details in [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md#7-watch-for-new-batches-and-get-alerts).
 
 ### Running Tests
 
