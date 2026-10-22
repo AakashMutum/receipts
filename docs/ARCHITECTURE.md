@@ -57,3 +57,22 @@ Dashboards and agents read only `PUB`. Only the gate writes `PUB`.
 * **Undo instead of scoring.** A score says "probably". Undoing the fault and getting the clean number back is a demonstration, and it also yields the corrected value and the fix.
 * **History as a check.** A correction that rewrites trusted history is not a fix for today's batch. The fan-out fix is the interesting case: it changes the candidate history back to exactly what was published, which is strong evidence on its own.
 * **The LLM last.** It can be wrong without consequence because it only rewords a decision already made.
+
+## Connecting your own metric
+
+Receipts is built around one metric and one schema today: daily revenue of the synthetic marketplace, read through the views in [`receipts/sql/pipeline.sql`](../receipts/sql/pipeline.sql). **The generic configuration layer that would let a company point it at its own metric is not built yet.** The detectors, the CUBE dimensions, the undo corrections and the fault scenarios name the marketplace tables and columns directly.
+
+What a company would need to provide, and what each part maps to in the code:
+
+| What to provide | Example | Used by |
+|---|---|---|
+| The view that holds the metric, one row per day | `PIPE.DAILY_REVENUE` (`TXN_DAY`, `REVENUE_INR`, `TXN_COUNT`) | the gate's candidate and baseline, `PUB.DAILY_REVENUE_PUBLISHED` |
+| The chain of views from raw tables to that view | the six views in `pipeline.sql` | lineage from the catalog, and the undo test, which re-renders the chain in a sandbox schema with one source swapped |
+| The raw tables feeding it, landed per batch | `RAW.ORDERS`, `RAW.PAYMENTS` with a `BATCH_DAY` column | the detectors and the watcher's "has a new batch landed" query |
+| Which column is the amount | `PAYMENTS.AMOUNT` | unit check, CUBE, reconciliation |
+| Which column is the record ID | `PAYMENTS.PAYMENT_ID` | duplicate check, reconciliation |
+| Which column is the event timestamp, and its time zone | `PAYMENTS.CAPTURED_AT`, UTC | clock check (the in-database UDF), day boundary |
+| The slicing dimensions | city, category, channel, gateway, currency, tier | the `GROUP BY CUBE` decomposition |
+| Reference tables that can go stale or fan out | `MERCHANTS`, `CATEGORY_MAP`, `FX_RATES` | stale feed, join fan-out and new-code checks |
+
+The real-data backtest ([`samples/real_backtest.md`](../samples/real_backtest.md)) shows what connecting a new source takes today: a thin adapter in [`receipts/backtest.py`](../receipts/backtest.py) maps NYC taxi trips onto these same tables (vendor as gateway, borough as city, rate code as category, and so on), and the unchanged engine runs on them. Turning that mapping into configuration, instead of an adapter per source, is the next step and is not done.

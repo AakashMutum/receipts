@@ -429,6 +429,17 @@ To check the gate outside our own synthetic data, `receipts backtest` runs it on
   * The clock check fired on five Saturdays, because Saturday night traffic has a different shape from the pooled baseline. Every time the undo test ruled it out, so nothing was held, but the check itself is noisy on weekends.
   * A verified real change becomes history. The 13 Feb snow day entered the Tuesday baseline and lowered it, which is part of why 27 Feb looked like a +26% move.
 
+## Connecting your own metric
+
+Today the code is built around the marketplace schema in this repository. **A generic configuration layer for other metrics is not built yet.** To put Receipts on a company's own number, the company would provide:
+
+* the view that holds the metric, one row per day (here `PIPE.DAILY_REVENUE`), and the chain of views that builds it, so lineage and the undo test can re-run it in a sandbox schema;
+* the raw tables that feed it, landed per batch with a batch day column (here `RAW.ORDERS` and `RAW.PAYMENTS`);
+* which column is the amount, which is the record ID and which is the event timestamp (with its time zone);
+* the dimensions to slice by, and the reference tables that can go stale or fan out.
+
+The real-data backtest above connects a new source the way it works today, with a thin adapter that maps NYC taxi trips onto these tables. The full mapping is in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#connecting-your-own-metric).
+
 ## Technical Notes
 
 **What is real and what is synthetic.** All data is synthetic: a fictional marketplace with 8 cities, 6 categories, 4 payment gateways, a USD slice with a daily FX feed, evening-heavy shopping in IST, and background payment retries, generated from a seed. The faults are planted as SQL statements in `receipts/faults.py`. Every query, the CUBE decomposition, the UDF, lineage parsing, the undo tests, the write-back, the timings and the evaluation numbers are real.
