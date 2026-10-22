@@ -269,9 +269,10 @@ receipts/
 │   ├── faults.py        planted faults and ground truth (the engine never imports it)
 │   ├── datagen.py       seeded synthetic marketplace data
 │   ├── watch.py         the batch watcher behind serve --watch, and its alerts
+│   ├── backtest.py      the real-data backtest on NYC taxi trips
 │   └── api.py           FastAPI endpoints for the command center
 ├── web/                 command center: index.html, app.css, app.js
-├── tests/               54 tests, including every scenario on the Exasol SQL path
+├── tests/               83 tests, including every scenario on the Exasol SQL path
 ├── samples/             committed, unedited eval reports and case files (samples/exasol from Exasol)
 ├── sql/exasol/          all rendered Exasol SQL, for reading
 ├── mcp/                 MCP server config and agent instructions
@@ -417,6 +418,17 @@ The ten scenarios were used to build and tune the detectors, so a perfect score 
 
 Weekly pattern: real revenue has weekday and weekend levels. With five weeks of trusted history the gate learns each weekday's index when (and only when) a one-way ANOVA says the pattern is real, and compares today with what that weekday should look like. On data with a weekly pattern of up to 16% above average, the gate gave 63 of 63 correct verdicts across all seven weekdays. With the old flat 14-day baseline the same data gave 56 of 63: no false alarms, but the wider range let an undetected fault of about 9% through unnoticed on every weekday.
 
+## Real-data backtest
+
+To check the gate outside our own synthetic data, `receipts backtest` runs it on public data: **NYC TLC yellow taxi trip records, January to March 2024** (9,554,757 trips, no login needed). The metric is the daily total of `total_amount`. A thin adapter maps trips onto the pipeline's tables (vendor as gateway, borough as city, rate code as category), so the six detectors, the CUBE and the undo test run unchanged; no threshold was changed. The first 35 days are taken as trusted history, then the gate judges 56 days one night at a time, on the local stand-in. Full report: [`samples/real_backtest.md`](samples/real_backtest.md).
+
+* **Real days, no faults planted: 56 judged, 0 held, 0 called PROVEN_FAULT.** 54 were published as `NO_INCIDENT` and 2 as a verified `REAL_CHANGE`: Tue 13 Feb (-33.9%, the day of a snowstorm when New York City schools switched to remote learning) and Tue 27 Feb (+26.0%, the busiest Tuesday so far, 117,332 trips).
+* **Planted faults on real days: 6 of 6 caught with the right cause.** Three unit changes (one vendor's amounts in cents, about +2,100% to +2,400%) and three duplicated payment files (+8.2% to +8.3%). The duplicates sat inside the normal range, so a threshold alert would have missed them; the duplicate check plus the undo test proved them.
+* **What it also shows, honestly:**
+  * Real revenue is noisy. The normal range was plus or minus 21.7% at the median (12.9% to 31.9%). A fault that moves the total less than that and has no detector would be published.
+  * The clock check fired on five Saturdays, because Saturday night traffic has a different shape from the pooled baseline. Every time the undo test ruled it out, so nothing was held, but the check itself is noisy on weekends.
+  * A verified real change becomes history. The 13 Feb snow day entered the Tuesday baseline and lowered it, which is part of why 27 Feb looked like a +26% move.
+
 ## Technical Notes
 
 **What is real and what is synthetic.** All data is synthetic: a fictional marketplace with 8 cities, 6 categories, 4 payment gateways, a USD slice with a daily FX feed, evening-heavy shopping in IST, and background payment retries, generated from a seed. The faults are planted as SQL statements in `receipts/faults.py`. Every query, the CUBE decomposition, the UDF, lineage parsing, the undo tests, the write-back, the timings and the evaluation numbers are real.
@@ -424,7 +436,8 @@ Weekly pattern: real revenue has weekday and weekend levels. With five weeks of 
 **Limitations.**
 
 * It only proves fault classes it has a detector for. Six today. Anything else becomes `UNEXPLAINED`: held, no cause guessed, a person decides.
-* The baseline learns a weekly pattern from five weeks of trusted history, but has no festival or holiday calendar.
+* The baseline learns a weekly pattern from five weeks of trusted history, but has no festival or holiday calendar, and a verified real change (a snow day, say) enters that history and shifts later expectations.
+* On real taxi data the normal range is wide (plus or minus 22% at the median), so a fault with no detector that moves the total less than that is published. See the real-data backtest.
 * One metric, one pipeline. Lineage parsing handles joins, filters, group by and simple expressions, not deeply nested SQL or stored procedures.
 * Corrections are hotfixes. The real fix is upstream, and Receipts records the evidence for that conversation.
 * Access control is a convention on Exasol Personal because it is single-user. On Enterprise it is a role grant.
@@ -440,7 +453,7 @@ Receipts is built by a team of one: **Aakash Singh Mutum** ([@AakashMutum](https
 |---|---|
 | Innovation and problem impact | [Problem](#problem), [Solution](#solution), prove by undoing in [`receipts/undo.py`](receipts/undo.py) and [`receipts/gate.py`](receipts/gate.py) |
 | Effective use of Exasol Personal | [How Exasol is used](#how-it-works), [`receipts/udf/clock_drift.py`](receipts/udf/clock_drift.py), [`receipts/decompose.py`](receipts/decompose.py), [`receipts/lineage.py`](receipts/lineage.py), [`sql/exasol/`](sql/exasol/) |
-| Technical excellence | [Results](#results), [Beyond the scripted scenarios](#beyond-the-scripted-scenarios), [`tests/`](tests/), [`samples/exasol/`](samples/exasol/) |
+| Technical excellence | [Results](#results), [Beyond the scripted scenarios](#beyond-the-scripted-scenarios), [Real-data backtest](#real-data-backtest), [`tests/`](tests/), [`samples/exasol/`](samples/exasol/) |
 | Solution design and user experience | [See it work](#see-it-work), [System Architecture](#system-architecture), [`web/`](web/) |
 | Documentation and reproducibility | [Building & Running](#building--running), [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`scripts/capture_screenshots.py`](scripts/capture_screenshots.py) |
 | Open-source quality | [`LICENSE`](LICENSE), [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md), [`.github/`](.github/) |

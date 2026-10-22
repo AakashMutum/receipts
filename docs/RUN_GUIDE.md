@@ -105,7 +105,12 @@ receipts eval                 # full scored evaluation, 5 seeds, writes samples/
 receipts eval --backend exasol  # the same evaluation on Exasol
 receipts sample               # writes an unedited case file per scenario to samples/cases
 receipts export-sql           # writes all Exasol SQL to sql/exasol for reading
+receipts demo --watch         # command center plus the batch watcher and alerts (section 7)
+receipts watch --once         # judge any newly landed batch once and exit
+receipts backtest             # the gate over real NYC taxi data, writes samples/real_backtest.md
 ```
+
+`receipts backtest` downloads about 150 MB of NYC TLC yellow taxi trip records (January to March 2024) once into `data/real/` with a progress line, then judges 56 real days one night at a time and plants six faults on real days. It runs on the local stand-in and takes a few minutes after the download.
 
 Scenarios: `healthy`, `festival`, `unit_paise`, `duplicate_load`, `join_fanout`, `stale_fx`, `ist_utc`, `new_code`, `masked_pair`, `unknown_discount`.
 

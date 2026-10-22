@@ -231,6 +231,20 @@ def cmd_variants(a):
     return 1 if n["WRONG"] else 0
 
 
+def cmd_backtest(a):
+    """Run the gate day by day over real NYC taxi data, with and without planted faults."""
+    from .backtest import run, to_markdown
+    rep = run(Path(a.data), warmup=a.warmup, log=lambda m: print(m, flush=True))
+    out = Path(a.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(to_markdown(rep, "receipts backtest"), encoding="utf-8")
+    (out.with_suffix(".json")).write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
+    held = sum(r["trust"] == "HELD" for r in rep["clean"])
+    caught = sum(r["caught"] for r in rep["planted"])
+    print(f"\n{len(rep['clean'])} real days judged, {held} held. Planted faults caught: {caught} of "
+          f"{len(rep['planted'])}. Report: {out}")
+
+
 def cmd_doctor(a):
     """Check the environment, and on Exasol check identifiers against reserved words."""
     from .doctor import run_doctor
@@ -385,6 +399,11 @@ def main(argv=None):
         sp.add_argument("--interval", type=float, default=60, help="seconds between checks (default 60)")
         sp.add_argument("--inbox", help="folder to read batch files from (default inbox/, or RECEIPTS_INBOX)")
     wt.set_defaults(fn=cmd_watch)
+    bt = sub.add_parser("backtest", help="run the gate over real NYC taxi data (downloads about 150 MB once)")
+    bt.add_argument("--data", default=str(ROOT / "data" / "real"), help="where the downloaded files go")
+    bt.add_argument("--warmup", type=int, default=35, help="days published as trusted before judging starts")
+    bt.add_argument("--out", default=str(ROOT / "samples" / "real_backtest.md"))
+    bt.set_defaults(fn=cmd_backtest)
     a = p.parse_args(argv)
     try:
         rc = a.fn(a)
