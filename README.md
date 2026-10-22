@@ -280,7 +280,13 @@ receipts/
 
 ## Building & Running
 
-Requires Python 3.10 or newer. Works on Windows, macOS and Linux.
+**Quick start** (needs only Python 3.10 or newer; the first run installs the packages):
+
+* **Windows:** double-click `run.bat`, or `run-exasol.bat` when Exasol Personal is running.
+* **macOS:** double-click `run.command`, or `run-exasol.command` (Exasol Personal needs an Apple Silicon Mac).
+* **Linux:** run `./run.sh`, or `./run-exasol.sh` (Exasol Personal needs Podman).
+
+Each script sets up a private `.venv`, builds the demo data, starts the command center and opens your browser. `run.bat`, `run.command` and `run.sh` use the local stand-in described below; the `run-exasol` scripts use your running Exasol Personal and never install anything for it. The step-by-step version follows.
 
 ### 1. Run it on Exasol Personal
 

@@ -1,0 +1,5 @@
+# Windows cmd misreads labels in batch files with LF-only line endings, so keep CRLF there
+*.bat text eol=crlf
+# Shell scripts must be LF to run on macOS and Linux
+*.sh text eol=lf
+*.command text eol=lf

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import date
 from pathlib import Path
@@ -236,12 +237,9 @@ def cmd_doctor(a):
     return run_doctor()
 
 
-def cmd_serve(a):
-    import uvicorn
-
+def _ensure_day(day: date) -> None:
+    """Build the database for `day` unless it already holds that day."""
     from .load import incoming_day
-    from .model import default_incoming_day
-    day = a.day or default_incoming_day()
     current = be = None
     try:
         be = _be()
@@ -255,8 +253,48 @@ def cmd_serve(a):
         print(f"database holds {current or 'no data'}, building it for {day}")
         conf = (_manifest() or {}).get("config", {})
         _build(day, conf.get("seed", 7), conf.get("orders_per_day", 20000), fresh=False)
-    print(f"Receipts command center on http://{a.host}:{a.port}")
+
+
+def _open_browser_when_up(url: str, timeout: float = 120) -> None:
+    """Wait in the background until the server answers, then open the page once."""
+    import threading
+    import time
+    import urllib.request
+    import webbrowser
+
+    def wait_and_open():
+        end = time.monotonic() + timeout
+        while time.monotonic() < end:
+            try:
+                with urllib.request.urlopen(url + "api/overview", timeout=2):
+                    webbrowser.open(url)
+                    return
+            except Exception:
+                time.sleep(0.5)
+        print(f"The server did not answer within {timeout:.0f}s. Open {url} yourself.")
+
+    threading.Thread(target=wait_and_open, daemon=True).start()
+
+
+def _serve(a, browser: bool) -> None:
+    import uvicorn
+
+    from .model import default_incoming_day
+    _ensure_day(a.day or default_incoming_day())
+    url = f"http://{a.host}:{a.port}/"
+    print(f"Receipts command center on {url}  (press Ctrl+C to stop)")
+    if browser:
+        _open_browser_when_up(url)
     uvicorn.run("receipts.api:app", host=a.host, port=a.port, log_level="warning")
+
+
+def cmd_serve(a):
+    _serve(a, browser=False)
+
+
+def cmd_demo(a):
+    """Build the database if needed, start the command center and open it in the browser."""
+    _serve(a, browser=not (a.no_browser or os.environ.get("RECEIPTS_NO_BROWSER") == "1"))
 
 
 def main(argv=None):
@@ -306,8 +344,24 @@ def main(argv=None):
     sv.add_argument("--day", type=_day, help="incoming batch day, YYYY-MM-DD (default: yesterday in India). "
                                               "Rebuilds the database first if it holds another day")
     sv.set_defaults(fn=cmd_serve)
+    dm = sub.add_parser("demo", help="build the database if needed, start the command center, open the browser")
+    dm.add_argument("--host", default="127.0.0.1")
+    dm.add_argument("--port", type=int, default=8000)
+    dm.add_argument("--day", type=_day, help="incoming batch day, YYYY-MM-DD (default: yesterday in India)")
+    dm.add_argument("--no-browser", action="store_true", help="do not open a browser window")
+    dm.set_defaults(fn=cmd_demo)
     a = p.parse_args(argv)
-    rc = a.fn(a)
+    try:
+        rc = a.fn(a)
+    except KeyboardInterrupt:
+        rc = 130
+    except Exception as e:
+        if type(e).__name__ != "ExaConnectionFailedError":
+            raise
+        cfg = settings()
+        print(f"\nCould not connect to Exasol at {cfg.exa_dsn}. Is the database running?\n"
+              "Check with `exasol status`, start it with `exasol start`, then try again.", file=sys.stderr)
+        rc = 2
     sys.exit(rc or 0)
 
 

@@ -1,5 +1,23 @@
 # Run guide
 
+## 0. One click
+
+Download or clone the repository, then:
+
+| System | Stand-in demo, nothing else to install | On Exasol Personal (must already be running) |
+|---|---|---|
+| Windows | double-click `run.bat` | double-click `run-exasol.bat` |
+| macOS | double-click `run.command` | double-click `run-exasol.command` (Apple Silicon only) |
+| Linux | `./run.sh` | `./run-exasol.sh` (needs Podman) |
+
+Every script finds Python 3.10 or newer (and says where to get it if missing), creates `.venv` the first time, installs Receipts only if it is not installed yet, then runs `receipts demo`: build the data if needed, start the command center, open the browser. The window stays open with a message if anything fails. Press Ctrl+C in it to stop.
+
+The `run-exasol` scripts look for the launcher on `PATH`, then in `EXASOL_HOME`, then in your Downloads folder. If Exasol is not running they say "Exasol is not running. Run: exasol start" and stop; they never install Podman or Exasol. Then they run `receipts init`, `receipts doctor` and `receipts demo` against it. Exasol Personal runs locally on Windows (amd64), on Apple Silicon Macs and on Linux with Podman; Intel Macs are not supported.
+
+On macOS, the first double-click on a downloaded `.command` file may be blocked as coming from an unidentified developer: right-click it and choose Open once. If the repository came as a ZIP and the file will not run, make it executable with `chmod +x run.command run-exasol.command run.sh run-exasol.sh`.
+
+`receipts demo` takes the same options as `receipts serve` (`--day`, `--port`) plus `--no-browser`.
+
 ## 1. Without Exasol (anyone, two minutes)
 
 Requires Python 3.10 or newer.
@@ -16,7 +34,7 @@ make judge-check
 Then the command center:
 
 ```bash
-make demo        # same as: receipts init && receipts serve
+make demo        # same as: receipts demo (builds if needed, serves, opens the browser)
 ```
 
 Open http://127.0.0.1:8000. The header chip says **Local stand-in** so nobody mistakes it for Exasol.
@@ -34,7 +52,7 @@ receipts serve --day 2026-10-20     # or: make demo DAY=2026-10-20
 
 Exasol Personal runs locally on macOS (Apple Silicon), on Linux with Podman, and on Windows (amd64) with Podman.
 
-Windows: download the `exasol` launcher from https://downloads.exasol.com/exasol-personal, put it in a folder on your `PATH`, open a new PowerShell and run `exasol version`. If Podman is missing the launcher offers to install it with `winget` (administrator approval may be asked). Windows arm64 is not supported for local deployments. The PowerShell equivalents of the exports below are `$env:EXA_DSN = "localhost:8563"`, and so on; `make` is not needed, run the `receipts` commands directly.
+Windows: download the `exasol` launcher from https://downloads.exasol.com/exasol-personal, put it in a folder on your `PATH`, open a new PowerShell and run `exasol version`. If Podman is missing the launcher offers to install it with `winget` (administrator approval may be asked). Windows arm64 is not supported for local deployments. The PowerShell equivalents of the exports below are `$env:EXA_DSN = "localhost:8563"`, and so on. On Windows the simplest route is to double-click `run-exasol.bat` (section 0), which does all of this for you.
 
 ```bash
 curl https://downloads.exasol.com/exasol-personal/installer.sh | sh   # macOS and Linux only: installs the `exasol` launcher

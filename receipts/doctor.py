@@ -63,7 +63,11 @@ def run_doctor() -> int:
         be = connect(cfg)
         line(be.scalar("SELECT 1" + be.dialect.from_dual()) == 1, "database reachable")
     except Exception as e:
-        line(False, f"database reachable: {e}")
+        if type(e).__name__ == "ExaConnectionFailedError":
+            line(False, f"database reachable: nothing answers at {cfg.exa_dsn}")
+            print("        Check with `exasol status`, start it with `exasol start`, then run doctor again.")
+        else:
+            line(False, f"database reachable: {e}")
         return 1
     if be.name == "exasol" and not be.is_standin:
         info = be.describe()

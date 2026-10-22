@@ -10,7 +10,7 @@ DAYARG = $(if $(DAY),--day $(DAY))
 help:
 	@echo "make install       install Receipts and its dependencies"
 	@echo "make init          generate synthetic data and build the database (Exasol if EXA_DSN is set)"
-	@echo "make demo          init, then start the command center on http://127.0.0.1:$(PORT) (DAY=YYYY-MM-DD pins the day)"
+	@echo "make demo          build if needed, start and open the command center on http://127.0.0.1:$(PORT) (DAY=YYYY-MM-DD pins the day)"
 	@echo "make judge-check   reproduce the headline claims. No Exasol, no API key needed"
 	@echo "make eval          full scored evaluation, writes samples/eval_report.md"
 	@echo "make test          run the test suite, including the Exasol SQL path"
@@ -23,7 +23,8 @@ install:
 init:
 	receipts init $(DAYARG)
 
-demo: init serve
+demo:
+	receipts demo --port $(PORT) $(DAYARG)
 
 serve:
 	receipts serve --port $(PORT) $(DAYARG)
