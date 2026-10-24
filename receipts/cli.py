@@ -73,11 +73,22 @@ def _print_case(c):
           f"total {c['total_ms']:.0f} ms, {c['statements']} SQL statements")
 
 
+def _synthetic_or_exit(be) -> None:
+    """Commands that plant faults only run on the built-in synthetic data."""
+    from .lab import synthetic_check
+    ok, why = synthetic_check(be)
+    if not ok:
+        print(f"Refused: this command plants faults into RAW and only runs on the built-in synthetic data. {why}",
+              file=sys.stderr)
+        sys.exit(3)
+
+
 def cmd_run(a):
     from . import gate
     from .faults import SCENARIOS
     from .load import incoming_day, ingest
     be = _be()
+    _synthetic_or_exit(be)
     day = incoming_day(be)
     sc = ingest(be, day, a.scenario)
     c = gate.run(be, day, {"id": sc.id, "title": sc.title, "story": sc.story, "kind": sc.kind})
@@ -139,6 +150,7 @@ def cmd_sample(a):
     from .faults import DEMO_ORDER, SCENARIOS
     from .load import incoming_day, ingest
     be = _be()
+    _synthetic_or_exit(be)
     day = incoming_day(be)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)

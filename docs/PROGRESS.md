@@ -109,3 +109,18 @@ Rule added during the work: everything that can write bad data or attack the sys
   schema filter), the prompts and the expected behaviour.
 * NOT tested: the MCP server itself (uv is not installed here, so the smoke test skips that part), Claude
   Desktop, Claude Code, and any live model answer.
+
+## Phase 6: Documentation and open-source polish (2026-10-24)
+
+* docs/tour.gif (0.29 MB, 16 frames, 800x500), recorded on Exasol with scripts/capture_tour.py: batch lands
+  and is published, Break the pipeline, the live timeline, HELD, receipt, approve, the agent. No image library:
+  Chromium decodes and scales the screenshots, numpy writes the GIF. Checked by decoding it in Chromium.
+* Dockerfile and .dockerignore for the stand-in demo in lab mode. NOT built: Docker Desktop was not running,
+  and Podman is busy hosting Exasol on the same small VM.
+* docs/EVAL_CARD.md (scope, data, results, holes, what is not claimed), docs/starter_issues.md (6 issues;
+  `gh` is not installed, so none were opened on GitHub).
+* README restructured: pitch, results table, tour GIF and the two modes, how Exasol is used (with the
+  Exasol-measured timings), quick start for Windows, macOS and Linux (plus Docker), real-data backtest, red
+  team (with the hole), scaling, agent demo, limits, architecture and diagrams. Test count 112 (2 live-only).
+* `receipts run` and `receipts sample` now refuse (exit 3) unless the loaded data is the synthetic data, as
+  they plant faults too (lab rule).

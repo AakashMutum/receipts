@@ -11,106 +11,201 @@
 
 # RECEIPTS: Proof for Every Number That Moves
 
-## Overview
+**When a daily business number moves, Receipts holds it back, proves inside Exasol which upstream fault caused it by undoing that fault in a sandbox, and tells dashboards and AI agents whether to trust it.**
 
-Receipts is a data-trust layer for a daily business metric. When revenue jumps or drops, it holds the number back, proves which upstream fault caused it by undoing that fault in a sandbox, and publishes a trust flag that dashboards and AI agents can read.
+Built for ExaThon India 2026, Track 4: The Work Behind the Work. Exasol Personal is the platform: every check, the slice decomposition, the Python UDF, lineage, the undo test and the write-back run inside Exasol, and agents read the result from Exasol through the Exasol MCP server. A DuckDB stand-in exists only for CI and for people without Exasol.
 
-Exasol Personal is the project's data platform. Every check, the slice decomposition, the Python UDF, lineage, the undo test and the write-back run inside Exasol, and agents read the result from Exasol through the Exasol MCP server.
+## Results
 
-**Built for:** ExaThon India 2026, Track 4: The Work Behind the Work.
+Every number below was measured on Exasol Personal 2026.2.0-nano.3 on one laptop (Windows 11, Intel Core 5, Podman on WSL2 with about 7.7 GiB visible to the VM). Each links to its unedited report.
 
-## Problem
+| What | Result on Exasol | Report |
+|---|---|---|
+| Scored evaluation, 10 scenarios x 5 seeds, 20,000 orders a day | **50 of 50** right verdict and exactly the right causes; cause precision and recall 100%, 0 wrong causes. Without the undo test: 5 wrong causes. A threshold alert: 0% of causes found | [`eval_report.md`](samples/exasol/eval_report.md) |
+| Real data: NYC taxi trips, Jan to Mar 2024, 9,554,757 trips | 56 real days judged, **0 held**, 2 verified real changes; **6 of 6** planted faults caught with the right cause; 62 of 62 gate runs agree with the DuckDB run | [`real_backtest.md`](samples/exasol/real_backtest.md) |
+| Red team: shrink each fault until the gate stops proving it | Floors: duplicates 2%, fan-out 2%, new codes 5%, unit and clock faults 100%, stale FX caught. **1 hole**: a x100 unit change on 2% of one gateway was published, 6.5% off | [`redteam_report.md`](samples/exasol/redteam_report.md) |
+| Scaling: the IST case after a fresh load | Right verdict at every size up to **400,000 orders a day, 17,346,085 payment rows**: gate 27.5 s, CUBE over 5.95 million rows 5.9 s. Nothing larger was measured | [`scaling.md`](samples/exasol/scaling.md) |
+| Live demo: click Break the pipeline to the HELD banner | **7.3 s** median over 5 runs (6.9 to 8.5 s), every gate step shown as it finishes | [`RUN_GUIDE.md`](docs/RUN_GUIDE.md#8-break-the-pipeline-lab-mode) |
+| Held-out fault variants (17, written after the detectors were fixed) | caught 13, held 3, published but under 4% off 1, published wrong 0 | [`variants_report.md`](samples/exasol/variants_report.md) |
+| A read-only agent user | `AGENT_READER` reads `PUB.METRIC_TRUST`; Exasol refuses it on RAW, PIPE, RECEIPTS and on every write | [`MCP_DEMO.md`](docs/MCP_DEMO.md) |
 
-A finance analyst at an Indian fintech marketplace can't tell whether a sudden change in daily revenue is real or a silent data bug, because the number passes through several tables and every check says green. If this worked, she'd know within minutes which upstream fault caused it, with proof, instead of guessing for two days.
+The ten scenarios were used to build the detectors, so 50 of 50 shows consistency, not generality. The real-data backtest, the variants and the red team are the tests of generality, and the red team found a hole that is described, not fixed, below.
 
-The faults are boring and common:
+## The demo in 30 seconds
 
-* a gateway starts sending paise instead of rupees
-* a payment file is loaded twice
-* a dimension table quietly gains duplicate keys
-* the FX feed misses a day
-* a connector writes IST into a UTC column
-* a new category code falls out of an inner join
+![Tour: a batch lands, the pipeline is broken, the gate runs step by step, the number is held, the receipt, approve, the agent answers](docs/tour.gif)
 
-None of them trips a null check or a row count check. They just make the number wrong.
+A clean batch lands and is published. **Break the pipeline** plants IST written as UTC into tonight's RAW batch, the gate runs step by step, the number is **HELD** and the dashboard keeps the last trusted value, the receipt shows the proof, a person approves the corrected value, and the agent that checks trust answers. Recorded on Exasol with [`scripts/capture_tour.py`](scripts/capture_tour.py).
 
-## Solution
+Receipts runs in two modes:
 
-Three layers, in this order. The LLM never decides what is true.
+* **Normal mode: watches and proves, cannot change data.** `receipts serve` and `receipts demo` start here. The command center shows the number, every receipt and the agent comparison. The only write a person can make is approving a proven correction. Planting faults, Break the pipeline, its Reset and the Red team tab are not on the page, and their API endpoints answer 403.
+* **Lab mode: break it and red team, for demos.** `receipts demo --lab` (or `RECEIPTS_LAB=1`) adds them. Even then, breaking anything is refused unless the database holds the built-in synthetic data (checked against `data/manifest.json`). The one-click run scripts start in lab mode.
 
-1. **Gate (prevent).** Six detectors check tonight's raw batch before the dashboard sees it. A suspicious number is held, and the dashboard keeps showing the last trusted value.
-2. **Investigate (prove).** Break the change down across every slice in one `GROUP BY CUBE`, read lineage from the database's own view definitions, then undo each suspect in a sandbox schema and re-run the metric. A cause is confirmed only if undoing it brings the number back into range and leaves published history untouched.
-3. **Explain.** A plain-language summary and the exact fix as a diff. Template text by default. An LLM rewrites it only if a key is set, and only from aggregated evidence.
-
-## See it work
-
-All screenshots are from the command center running on Exasol Personal, captured with [`scripts/capture_screenshots.py`](scripts/capture_screenshots.py) on the fixed demo day 20 Oct 2026.
-
-**A connector wrote IST into a UTC column.** Revenue drops 19%, the dashboard holds it and keeps showing the last trusted value.
-
-![Held: IST written as UTC](docs/screenshots/02_held_ist.png)
-
-**The receipt.** Each suspect against the four rules, where the change landed across 11,074 slices, the undo test, lineage from the catalog, and the proposed fix waiting for approval.
-
-![The receipt for the IST case](docs/screenshots/03_receipt_ist.png)
-
-**Two AI agents, one question.** The agent that reads the pipeline states the broken number as fact; the one that checks `PUB.METRIC_TRUST` gives the last trusted value and says why.
-
-![Agent comparison](docs/screenshots/04_agents_held.png)
-
-**Two faults that cancel out.** The total moves only 1.8%, so a threshold alert stays silent. Receipts proves both faults and shows the slice that moved, gateway GW_B and currency INR, down 31% against its usual level.
-
-![Two faults that cancel out](docs/screenshots/05_masked_pair.png)
-
-**A real festival surge.** The duplicate check fires on payment retries, undoing it changes nothing, so it is ruled out and the surge is published as a verified real change.
-
-![Real festival surge, published](docs/screenshots/06_festival_published.png)
-
-## Key Features
-
-* **Prove by undoing.** A detector only nominates a suspect. The undo test rebuilds the pipeline with the fault removed and shows the number come back.
-* **Two faults that cancel out.** The total looks normal, a threshold alert stays silent, and Receipts proves both faults.
-* **Real changes are published.** On a festival surge the duplicate check fires on payment retries, undoing it changes nothing, so it is ruled out and the surge is published as a verified real change.
-* **Agent-safe.** `PUB.METRIC_TRUST` tells an AI agent connected through the Exasol MCP server not to quote a held number, and gives the last trusted value.
-* **Human in the loop.** A proven fault stays held until a person approves the corrected value. Approval is logged.
-* **Works without a key.** The LLM explanation is optional. The whole system runs offline.
-* **Command center.** One responsive page: the number, the receipt, where it moved, the undo chart, lineage, the fix diff, and a side-by-side agent comparison.
-
-## Technology Stack
-
-* Exasol Personal: SQL, `GROUP BY CUBE` with `GROUPING_ID`, Python 3 SET SCRIPT UDF, `SYS.EXA_ALL_VIEWS`, schemas, `IMPORT`
-* Exasol MCP server for agent access
-* Python 3.10+, pyexasol, sqlglot (lineage), Jinja2 (one SQL template per dialect), NumPy
-* FastAPI and Uvicorn
-* Plain HTML, CSS and JavaScript for the UI, no build step
-* Optional: Anthropic API for the explanation text
-
-## How It Works
-
-Every batch goes through the same path inside Exasol, shown as diagrams in [System Architecture](#system-architecture): six detectors, one `GROUP BY CUBE` over every slice, lineage from the catalog, an undo test per suspect in a sandbox schema, and an evidence gate that decides the verdict and writes it back.
-
-The four rules for confirming a cause:
-
-1. The evidence names a specific column and slice.
-2. That column feeds this metric, according to lineage parsed from the catalog.
-3. Undoing it moves today's number by at least 1.5%.
-4. History stays exactly as published, or comes back to exactly what was published.
-
-How Exasol is used:
+## How Exasol is used
 
 | Exasol feature | What Receipts does with it |
 |---|---|
-| `GROUP BY CUBE` with `GROUPING_ID` | Tests every combination of six dimensions for today and the baseline in one scan |
+| `GROUP BY CUBE` with `GROUPING_ID` | Tests every combination of six dimensions for today and the baseline in one scan: 11,074 slices |
 | `PYTHON3 SET SCRIPT` UDF | `RECEIPTS.CLOCK_DRIFT` compares each gateway's half-hour profile with its baseline and finds the shift that lines it up, per group, inside the database |
 | `SYS.EXA_ALL_VIEWS` | Lineage from the view text Exasol already stores |
 | Views and schemas | The undo test rebuilds the full pipeline in a sandbox schema with one source swapped |
-| `IMPORT` via pyexasol | Bulk load of the synthetic landing data |
+| `EXA_STATISTICS.EXA_SQL_LAST_DAY` | After each gate run, `FLUSH STATISTICS` and Exasol's own per-statement duration and peak memory, bracketed with `CURRENT_STATEMENT`; shown in the receipt as "Measured by Exasol" |
+| Users and grants | `AGENT_READER` can `SELECT` from `PUB` and nothing else; the MCP server logs in as it |
+| `IMPORT` via pyexasol | Bulk load of the synthetic data and of the 9.5 million real taxi trips |
 | `SYS.EXA_SQL_KEYWORDS` | `receipts doctor` checks every identifier against reserved words |
 | Exasol MCP server | Agents read `PUB.METRIC_TRUST` before quoting a number |
 
-The architecture in full is in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+One incident on Exasol, `receipts run ist_utc` at 20,000 orders a day: 26 SQL statements, 4.2 s end to end. Exasol's own statistics for the same case on a repeat run: 3.1 s inside the database over 25 statements, the CUBE 0.8 s, peak temporary memory 77 MiB.
 
-## System Architecture
+| Step | Time |
+|---|---|
+| Read candidate and five weeks of trusted history | 192 ms |
+| Run six detectors on the incoming batch (clock check is a Python UDF inside Exasol) | 692 ms |
+| Read lineage from view definitions (`EXA_ALL_VIEWS`) | 44 ms |
+| Test 11,074 slices over 296,484 rows in one `GROUP BY CUBE` | 1,091 ms |
+| Reconcile raw payments to revenue rows | 354 ms |
+| Undo each suspect in a sandbox schema | 997 ms |
+| Write receipts back to the database | 761 ms |
+
+![Where the time went, with the time measured by Exasol](docs/screenshots/10_measured_by_exasol.png)
+
+## Quick start
+
+**One click** (needs only Python 3.10 or newer; the first run installs the packages):
+
+| System | Stand-in demo, nothing else to install | On Exasol Personal (must already be running) |
+|---|---|---|
+| Windows | double-click `run.bat` | double-click `run-exasol.bat` |
+| macOS | double-click `run.command` | double-click `run-exasol.command` (Apple Silicon only) |
+| Linux | `./run.sh` | `./run-exasol.sh` (needs Podman) |
+
+Each script sets up a private `.venv`, builds the demo data, starts the command center in lab mode and opens your browser. The `run-exasol` scripts use your running Exasol Personal and never install anything for it.
+
+**With Docker** (stand-in only, nothing else on the host): `docker build -t receipts .` then `docker run --rm -p 8000:8000 receipts`, and open http://127.0.0.1:8000. Not tested on the machine this was built on (Docker was not running there).
+
+**Step by step on Exasol Personal:**
+
+1. Install the launcher. Windows 10 or later (amd64): download `exasol` from the [Exasol download portal](https://downloads.exasol.com/exasol-personal), put it on your `PATH`, open a new PowerShell and run `exasol version`. macOS and Linux: `curl https://downloads.exasol.com/exasol-personal/installer.sh | sh`
+2. `exasol install local`, then `exasol slc install python3` (Python UDFs, restarts the database), then `exasol info`. Local defaults are user `sys`, password `exasol`.
+3. Install Receipts, point it at Exasol and build.
+
+   Windows (PowerShell):
+
+   ```powershell
+   git clone https://github.com/AakashMutum/receipts.git
+   cd receipts
+   python -m venv .venv
+   .venv\Scripts\Activate.ps1
+   pip install -e ".[dev]"
+   $env:RECEIPTS_BACKEND = "exasol"; $env:EXA_DSN = "localhost:8563"; $env:EXA_USER = "sys"; $env:EXA_PASSWORD = "exasol"
+   receipts init
+   receipts doctor
+   receipts demo --lab
+   ```
+
+   macOS and Linux:
+
+   ```bash
+   git clone https://github.com/AakashMutum/receipts.git && cd receipts
+   python3 -m venv .venv && source .venv/bin/activate
+   make install
+   export EXA_DSN=localhost:8563 EXA_USER=sys EXA_PASSWORD=exasol
+   make exasol-init
+   RECEIPTS_BACKEND=exasol receipts demo --lab
+   ```
+
+`receipts doctor` checks that every statement parses with the Exasol grammar, that the database is reachable, that no identifier is a reserved word, that the UDF runs inside the database, and that the agent user can read `PUB` and nothing else. The header chips read **Exasol** and **Python UDF in the database**.
+
+**Without Exasol:** `pip install -e ".[dev]"`, then `receipts judge-check` (reproduces the headline claims on fresh data in about a minute), `receipts init` and `receipts demo --lab` with no `EXA_*` variables set. The page header then says **Local stand-in**. The same SQL templates render for both, and the tests also run every scenario through an Exasol SQL path (rendered for Exasol, parsed with sqlglot's Exasol grammar, then executed).
+
+The incoming batch is dated yesterday (in India), with 42 days of history before it. To reproduce the screenshots exactly, pin the day: `receipts init --day 2026-10-20` and `receipts demo --lab --day 2026-10-20`. `judge-check`, `eval` and the tests always use 20 Oct 2026.
+
+More commands, alerts with `--watch`, an optional LLM explanation, and troubleshooting: [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md).
+
+## Real-data backtest
+
+`receipts backtest --backend exasol` runs the gate on public data: **NYC TLC yellow taxi trip records, January to March 2024**, 9,554,757 trips, no login needed. The metric is the daily total of `total_amount`. A thin adapter maps trips onto the pipeline's tables (vendor as gateway, borough as city, rate code as category), the mapped tables are bulk loaded into Exasol with `IMPORT`, and the detectors, the CUBE and the undo test run unchanged. No threshold was changed. The first 35 days are trusted history, then the gate judges 56 days one night at a time. Full report: [`samples/exasol/real_backtest.md`](samples/exasol/real_backtest.md).
+
+* **Real days, no faults planted: 56 judged, 0 held, 0 called PROVEN_FAULT.** 54 published as `NO_INCIDENT`, 2 as a verified `REAL_CHANGE`: Tue 13 Feb (-33.9%, a snowstorm day when New York City schools went remote) and Tue 27 Feb (+26.0%, the busiest Tuesday so far).
+* **Planted faults on real days: 6 of 6 caught with the right cause.** Three unit changes (one vendor in cents, +2,111% to +2,371%) and three duplicated payment files (+8.2% to +8.3%, inside the normal range, so a threshold alert would have missed them).
+* **The same on both databases:** all 62 gate runs reach the same verdict and causes on Exasol and on the DuckDB stand-in; the daily values differ by at most 6.5e-05 relative.
+* **Timing on Exasol:** median 14.8 s per gate run (max 47.5 s) as RAW grows to 9.5 million rows; loading and building took 150 s.
+* **What it also shows:** real revenue is noisy, with a normal range of plus or minus 21.7% at the median, so a fault without a detector that moves the total less than that is published. The clock check fired on five Saturdays and the undo test ruled it out every time.
+
+## Red team
+
+`receipts redteam` attacks the gate: for each fault class it shrinks the share of rows affected (100, 50, 25, 10, 5, 2 percent), and past the first step the gate no longer proves it keeps going while the fault could still publish a number more than 4% off. Then it plants two faults that push in opposite directions, each at its floor. **Run it on the built-in synthetic data or a sandbox copy, never on live production tables:** every attack writes a planted fault into RAW, and on Exasol it rebuilds the database. Full report: [`samples/exasol/redteam_report.md`](samples/exasol/redteam_report.md) (seed 11, 20,000 orders a day, 7 minutes).
+
+| Fault class | Detection floor (smallest share still proven) | Below the floor |
+|---|---|---|
+| Payment rows loaded twice | 2% | not reached |
+| Merchant table fans out | 2% | not reached |
+| New category code | 5% | published, 0.7% off |
+| FX feed misses today | caught (one rate is there or not) | nothing to shrink |
+| IST written as UTC on one gateway | 100% | held, nothing proven, at 50% and 25% |
+| Unit change (x100) on the smallest gateway | 100% | held at 50% to 5%; **published at 2%: the hole** |
+
+* **The hole:** a x100 unit change on 2% of one small gateway's payments moves revenue up 6.5%. The unit check compares medians, which 2% of rows do not move, and the real-change test accepts a move with flat volume when the average ticket moves less than 6%. So it was published as a verified `REAL_CHANGE`. The same attack on the demo data was published as `NO_INCIDENT`, 8.6% off. The DuckDB run finds the same hole.
+* Two fixes are proposed in [`docs/PROGRESS.md`](docs/PROGRESS.md) (a tail check in the unit detector, and a stricter real-change test). Neither is applied: each would need the evaluation, the variants and the backtest re-run first.
+* Of 9 opposite-direction pairs at the floors, 8 were caught with both causes, and 1 was held with one of the two causes proven.
+
+The **Red team** tab in lab mode charts these floors and runs one attack live.
+
+![The Red team tab](docs/screenshots/09_redteam.png)
+
+## Scaling
+
+`receipts scale --backend exasol` runs the IST case after `receipts init --fresh --orders-per-day N`, one gate run per size. Full report: [`samples/exasol/scaling.md`](samples/exasol/scaling.md).
+
+| Orders a day | Payment rows | Load and build | Gate end to end | Measured by Exasol | CUBE | Peak temp memory | Verdict |
+|---|---|---|---|---|---|---|---|
+| 20,000 | 863,336 | 25 s | 9.1 s | 7.6 s | 2.4 s | 73 MiB | right |
+| 100,000 | 4,323,746 | 40 s | 14.0 s | 12.6 s | 2.9 s | 168 MiB | right |
+| 200,000 | 8,636,296 | 86 s | 18.4 s | 16.9 s | 3.4 s | 229 MiB | right |
+| 400,000 | 17,346,085 | 215 s | 27.5 s | 26.3 s | 5.9 s | 353 MiB | right |
+
+Each run is the first after a fresh load, which is slower than a repeat. The run stopped at 400,000 on purpose: the laptop's free disk would not hold the next size. Nothing larger is claimed.
+
+## Agent demo
+
+`PUB.METRIC_TRUST` tells an AI agent not to quote a held number and gives the last trusted value. On Exasol, `receipts init` creates `AGENT_READER`, which can read `PUB` and nothing else, and the Exasol MCP server logs in as it. With the IST case held, that user sees `HELD`, no trusted value, the guidance to quote the last trusted day, and the proven cause from `PUB.CONFIRMED_CAUSES`; Exasol refuses it on `RAW`, `PIPE`, `RECEIPTS` and every write (`python scripts/mcp_smoke.py`).
+
+Connecting Claude Desktop or Claude Code, the prompts to ask and the expected answers: [`docs/MCP_DEMO.md`](docs/MCP_DEMO.md). The MCP server and a live model were not tested end to end here (no `uv` on the build machine); the page says exactly what was.
+
+The command center shows the same contrast with two deterministic agents, so the demo never depends on a live model:
+
+![Two agents, one question](docs/screenshots/04_agents_held.png)
+
+## Limits
+
+* It only proves fault classes it has a detector for. Six today. Anything else becomes `UNEXPLAINED`: held, no cause guessed, a person decides.
+* The red team hole above: a unit change on a small share of one gateway can be published.
+* Partial faults are often held without a proven cause (unit changes on 5% to 50% of a gateway, clock shifts on 25% to 50%): safe, but a person has to look.
+* The baseline learns a weekly pattern from five weeks of trusted history but has no holiday calendar, and a verified real change enters that history.
+* On real taxi data the normal range is wide (plus or minus 22% at the median), so a fault without a detector that moves the total less than that is published.
+* One metric, one pipeline. A generic configuration layer for other metrics is not built; the real-data backtest uses an adapter. What a company would provide is listed in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#connecting-your-own-metric).
+* Corrections are hotfixes. The real fix is upstream, and Receipts records the evidence for that conversation.
+* Exasol is not started in CI. The Exasol path is verified by hand on Exasol Personal 2026.2.0-nano.3 (including `tests/test_exasol_live.py`) and in CI through the Exasol SQL path on the stand-in.
+* What is claimed and what is not, in one page: [`docs/EVAL_CARD.md`](docs/EVAL_CARD.md).
+
+## Architecture
+
+### The problem
+
+A finance analyst at an Indian fintech marketplace cannot tell whether a sudden change in daily revenue is real or a silent data bug, because the number passes through several tables and every check says green. The faults are boring and common: a gateway sends paise instead of rupees, a payment file is loaded twice, a dimension table gains duplicate keys, the FX feed misses a day, a connector writes IST into a UTC column, a new category code falls out of an inner join. None trips a null check or a row count check.
+
+### Three layers
+
+1. **Gate (prevent).** Six detectors check tonight's raw batch before the dashboard sees it. A suspicious number is held, and the dashboard keeps showing the last trusted value.
+2. **Investigate (prove).** Break the change down across every slice in one `GROUP BY CUBE`, read lineage from the database's own view definitions, then undo each suspect in a sandbox schema and re-run the metric. A cause is confirmed only if undoing it brings the number back into range and leaves published history untouched.
+3. **Explain.** A plain-language summary and the exact fix as a diff. Template text by default; an LLM rewrites it only if a key is set, only from aggregated evidence, and never decides the verdict.
+
+The four rules for confirming a cause: the evidence names a specific column and slice; that column feeds this metric according to lineage; undoing it moves today's number by at least 1.5%; history stays exactly as published, or comes back to exactly what was published.
+
+![The receipt for the IST case](docs/screenshots/03_receipt_ist.png)
+
+More screenshots: [held](docs/screenshots/02_held_ist.png), [two faults that cancel out](docs/screenshots/05_masked_pair.png), [a real festival surge, published](docs/screenshots/06_festival_published.png), [Break the pipeline](docs/screenshots/08_break_it.png). The full design is in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ### System architecture
 
@@ -136,7 +231,8 @@ graph TB
         rec[RECEIPTS]
         pub[PUB]
         udf[Python UDF CLOCK_DRIFT]
-        mcp[Exasol MCP server]
+        stats[EXA_STATISTICS]
+        mcp[Exasol MCP server as AGENT_READER]
     end
     analyst --> web
     web --> api
@@ -153,6 +249,7 @@ graph TB
     undo --> sbx
     gate --> rec
     gate --> pub
+    gate --> stats
     agent --> mcp
     mcp --> pub
 ```
@@ -170,23 +267,6 @@ flowchart LR
     G --> H[RECEIPTS.CASES]
     G --> I[PUB.DAILY_REVENUE_PUBLISHED]
     G --> J[PUB.METRIC_TRUST]
-```
-
-### Analyst user flow
-
-```mermaid
-flowchart TD
-    A[A batch lands] --> B[The number looks off]
-    B --> C[Receipts checks it]
-    C --> D{Verdict}
-    D -->|No incident| E[Published]
-    D -->|Real change| F[Published with the checks shown]
-    D -->|Proven fault| G[Held, proof and fix shown]
-    G --> H[Person clicks approve]
-    H --> I[Corrected value published]
-    I --> J[Approval logged]
-    D -->|Unexplained| K[Held]
-    K --> L[Person investigates]
 ```
 
 ### Verdict decision flow
@@ -220,21 +300,19 @@ flowchart TD
 sequenceDiagram
     actor U as Analyst
     participant T as Agent that checks trust
-    participant N as Agent that reads the pipeline
-    participant M as Exasol MCP server
+    participant M as Exasol MCP server as AGENT_READER
     participant X as Exasol
     U->>T: What was revenue yesterday
     T->>M: Read PUB.METRIC_TRUST for that day
     M->>X: SELECT from PUB.METRIC_TRUST
-    X-->>M: Status HELD, case ID, last trusted value
-    M-->>T: Status HELD and last trusted value
+    X-->>M: Status HELD, case ID, last trusted day
+    M-->>T: Status HELD and guidance
+    T->>M: Read PUB.CONFIRMED_CAUSES for the case
+    M-->>T: The proven cause
     T-->>U: Gives the last trusted value and says the latest one is held and why
-    U->>N: Same question
-    N->>M: Read PIPE.DAILY_REVENUE
+    T->>M: Try PIPE.DAILY_REVENUE
     M->>X: SELECT from PIPE.DAILY_REVENUE
-    X-->>M: The held pipeline value
-    M-->>N: The held pipeline value
-    N-->>U: States the broken number as fact
+    X-->>M: Insufficient privileges
 ```
 
 ### Trust status states
@@ -251,7 +329,7 @@ stateDiagram-v2
     CORRECTED --> [*]
 ```
 
-## Project Structure
+## Project structure
 
 ```
 receipts/
@@ -262,202 +340,35 @@ receipts/
 │   ├── decompose.py     GROUP BY CUBE over six dimensions
 │   ├── lineage.py       lineage from the catalog's view text
 │   ├── undo.py          sandbox rebuild and history check
-│   ├── gate.py          the three layers, the evidence gate, write-back, approval
+│   ├── gate.py          the three layers, the evidence gate, write-back, approval, Exasol-measured timings
 │   ├── agent.py         naive agent vs trust-checking agent
 │   ├── evaluate.py      scored evaluation with baselines and ablation
 │   ├── variants.py      held-out fault variants
-│   ├── faults.py        planted faults and ground truth (the engine never imports it)
+│   ├── faults.py        planted faults, their share-of-rows dial, and ground truth (the engine never imports it)
+│   ├── lab.py           lab mode and the synthetic-data check
+│   ├── redteam.py       the red team
+│   ├── scale.py         the scaling run
 │   ├── datagen.py       seeded synthetic marketplace data
 │   ├── watch.py         the batch watcher behind serve --watch, and its alerts
 │   ├── backtest.py      the real-data backtest on NYC taxi trips
 │   └── api.py           FastAPI endpoints for the command center
 ├── web/                 command center: index.html, app.css, app.js
-├── tests/               83 tests, including every scenario on the Exasol SQL path
-├── samples/             committed, unedited eval reports and case files (samples/exasol from Exasol)
+├── tests/               112 tests (2 of them run only against a live Exasol)
+├── samples/             committed, unedited reports and case files (samples/exasol from Exasol)
 ├── sql/exasol/          all rendered Exasol SQL, for reading
-├── mcp/                 MCP server config and agent instructions
-├── scripts/             screenshot capture for the README
-└── docs/                run guide, architecture, demo script, jury Q&A, screenshots
+├── mcp/                 MCP client config and agent instructions
+├── scripts/             screenshots, the tour GIF, the click-to-HELD timer, the MCP smoke test
+└── docs/                run guide, architecture, eval card, MCP demo, progress log, screenshots
 ```
 
-## Building & Running
-
-**Quick start** (needs only Python 3.10 or newer; the first run installs the packages):
-
-* **Windows:** double-click `run.bat`, or `run-exasol.bat` when Exasol Personal is running.
-* **macOS:** double-click `run.command`, or `run-exasol.command` (Exasol Personal needs an Apple Silicon Mac).
-* **Linux:** run `./run.sh`, or `./run-exasol.sh` (Exasol Personal needs Podman).
-
-Each script sets up a private `.venv`, builds the demo data, starts the command center and opens your browser. `run.bat`, `run.command` and `run.sh` use the local stand-in described below; the `run-exasol` scripts use your running Exasol Personal and never install anything for it. The step-by-step version follows.
-
-### Two modes
-
-* **Normal mode: watches and proves, cannot change data.** `receipts serve` and `receipts demo` start here. The command center shows the number, every receipt and the agent comparison, and the only write a person can make is approving a proven correction. Planting faults, Break the pipeline, its Reset and the Red team tab are not on the page, and their API endpoints answer 403.
-* **Lab mode: break it and red team, for demos.** `receipts demo --lab` (or `RECEIPTS_LAB=1`) adds the scenario picker, the **Break the pipeline** panel and the **Red team** tab. Even then, breaking anything is refused unless the database holds the built-in synthetic data (checked against `data/manifest.json`). The one-click run scripts start in lab mode. On Exasol Personal the time from clicking **Break the pipeline** to the HELD banner, with every gate step shown live, is a median of 7.3 s (5 runs, 6.9 to 8.5 s, measured with [`scripts/measure_break.py`](scripts/measure_break.py)).
-
-### 1. Run it on Exasol Personal
-
-1. **Install the launcher.**
-   * Windows 10 or later (amd64): download the `exasol` launcher from the [Exasol download portal](https://downloads.exasol.com/exasol-personal), put it in a folder on your `PATH`, then open a new PowerShell and run `exasol version`. The launcher offers to install Podman through `winget` if it is missing, which may ask for administrator approval.
-   * macOS and Linux: `curl https://downloads.exasol.com/exasol-personal/installer.sh | sh`
-2. **Start the database.** `exasol install local`
-3. **Enable Python UDFs.** `exasol slc install python3` (restarts the database)
-4. **Read the connection details.** `exasol info`. Local defaults are user `sys`, password `exasol`.
-5. **Install Receipts, point it at Exasol and build.**
-
-   PowerShell:
-
-   ```powershell
-   git clone https://github.com/AakashMutum/receipts.git
-   cd receipts
-   python -m venv .venv
-   .venv\Scripts\Activate.ps1
-   pip install -e ".[dev]"
-   $env:RECEIPTS_BACKEND = "exasol"
-   $env:EXA_DSN = "localhost:8563"
-   $env:EXA_USER = "sys"
-   $env:EXA_PASSWORD = "exasol"
-   receipts init
-   receipts doctor
-   receipts serve
-   ```
-
-   macOS and Linux:
-
-   ```bash
-   git clone https://github.com/AakashMutum/receipts.git && cd receipts
-   python3 -m venv .venv && source .venv/bin/activate
-   make install
-   export EXA_DSN=localhost:8563 EXA_USER=sys EXA_PASSWORD=exasol
-   make exasol-init
-   RECEIPTS_BACKEND=exasol make serve
-   ```
-
-`receipts doctor` checks that every statement parses with the Exasol grammar, that the database is reachable, that no identifier is a reserved word, and that the UDF runs inside the database. Open http://127.0.0.1:8000. The header chips read **Exasol** and **Python UDF in the database**, and every receipt shows how long each step took in the database.
-
-![The command center before tonight's batch lands](docs/screenshots/01_waiting.png)
-
-The incoming batch is dated yesterday (in India), with 42 days of history before it, so the page always shows a recent date. To reproduce the screenshots and the numbers in this README exactly, pin the day: `receipts init --day 2026-10-20` and `receipts serve --day 2026-10-20` (or `make demo DAY=2026-10-20`). `judge-check`, `eval` and the tests always use 20 Oct 2026.
-
-### 2. A quick look without Exasol
-
-Reviewers without Exasol can try the project in two minutes on DuckDB, used only as a local stand-in: `pip install -e ".[dev]"`, then `receipts judge-check` (checks the headline claims on fresh data), `receipts init` and `receipts serve` with no `EXA_*` variables set. The same SQL templates render for both, the UDF source file is identical, and the tests also run every scenario through an Exasol SQL path (rendered for Exasol, parsed with sqlglot's Exasol grammar, then executed). The page header then says **Local stand-in**. Every timing in this README comes from Exasol Personal.
-
-### 3. Try the scenarios
-
-```
-receipts run ist_utc          IST written as UTC
-receipts run unit_paise       a gateway sends paise
-receipts run festival         the real-change control
-receipts run masked_pair      two faults that cancel out
-receipts eval --backend exasol  full scored evaluation on Exasol (rebuilds the database once per seed)
-```
-
-Others: `healthy`, `duplicate_load`, `join_fanout`, `stale_fx`, `new_code`, `unknown_discount`.
-
-### 4. Connect an AI agent (optional)
-
-Add the Exasol MCP server to any MCP client (for example a desktop AI assistant) using [`mcp/mcp_client_config.example.json`](mcp/mcp_client_config.example.json) and paste [`mcp/AGENT_INSTRUCTIONS.md`](mcp/AGENT_INSTRUCTIONS.md) into the agent's instructions. Full steps, an optional LLM explanation key, and troubleshooting are in [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md).
-
-### 5. Get alerts when a batch is held (optional)
-
-`receipts demo --watch` (the `run-exasol` scripts use it) adds a light watcher to the command center. Once a minute it runs one cheap query for a newly landed batch and only then runs the gate. A hold prints an `ALERT` line, writes `alerts/<case>.txt` with the verdict, the cause, the last trusted value and the receipt link, shows an **ALERTS** banner on the page until someone approves or dismisses it, and posts to Slack if `SLACK_WEBHOOK_URL` is set. To try it, start `receipts demo --watch --lab --interval 5` and drop an empty file named `ist_utc.batch` into the `inbox/` folder. Details in [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md#7-watch-for-new-batches-and-get-alerts).
-
-### Running Tests
+## Running tests
 
 ```
 pytest -q
+receipts judge-check
 ```
 
-## Results
-
-Scored against ground truth on Exasol Personal, on freshly generated data: 10 scenarios on each of 5 seeds, 20,000 orders a day (`receipts eval --backend exasol`). Full report: [`samples/eval_report.md`](samples/eval_report.md).
-
-| System | Right call to hold or publish | Cause precision | Cause recall | Wrong causes named |
-|---|---|---|---|---|
-| **Receipts** | **100%** | **100%** | **100%** | **0** |
-| Detectors without the undo test (ablation) | 80% | 89% | 100% | 5 |
-| Threshold alert (a typical monitor) | 88% | n/a | 0% | 0 |
-
-* 50 of 50 runs: right verdict and exactly the right causes.
-* Corrected values land within 0.017% of the true clean value.
-* Without the undo test, the festival retry burst gets blamed as a duplicate load every time.
-* The threshold alert never names a cause and misses the masked pair because the total looks normal.
-* The tenth scenario has no detector on purpose. Receipts holds it as `UNEXPLAINED` and names no cause, which is scored as correct.
-* Gate latency on Exasol, from batch landing to written receipt: median 3.4 s per run. 45 of 50 runs finished within 7 s; five took 7 to 27 s, spread over different seeds and scenarios, which we put down to the local container on a laptop rather than to the query plan.
-* The same 50 runs with the current code (weekday baseline included) are in [`samples/exasol/eval_report.md`](samples/exasol/eval_report.md): 50 of 50 again.
-
-### Exasol timings for one incident
-
-`receipts run ist_utc` on Exasol Personal 2026.2.0-nano.3 (Windows 11 laptop, Podman on WSL2 with 6 CPUs and 7.7 GiB RAM visible to the VM, 20,000 orders a day, about 844,000 payment rows). Verdict `PROVEN_FAULT`, cause `clock_shift`, 26 SQL statements, 4.2 s end to end, 3.2 s of it inside the database. The first run right after a fresh load is slower (7.8 s).
-
-| Step | Time |
-|---|---|
-| Read candidate and five weeks of trusted history | 192 ms |
-| Run six detectors on the incoming batch (clock check is a Python UDF inside Exasol) | 692 ms |
-| Read lineage from view definitions (`EXA_ALL_VIEWS`) | 44 ms |
-| Test 11,074 slices over 296,484 rows in one `GROUP BY CUBE` | 1,091 ms |
-| Reconcile raw payments to revenue rows | 354 ms |
-| Undo each suspect in a sandbox schema | 997 ms |
-| Write receipts back to the database | 761 ms |
-
-The command center shows the same breakdown after every run:
-
-![Where the time went](docs/screenshots/07_timings.png)
-
-Loading the full dataset with `receipts init` takes 12 to 18 s.
-
-At five times the volume (`receipts init --fresh --orders-per-day 100000`, 4.2 million payment rows, loaded in 40 s) on the same laptop, both cases still reach the right verdict. `ist_utc` takes 6.8 s (5.9 s in the database, CUBE over 1.48 million rows in 1.9 s) and `masked_pair` 9.7 s (8.6 s in the database, two suspects undone). Nothing larger has been measured.
-
-At a smaller sample (3,000 orders a day, on the local stand-in) Receipts passes 29 of 30. It misses the no-detector fault on one seed, because daily noise there is wider than the fault. See [`samples/eval_quick.md`](samples/eval_quick.md).
-
-## Beyond the scripted scenarios
-
-The ten scenarios were used to build and tune the detectors, so a perfect score on them shows the system is consistent, not that it generalises. To test that, `receipts variants` runs 17 held-out variants: other gateways, other factors, partial row coverage, other file counts, and two faults at once. Each run is judged against the clean value, so the question is how a miss fails, not whether the score is 100%.
-
-* **On Exasol** (`receipts variants --backend exasol --seeds 11`): caught 13, held 3, small 1, wrong 0. Table: [`samples/exasol/variants_report.md`](samples/exasol/variants_report.md).
-* **Across two seeds** (34 runs, on the local stand-in): 26 caught, 6 held for a person, 2 published as harmless, 0 published wrong, with the same outcome per variant as Exasol on the shared seed. Table: [`samples/variants_report.md`](samples/variants_report.md). Nothing that was wrong by more than 4% was published as trusted.
-* **Known gaps, all held for a person with no cause named:** a unit change on only part of a gateway's rows (the median does not move), and a clock shift of 12 hours.
-* **One variant is published on purpose:** a one-hour clock shift on one gateway moves revenue by 1.5%, inside normal noise.
-* Writing the variants found a real bug. The unit check only recognised a factor of about 100, while the README claimed 10, 100 and 1000. It now accepts any power of ten up to 1000.
-
-Weekly pattern: real revenue has weekday and weekend levels. With five weeks of trusted history the gate learns each weekday's index when (and only when) a one-way ANOVA says the pattern is real, and compares today with what that weekday should look like. On data with a weekly pattern of up to 16% above average, the gate gave 63 of 63 correct verdicts across all seven weekdays. With the old flat 14-day baseline the same data gave 56 of 63: no false alarms, but the wider range let an undetected fault of about 9% through unnoticed on every weekday.
-
-## Real-data backtest
-
-To check the gate outside our own synthetic data, `receipts backtest` runs it on public data: **NYC TLC yellow taxi trip records, January to March 2024** (9,554,757 trips, no login needed). The metric is the daily total of `total_amount`. A thin adapter maps trips onto the pipeline's tables (vendor as gateway, borough as city, rate code as category), so the six detectors, the CUBE and the undo test run unchanged; no threshold was changed. The first 35 days are taken as trusted history, then the gate judges 56 days one night at a time, on the local stand-in. Full report: [`samples/real_backtest.md`](samples/real_backtest.md).
-
-* **Real days, no faults planted: 56 judged, 0 held, 0 called PROVEN_FAULT.** 54 were published as `NO_INCIDENT` and 2 as a verified `REAL_CHANGE`: Tue 13 Feb (-33.9%, the day of a snowstorm when New York City schools switched to remote learning) and Tue 27 Feb (+26.0%, the busiest Tuesday so far, 117,332 trips).
-* **Planted faults on real days: 6 of 6 caught with the right cause.** Three unit changes (one vendor's amounts in cents, about +2,100% to +2,400%) and three duplicated payment files (+8.2% to +8.3%). The duplicates sat inside the normal range, so a threshold alert would have missed them; the duplicate check plus the undo test proved them.
-* **What it also shows, honestly:**
-  * Real revenue is noisy. The normal range was plus or minus 21.7% at the median (12.9% to 31.9%). A fault that moves the total less than that and has no detector would be published.
-  * The clock check fired on five Saturdays, because Saturday night traffic has a different shape from the pooled baseline. Every time the undo test ruled it out, so nothing was held, but the check itself is noisy on weekends.
-  * A verified real change becomes history. The 13 Feb snow day entered the Tuesday baseline and lowered it, which is part of why 27 Feb looked like a +26% move.
-
-## Connecting your own metric
-
-Today the code is built around the marketplace schema in this repository. **A generic configuration layer for other metrics is not built yet.** To put Receipts on a company's own number, the company would provide:
-
-* the view that holds the metric, one row per day (here `PIPE.DAILY_REVENUE`), and the chain of views that builds it, so lineage and the undo test can re-run it in a sandbox schema;
-* the raw tables that feed it, landed per batch with a batch day column (here `RAW.ORDERS` and `RAW.PAYMENTS`);
-* which column is the amount, which is the record ID and which is the event timestamp (with its time zone);
-* the dimensions to slice by, and the reference tables that can go stale or fan out.
-
-The real-data backtest above connects a new source the way it works today, with a thin adapter that maps NYC taxi trips onto these tables. The full mapping is in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#connecting-your-own-metric).
-
-## Technical Notes
-
-**What is real and what is synthetic.** All data is synthetic: a fictional marketplace with 8 cities, 6 categories, 4 payment gateways, a USD slice with a daily FX feed, evening-heavy shopping in IST, and background payment retries, generated from a seed. The faults are planted as SQL statements in `receipts/faults.py`. Every query, the CUBE decomposition, the UDF, lineage parsing, the undo tests, the write-back, the timings and the evaluation numbers are real.
-
-**Limitations.**
-
-* It only proves fault classes it has a detector for. Six today. Anything else becomes `UNEXPLAINED`: held, no cause guessed, a person decides.
-* The baseline learns a weekly pattern from five weeks of trusted history, but has no festival or holiday calendar, and a verified real change (a snow day, say) enters that history and shifts later expectations.
-* On real taxi data the normal range is wide (plus or minus 22% at the median), so a fault with no detector that moves the total less than that is published. See the real-data backtest.
-* One metric, one pipeline. Lineage parsing handles joins, filters, group by and simple expressions, not deeply nested SQL or stored procedures.
-* Corrections are hotfixes. The real fix is upstream, and Receipts records the evidence for that conversation.
-* Access control is a convention on Exasol Personal because it is single-user. On Enterprise it is a role grant.
-* Exasol itself is not started in CI, so the Exasol path is verified by hand on Exasol Personal 2026.2.0-nano.3 and by the stand-in tests.
+On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.py`. Good first issues: [`docs/starter_issues.md`](docs/starter_issues.md).
 
 ## Team
 
@@ -467,12 +378,12 @@ Receipts is built by a team of one: **Aakash Singh Mutum** ([@AakashMutum](https
 
 | Criterion | Where it is addressed |
 |---|---|
-| Innovation and problem impact | [Problem](#problem), [Solution](#solution), prove by undoing in [`receipts/undo.py`](receipts/undo.py) and [`receipts/gate.py`](receipts/gate.py) |
-| Effective use of Exasol Personal | [How Exasol is used](#how-it-works), [`receipts/udf/clock_drift.py`](receipts/udf/clock_drift.py), [`receipts/decompose.py`](receipts/decompose.py), [`receipts/lineage.py`](receipts/lineage.py), [`sql/exasol/`](sql/exasol/) |
-| Technical excellence | [Results](#results), [Beyond the scripted scenarios](#beyond-the-scripted-scenarios), [Real-data backtest](#real-data-backtest), [`tests/`](tests/), [`samples/exasol/`](samples/exasol/) |
-| Solution design and user experience | [See it work](#see-it-work), [System Architecture](#system-architecture), [`web/`](web/) |
-| Documentation and reproducibility | [Building & Running](#building--running), [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`scripts/capture_screenshots.py`](scripts/capture_screenshots.py) |
-| Open-source quality | [`LICENSE`](LICENSE), [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md), [`.github/`](.github/) |
+| Innovation and problem impact | [The problem](#the-problem), [Three layers](#three-layers), prove by undoing in [`receipts/undo.py`](receipts/undo.py) and [`receipts/gate.py`](receipts/gate.py) |
+| Effective use of Exasol Personal | [How Exasol is used](#how-exasol-is-used), [`receipts/udf/clock_drift.py`](receipts/udf/clock_drift.py), [`receipts/decompose.py`](receipts/decompose.py), [`receipts/lineage.py`](receipts/lineage.py), [`sql/exasol/`](sql/exasol/) |
+| Technical excellence | [Results](#results), [Real-data backtest](#real-data-backtest), [Red team](#red-team), [Scaling](#scaling), [`tests/`](tests/), [`samples/exasol/`](samples/exasol/) |
+| Solution design and user experience | [The demo in 30 seconds](#the-demo-in-30-seconds), [Architecture](#architecture), [`web/`](web/) |
+| Documentation and reproducibility | [Quick start](#quick-start), [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md), [`docs/EVAL_CARD.md`](docs/EVAL_CARD.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+| Open-source quality | [`LICENSE`](LICENSE), [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md), [`Dockerfile`](Dockerfile), [`.github/`](.github/), [`docs/starter_issues.md`](docs/starter_issues.md) |
 
 ## License
 

@@ -148,3 +148,18 @@ def test_redteam_endpoints(client, mp):
     mp.delenv("RECEIPTS_LAB")
     assert client.get("/api/lab/redteam").status_code == 403
     assert client.post("/api/lab/redteam/attack", json={"fault": "orphan_code"}).status_code == 403
+
+
+def test_cli_run_refuses_data_that_is_not_synthetic(monkeypatch, tmp_path, data_dir):
+    from receipts import cli
+    monkeypatch.setenv("RECEIPTS_BACKEND", "duckdb")
+    monkeypatch.setenv("RECEIPTS_DUCKDB", str(tmp_path / "x.duckdb"))
+    monkeypatch.setenv("RECEIPTS_DATA", str(tmp_path))  # no manifest here
+    from receipts.db import connect
+    from receipts.load import init_database
+    be = connect()
+    init_database(be, data_dir, log=lambda *a: None)
+    be.close()
+    with pytest.raises(SystemExit) as e:
+        cli.main(["run", "ist_utc"])
+    assert e.value.code == 3

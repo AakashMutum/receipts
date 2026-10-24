@@ -110,15 +110,22 @@ receipts export-sql           # writes all Exasol SQL to sql/exasol for reading
 receipts demo --watch         # command center plus the batch watcher and alerts (section 7)
 receipts watch --once         # judge any newly landed batch once and exit
 receipts backtest             # the gate over real NYC taxi data, writes samples/real_backtest.md
+receipts backtest --backend exasol  # the same inside Exasol, writes samples/exasol/real_backtest.md
+receipts scale                # the IST case at 20k to 400k orders a day on Exasol, writes samples/exasol/scaling.md
+receipts redteam              # shrink each fault until the gate stops proving it (synthetic data only)
 ```
 
-`receipts backtest` downloads about 150 MB of NYC TLC yellow taxi trip records (January to March 2024) once into `data/real/` with a progress line, then judges 56 real days one night at a time and plants six faults on real days. It runs on the local stand-in and takes a few minutes after the download.
+`receipts backtest` downloads about 150 MB of NYC TLC yellow taxi trip records (January to March 2024) once into `data/real/` with a progress line, then judges 56 real days one night at a time and plants six faults on real days. It runs on the local stand-in and takes a few minutes after the download. With `--backend exasol` the mapped trips are bulk loaded into Exasol (about 2.5 minutes for 9.5 million trips on the laptop above) and every gate run happens there, about 35 minutes in all.
+
+`receipts scale` and `receipts redteam --backend exasol` rebuild the database at `EXA_DSN` with synthetic data (the red team plants faults into it) and run `receipts init --fresh` at the end to restore the demo data. Never point them at a database that holds anything else.
 
 Scenarios: `healthy`, `festival`, `unit_paise`, `duplicate_load`, `join_fanout`, `stale_fx`, `ist_utc`, `new_code`, `masked_pair`, `unknown_discount`.
 
 ## 4. Connect a real AI agent (MCP)
 
-1. Install `uv`, then add the Exasol MCP server to any MCP client (for example a desktop AI assistant) using [`mcp/mcp_client_config.example.json`](../mcp/mcp_client_config.example.json).
+Full steps for Claude Desktop and Claude Code, with the read-only `AGENT_READER` user that `receipts init` creates on Exasol, are in [`MCP_DEMO.md`](MCP_DEMO.md). In short:
+
+1. Install `uv`, then add the Exasol MCP server to any MCP client (for example a desktop AI assistant) using [`mcp/mcp_client_config.example.json`](../mcp/mcp_client_config.example.json). It logs in as `AGENT_READER`, which can read `PUB` and nothing else. `python scripts/mcp_smoke.py` checks that path without any AI client.
 2. Put [`mcp/AGENT_INSTRUCTIONS.md`](../mcp/AGENT_INSTRUCTIONS.md) into the agent's instructions.
 3. Run `receipts run unit_paise`, then ask the agent for revenue on the incoming day (the date `receipts init` printed; yesterday unless you passed `--day`), for example "What was revenue on 20 October?" after `--day 2026-10-20`. With the instructions it reads `PUB.METRIC_TRUST`, sees the value is held, and quotes the last trusted day instead. Remove the instructions and ask again to see it quote the broken number.
 
@@ -139,7 +146,7 @@ A button appears on each receipt. The model receives only the aggregated case (v
 make test
 ```
 
-35 tests. `tests/test_scenarios.py` runs all ten scenarios twice: once on the DuckDB stand-in and once on the Exasol SQL path, where every statement is rendered for Exasol, parsed by sqlglot's Exasol grammar, translated and executed.
+112 tests, 2 of which run only against a live Exasol (`RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.py`). `tests/test_scenarios.py` runs all ten scenarios twice: once on the DuckDB stand-in and once on the Exasol SQL path, where every statement is rendered for Exasol, parsed by sqlglot's Exasol grammar, translated and executed.
 
 ## 7. Watch for new batches and get alerts
 
