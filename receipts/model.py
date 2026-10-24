@@ -26,6 +26,19 @@ def default_incoming_day(now: datetime | None = None) -> date:
     now = now or datetime.now(IST)
     return now.astimezone(IST).date() - timedelta(days=1)
 
+def expected_day() -> date:
+    """The day the command center should show: the pinned --day (RECEIPTS_DAY), else yesterday in India."""
+    import os
+    pinned = os.environ.get("RECEIPTS_DAY")
+    return date.fromisoformat(pinned) if pinned else default_incoming_day()
+
+
+def stale_message(data_day: date | None) -> str:
+    if data_day is None:
+        return "No data yet. Run receipts demo to build it."
+    return f"The data is for {data_day:%a %d %b %Y}. Run receipts demo to refresh."
+
+
 # schema -> table -> [(column, type)]
 SOURCE_TABLES: dict[str, list[tuple[str, str]]] = {
     "ORDERS": [

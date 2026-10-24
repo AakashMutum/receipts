@@ -106,10 +106,16 @@
     const [n, u] = inrParts(today && today.day === day ? today.value : null);
     $("#big-value").innerHTML = `${esc(n)}<span class="unit">${esc(u)}</span>`;
 
+    if (state.overview.stale) {  // the database holds another day than the one the page should show
+      big.classList.remove("is-held");
+      status.className = "status";
+      status.innerHTML = `<span class="flag">STALE</span><span class="msg">${esc(state.overview.stale.message)}</span>`;
+      return;
+    }
     if (!today || today.day !== day) {
       big.classList.remove("is-held");
       status.className = "status";
-      status.innerHTML = `<span class="flag">WAITING</span><span class="msg">Tonight's batch has not landed. ${state.overview.lab ? "Pick a scenario and run the gate, or break the pipeline." : "Receipts checks it as soon as it lands."}</span>`;
+      status.innerHTML = `<span class="flag">WAITING</span><span class="msg">Tonight's batch has not landed. ${state.overview.lab ? "Pick a scenario and run the gate, or break the pipeline." : "Run receipts demo, or load a batch."}</span>`;
       return;
     }
     const prev = pts.filter((p) => p.day < day && !p.held).slice(-1)[0];
@@ -583,6 +589,10 @@
     const o = state.overview, c = state.case;
     renderHero(o.board, c);
     renderTrend(o.board, c);
+    if (!c) {
+      $("#time-sub").textContent = "No run yet. The time of every step shows here after the gate first runs.";
+      $("#timings").innerHTML = `<li class="none">No run yet</li>`;
+    }
     if (c) {
       $("#case").hidden = false;
       renderPaper(c, animate);
@@ -651,6 +661,7 @@
       setInterval(loadAlerts, 20000);
     } catch (e) {
       $("#status").innerHTML = `<span class="flag">OFFLINE</span><span class="msg">${esc(e.message)}</span>`;
+      $("#time-sub").textContent = "No run yet.";
     }
   }
   boot();

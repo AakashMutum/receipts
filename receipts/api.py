@@ -38,8 +38,9 @@ def be() -> Backend:
                 b.scalar("SELECT COUNT(*) FROM PUB.DAILY_REVENUE_PUBLISHED")
                 _state["be"], _state["error"] = b, None
             except Exception as e:  # not initialised yet, or Exasol not reachable
+                from .model import stale_message
                 _state["error"] = str(e)
-                raise HTTPException(503, f"Database not ready: {e}. Run `make init` first.")
+                raise HTTPException(503, f"{stale_message(None)} ({type(e).__name__})")
         return _state["be"]
 
 
@@ -98,17 +99,42 @@ class ApproveReq(BaseModel):
     note: str = ""
 
 
+def _rebuild_if_stale(b: Backend) -> Backend:
+    """In `receipts demo`, a new day (midnight in India) rebuilds the demo data for it, once, here."""
+    import os
+
+    from .model import expected_day
+    if os.environ.get("RECEIPTS_AUTO_REBUILD") != "1" or _day(b) == expected_day():
+        return b
+    from .cli import _build, _manifest, preland_headline
+    conf = (_manifest() or {}).get("config", {})
+    b.close()
+    _state["be"] = None
+    _build(expected_day(), conf.get("seed", 7), conf.get("orders_per_day", 20000), fresh=False)
+    if lab.enabled():
+        preland_headline()
+    return be()
+
+
+def _stale(day: date) -> dict | None:
+    from .model import expected_day, stale_message
+    if day == expected_day():
+        return None
+    return {"data_day": day.isoformat(), "expected_day": expected_day().isoformat(), "message": stale_message(day)}
+
+
 @app.get("/api/overview")
 def overview():
     b = be()
     with _lock:
+        b = _rebuild_if_stale(b)
         day = _day(b)
         rows = b.scalar("SELECT COUNT(*) FROM RAW.PAYMENTS")
         on = lab.enabled()
         return {"backend": b.describe() | udf_status(b), "incoming_day": day.isoformat(),
                 "scenarios": _scenarios() if on else [], "board": _board(b, day), "case": _latest_case(b),
                 "raw_payment_rows": rows, "eval": _eval_summary(), "llm": bool(settings().llm_key),
-                "lab": on, "faults": [{"id": k, "title": v[0], "share_of": v[1], "gateways": v[2], "gateway": v[3]}
+                "lab": on, "stale": _stale(day), "faults": [{"id": k, "title": v[0], "share_of": v[1], "gateways": v[2], "gateway": v[3]}
                                       for k, v in FAULT_CLASSES.items()] if on else []}
 
 

@@ -138,3 +138,9 @@ Rule added during the work: everything that can write bad data or attack the sys
 * Left on Exasol: fresh demo data (`receipts init --fresh` at the end), no server running.
 * Open: the unit-change hole (fixes proposed above, not applied); the MCP server, Claude clients and Docker
   build are untested here; GitHub issues not created (no `gh`). Nothing merged into main.
+
+## Small fixes: day rollover, first view, empty timings (2026-10-24)
+
+* `receipts demo` and the run scripts rebuild when the data is not for yesterday in India (no --day), also at midnight while running; `serve` only shows "The data is for <date>. Run receipts demo to refresh." (API `stale`).
+* In lab mode `demo` lands the IST written as UTC batch after a rebuild, so the page opens on a held number; normal mode waits and says "Run receipts demo, or load a batch". "Where the time went" says "No run yet" until a run exists.
+* Tests: tests/test_stale_day.py (stand-in). Phase 8 work (unit tail check, held-out reruns) is in the working tree, not committed, and paused as asked.

@@ -127,6 +127,7 @@ def test_serve_lab_flag_turns_lab_on(mp):
     from receipts import cli
     mp.delenv("RECEIPTS_LAB", raising=False)
     mp.setattr(cli, "_ensure_day", lambda day: None)
+    mp.setattr(cli, "_data_day", lambda: None)
     seen = []
     mp.setattr(uvicorn, "run", lambda *a, **k: seen.append(lab.enabled()))
     args = argparse.Namespace(day=None, host="127.0.0.1", port=0, watch=False, lab=False)

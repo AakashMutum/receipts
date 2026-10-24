@@ -328,8 +328,8 @@ def cmd_doctor(a):
     return run_doctor()
 
 
-def _ensure_day(day: date) -> None:
-    """Build the database for `day` unless it already holds that day."""
+def _data_day() -> date | None:
+    """The incoming day the database holds, or None if it is not built."""
     from .load import incoming_day
     current = be = None
     try:
@@ -339,11 +339,32 @@ def _ensure_day(day: date) -> None:
         pass
     finally:
         if be is not None:
-            be.close()  # DuckDB keeps a file lock, and the rebuild below may need to delete the file
-    if current != day:
-        print(f"database holds {current or 'no data'}, building it for {day}")
-        conf = (_manifest() or {}).get("config", {})
-        _build(day, conf.get("seed", 7), conf.get("orders_per_day", 20000), fresh=False)
+            be.close()  # DuckDB keeps a file lock, and a rebuild may need to delete the file
+    return current
+
+
+def preland_headline() -> dict:
+    """Land the headline IST written as UTC batch and run the gate, so the page opens on a held number."""
+    from . import gate
+    from .load import incoming_day, ingest
+    be = _be()
+    try:
+        day = incoming_day(be)
+        sc = ingest(be, day, "ist_utc")
+        return gate.run(be, day, {"id": sc.id, "title": sc.title, "story": sc.story, "kind": sc.kind})
+    finally:
+        be.close()
+
+
+def _ensure_day(day: date) -> bool:
+    """Build the database for `day` unless it already holds that day. True if it was built."""
+    current = _data_day()
+    if current == day:
+        return False
+    print(f"database holds {current or 'no data'}, building it for {day}")
+    conf = (_manifest() or {}).get("config", {})
+    _build(day, conf.get("seed", 7), conf.get("orders_per_day", 20000), fresh=False)
+    return True
 
 
 def _open_browser_when_up(url: str, timeout: float = 120) -> None:
@@ -367,16 +388,29 @@ def _open_browser_when_up(url: str, timeout: float = 120) -> None:
     threading.Thread(target=wait_and_open, daemon=True).start()
 
 
-def _serve(a, browser: bool) -> None:
+def _serve(a, browser: bool, rebuild: bool = False) -> None:
+    """Start the command center. `demo` (rebuild=True) rebuilds stale data, at start and later at midnight;
+    `serve` only says the data is stale, so it never replaces a database behind someone's back."""
     import uvicorn
 
-    from .model import default_incoming_day
+    from .model import default_incoming_day, stale_message
     if a.lab:
         os.environ["RECEIPTS_LAB"] = "1"  # read by the API and the watcher in this process
     lab_on = os.environ.get("RECEIPTS_LAB") == "1"
     print("Lab mode: break it and red team, for demos, on synthetic data only." if lab_on else
           "Normal mode: watches and proves, cannot change data. Add --lab for the break-it demo and the red team.")
-    _ensure_day(a.day or default_incoming_day())
+    if a.day:
+        os.environ["RECEIPTS_DAY"] = a.day.isoformat()  # pinned: the page compares the data with this day
+        _ensure_day(a.day)
+    elif rebuild:
+        os.environ["RECEIPTS_AUTO_REBUILD"] = "1"  # the API rebuilds again if the day turns while it runs
+        if _ensure_day(default_incoming_day()) and lab_on:
+            c = preland_headline()
+            print(f"landed the IST written as UTC batch: {c['verdict']}, revenue {c['trust_status']}")
+    else:
+        current = _data_day()
+        if current != default_incoming_day():
+            print(stale_message(current))
     url = f"http://{a.host}:{a.port}/"
     print(f"Receipts command center on {url}  (press Ctrl+C to stop)")
     if browser:
@@ -417,7 +451,7 @@ def cmd_serve(a):
 
 def cmd_demo(a):
     """Build the database if needed, start the command center and open it in the browser."""
-    _serve(a, browser=not (a.no_browser or os.environ.get("RECEIPTS_NO_BROWSER") == "1"))
+    _serve(a, browser=not (a.no_browser or os.environ.get("RECEIPTS_NO_BROWSER") == "1"), rebuild=True)
 
 
 def main(argv=None):

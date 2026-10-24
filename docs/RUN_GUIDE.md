@@ -41,7 +41,7 @@ make demo        # same as: receipts demo (builds if needed, serves, opens the b
 
 Open http://127.0.0.1:8000. The header chip says **Local stand-in** so nobody mistakes it for Exasol.
 
-The incoming batch day is yesterday in India (Asia/Kolkata), with 42 days of history generated before it. Every date on the page, the agent's question and the case IDs follow it. `receipts serve` rebuilds the database first if it holds another day. To pin a day, pass it to both commands (the README screenshots use Fri 23 Oct 2026):
+The incoming batch day is yesterday in India (Asia/Kolkata), with 42 days of history generated before it. Every date on the page, the agent's question and the case IDs follow it. `receipts demo` (and the run scripts) rebuild the database when it holds another day, also when the day turns while it runs, and in lab mode land the IST written as UTC batch so the page opens on a held number. `receipts serve` never rebuilds; it says "The data is for <date>. Run receipts demo to refresh." To pin a day, pass it to both commands (the README screenshots use Fri 23 Oct 2026):
 
 ```bash
 receipts init --day 2026-10-23

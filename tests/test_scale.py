@@ -4,6 +4,7 @@ from receipts import scale
 
 
 def test_scale_records_each_size_and_stops_on_failure(monkeypatch):
+    monkeypatch.setattr(scale, "MIN_FREE_GB", 0)  # the disk guard is for real runs, not this tiny one
     rep = scale.run([2000, 3000], backend="duckdb", log=lambda *a: None)
     assert [r["orders_per_day"] for r in rep["results"]] == [2000, 3000]
     r = rep["results"][0]

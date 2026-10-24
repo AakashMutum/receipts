@@ -355,3 +355,4 @@ button { font: inherit; cursor: pointer; }
 .lab-form h3 { margin: 0; font-size: 17px; }
 @media (max-width: 760px) { .rt-grid { grid-template-columns: 1fr; } }
 .timings .detail.exa { color: var(--ink); }
+.timings li.none { display: block; color: var(--ink-faint); }
