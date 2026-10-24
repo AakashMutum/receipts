@@ -11,6 +11,10 @@ ANTHROPIC_API_KEY  optional, enables the LLM explanation layer
 RECEIPTS_ALERTS    folder for alert files written by the watcher (default alerts/)
 RECEIPTS_INBOX     folder the watcher reads batch files from (default inbox/)
 SLACK_WEBHOOK_URL  optional, the watcher posts a short message here when it holds a batch
+RECEIPTS_AGENT_USER      read-only Exasol user for AI agents, created by `receipts init` (default AGENT_READER)
+RECEIPTS_AGENT_PASSWORD  its password (default in mcp/mcp_client_config.example.json; change it for anything shared)
+RECEIPTS_LAB       1 turns on lab mode (same as `serve --lab`): planting faults, Break it and the red team.
+                   Without it the command center watches and proves but cannot change data
 """
 
 from __future__ import annotations
@@ -37,6 +41,9 @@ class Settings:
     alerts_dir: Path = field(default_factory=lambda: Path(os.environ.get("RECEIPTS_ALERTS", str(ROOT / "alerts"))))
     inbox_dir: Path = field(default_factory=lambda: Path(os.environ.get("RECEIPTS_INBOX", str(ROOT / "inbox"))))
     slack_url: str | None = field(default_factory=lambda: os.environ.get("SLACK_WEBHOOK_URL") or None)
+    agent_user: str = field(default_factory=lambda: os.environ.get("RECEIPTS_AGENT_USER", "AGENT_READER").upper())
+    agent_password: str = field(default_factory=lambda: os.environ.get("RECEIPTS_AGENT_PASSWORD", "receipts-agent-local"))
+    lab: bool = field(default_factory=lambda: os.environ.get("RECEIPTS_LAB", "0") == "1")
     llm_model: str = field(default_factory=lambda: os.environ.get("RECEIPTS_LLM_MODEL", "claude-sonnet-5-5"))
 
 

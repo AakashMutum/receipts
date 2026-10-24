@@ -269,6 +269,28 @@ def cmd_scale(a):
     return 0 if rep["results"] and all(r["right"] for r in rep["results"]) else 1
 
 
+def cmd_redteam(a):
+    """Shrink each fault until the gate stops proving it; write the red team report. Synthetic data only."""
+    from .redteam import run, to_markdown
+    print("Red team: run this on the built-in synthetic data or a sandbox copy, never on live production tables.\n")
+    rep = run(backend=a.backend, seeds=tuple(a.seeds), orders_per_day=a.orders_per_day, log=lambda m: print(m, flush=True))
+    out = Path(a.out) if a.out else ROOT / "samples" / ("exasol" if a.backend == "exasol" else "")
+    out.mkdir(parents=True, exist_ok=True)
+    cmd = (f"receipts redteam --backend {a.backend} --seeds {' '.join(map(str, a.seeds))} "
+           f"--orders-per-day {a.orders_per_day}")
+    (out / "redteam_report.json").write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
+    (out / "redteam_report.md").write_text(to_markdown(rep, cmd), encoding="utf-8")
+    s = rep["summary"]
+    print("\ndetection floor: " + ", ".join(f"{k} {'none' if c['floor'] is None else format(c['floor'], '.0%')}"
+                                         for k, c in s["classes"].items()))
+    print(f"holes: {len(s['holes'])}. Report: {out / 'redteam_report.md'}")
+    if a.backend == "exasol" and not a.no_restore:
+        print("restoring the demo data (receipts init --fresh)")
+        from .model import default_incoming_day
+        _build(default_incoming_day(), 7, 20000, fresh=True)
+    return 0
+
+
 def cmd_doctor(a):
     """Check the environment, and on Exasol check identifiers against reserved words."""
     from .doctor import run_doctor
@@ -318,6 +340,11 @@ def _serve(a, browser: bool) -> None:
     import uvicorn
 
     from .model import default_incoming_day
+    if a.lab:
+        os.environ["RECEIPTS_LAB"] = "1"  # read by the API and the watcher in this process
+    lab_on = os.environ.get("RECEIPTS_LAB") == "1"
+    print("Lab mode: break it and red team, for demos, on synthetic data only." if lab_on else
+          "Normal mode: watches and proves, cannot change data. Add --lab for the break-it demo and the red team.")
     _ensure_day(a.day or default_incoming_day())
     url = f"http://{a.host}:{a.port}/"
     print(f"Receipts command center on {url}  (press Ctrl+C to stop)")
@@ -417,6 +444,9 @@ def main(argv=None):
     dm.set_defaults(fn=cmd_demo)
     for sp in (sv, dm):
         sp.add_argument("--watch", action="store_true", help="also watch for new batches and raise alerts")
+        sp.add_argument("--lab", action="store_true",
+                        help="lab mode (or RECEIPTS_LAB=1): plant faults, break the pipeline and run the red team, "
+                             "on the built-in synthetic data only. Without it the command center cannot change data")
     wt = sub.add_parser("watch", help="judge new batches and raise alerts, without the web server")
     wt.add_argument("--once", action="store_true", help="process any new batch once and exit")
     for sp in (sv, dm, wt):
@@ -431,6 +461,16 @@ def main(argv=None):
     bt.add_argument("--months", nargs="+", help="months to load, YYYY-MM (default 2024-01 2024-02 2024-03)")
     bt.add_argument("--out", help="report path (default samples/real_backtest.md, or samples/exasol/ for Exasol)")
     bt.set_defaults(fn=cmd_backtest)
+    rt = sub.add_parser("redteam", help="find the smallest fault each detector still proves (synthetic data only)",
+                        description="Run on the built-in synthetic data or a sandbox copy, never on live production "
+                                    "tables: every attack writes a planted fault into RAW. Generates its own data per seed.")
+    rt.add_argument("--backend", choices=["duckdb", "exasol"], default="duckdb",
+                    help="exasol rebuilds the database at EXA_DSN with synthetic data, then restores the demo data")
+    rt.add_argument("--seeds", type=int, nargs="+", default=[11])
+    rt.add_argument("--orders-per-day", type=int, default=8000)
+    rt.add_argument("--out", help="folder for redteam_report.md and .json (default samples/, or samples/exasol/)")
+    rt.add_argument("--no-restore", action="store_true", help="do not run init --fresh afterwards (Exasol)")
+    rt.set_defaults(fn=cmd_redteam)
     sc = sub.add_parser("scale", help="run the IST case at increasing order volumes and record the timings")
     sc.add_argument("--backend", choices=["duckdb", "exasol"], default="exasol")
     sc.add_argument("--sizes", type=int, nargs="+", default=[20000, 100000, 200000, 400000],

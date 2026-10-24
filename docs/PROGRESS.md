@@ -46,3 +46,21 @@ Rule added during the work: everything that can write bad data or attack the sys
   and 3,849 ms end to end), CUBE 1,494 and 834 ms, peak temp memory 67.5 and 76.5 MiB. Reading the
   statistics (FLUSH included) takes another 0.7 to 0.9 s, outside the gate's total.
 * The UI part of this phase is in the next commit, because it shares web/app.js with the lab panel.
+
+## Phase 3: Break the pipeline, live, in lab mode (2026-10-24)
+
+* Lab mode (`serve --lab`, `demo --lab`, `RECEIPTS_LAB=1`): without it the page has no scenario picker, no
+  Break panel, no Reset, no Red team tab (removed server-side from index.html; /static/index.html is 404) and
+  `/api/run`, `/api/lab/*` answer 403. With it, breaking or resetting is refused (409) unless LANDING matches
+  `data/manifest.json` of the synthetic generator. Inbox scenario files are lab-only too. Run scripts pass --lab.
+* `faults.fault_sql(kind, share, gateway)`: the six faults with a share-of-rows dial (MOD(id, 1000)) and a
+  gateway for unit and clock faults; stale FX has no share (one rate is there or not).
+* API: POST /api/lab/break starts the gate in a thread and GET /api/lab/job/{id} returns each step as it
+  finishes (gate.run got an on_step callback); POST /api/lab/reset removes tonight's RAW batch and published
+  row. The page polls every 250 ms and shows the timeline, then the HELD banner, receipt and Approve.
+* Measured on Exasol with scripts/measure_break.py (headless Chromium, clock_shift on GW_B, 100%): click to
+  HELD 7,254 / 8,483 / 7,166 / 6,890 / 7,566 ms, median 7,254 ms, 9 steps shown live. Port 8000 was taken by
+  another app on this laptop, so the measurement ran on port 8765.
+* Tests: tests/test_lab.py (403 without lab for every lab endpoint, panel absent, panel present with lab,
+  break shows every step then HELD, approve, reset, refusal on non-synthetic data, the --lab flag) and the
+  run-script check in tests/test_scripts.py. Not tested: the page in Safari/Firefox, only headless Chromium.

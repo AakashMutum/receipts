@@ -290,6 +290,11 @@ receipts/
 
 Each script sets up a private `.venv`, builds the demo data, starts the command center and opens your browser. `run.bat`, `run.command` and `run.sh` use the local stand-in described below; the `run-exasol` scripts use your running Exasol Personal and never install anything for it. The step-by-step version follows.
 
+### Two modes
+
+* **Normal mode: watches and proves, cannot change data.** `receipts serve` and `receipts demo` start here. The command center shows the number, every receipt and the agent comparison, and the only write a person can make is approving a proven correction. Planting faults, Break the pipeline, its Reset and the Red team tab are not on the page, and their API endpoints answer 403.
+* **Lab mode: break it and red team, for demos.** `receipts demo --lab` (or `RECEIPTS_LAB=1`) adds the scenario picker, the **Break the pipeline** panel and the **Red team** tab. Even then, breaking anything is refused unless the database holds the built-in synthetic data (checked against `data/manifest.json`). The one-click run scripts start in lab mode. On Exasol Personal the time from clicking **Break the pipeline** to the HELD banner, with every gate step shown live, is a median of 7.3 s (5 runs, 6.9 to 8.5 s, measured with [`scripts/measure_break.py`](scripts/measure_break.py)).
+
 ### 1. Run it on Exasol Personal
 
 1. **Install the launcher.**
@@ -356,7 +361,7 @@ Add the Exasol MCP server to any MCP client (for example a desktop AI assistant)
 
 ### 5. Get alerts when a batch is held (optional)
 
-`receipts demo --watch` (the `run-exasol` scripts use it) adds a light watcher to the command center. Once a minute it runs one cheap query for a newly landed batch and only then runs the gate. A hold prints an `ALERT` line, writes `alerts/<case>.txt` with the verdict, the cause, the last trusted value and the receipt link, shows an **ALERTS** banner on the page until someone approves or dismisses it, and posts to Slack if `SLACK_WEBHOOK_URL` is set. To try it, start `receipts demo --watch --interval 5` and drop an empty file named `ist_utc.batch` into the `inbox/` folder. Details in [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md#7-watch-for-new-batches-and-get-alerts).
+`receipts demo --watch` (the `run-exasol` scripts use it) adds a light watcher to the command center. Once a minute it runs one cheap query for a newly landed batch and only then runs the gate. A hold prints an `ALERT` line, writes `alerts/<case>.txt` with the verdict, the cause, the last trusted value and the receipt link, shows an **ALERTS** banner on the page until someone approves or dismisses it, and posts to Slack if `SLACK_WEBHOOK_URL` is set. To try it, start `receipts demo --watch --lab --interval 5` and drop an empty file named `ist_utc.batch` into the `inbox/` folder. Details in [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md#7-watch-for-new-batches-and-get-alerts).
 
 ### Running Tests
 

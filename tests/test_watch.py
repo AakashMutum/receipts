@@ -84,11 +84,23 @@ def test_failing_slack_does_not_stop_the_alert(be, tmp_path):
     assert any("could not post to Slack" in m for m in logs)
 
 
-def test_inbox_file_lands_a_batch(be, tmp_path):
+def test_inbox_scenarios_are_lab_only(be, tmp_path, data_dir):
+    inbox = tmp_path / "inbox"
+    inbox.mkdir()
+    (inbox / "ist_utc.batch").write_text("", encoding="utf-8")
+    w, logs = watcher(be, tmp_path, inbox_dir=inbox, lab_mode=False, data_dir=data_dir)
+    assert w.check_once() == []
+    assert (inbox / "ignored" / "ist_utc.batch").exists() and any("lab mode is off" in m for m in logs)
+    (inbox / "ist_utc.batch").write_text("", encoding="utf-8")
+    w, logs = watcher(be, tmp_path, inbox_dir=inbox, lab_mode=True, data_dir=tmp_path)  # no manifest there
+    assert w.check_once() == [] and any("does not look like the built-in synthetic data" in m for m in logs)
+
+
+def test_inbox_file_lands_a_batch(be, tmp_path, data_dir):
     inbox = tmp_path / "inbox"
     inbox.mkdir()
     (inbox / "join_fanout.batch").write_text("", encoding="utf-8")
-    w, logs = watcher(be, tmp_path, inbox_dir=inbox)
+    w, logs = watcher(be, tmp_path, inbox_dir=inbox, lab_mode=True, data_dir=data_dir)
     (case,) = w.check_once()
     assert case["verdict"] == "PROVEN_FAULT" and case["confirmed"] == ["key_fanout"]
     assert (inbox / "processed" / "join_fanout.batch").exists() and not (inbox / "join_fanout.batch").exists()

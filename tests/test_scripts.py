@@ -64,3 +64,9 @@ def test_demo_opens_the_browser_only_once_the_server_answers(monkeypatch):
         assert opened.wait(5.0)
     finally:
         server.shutdown()
+
+
+@pytest.mark.parametrize("name", ["run.bat", "run-exasol.bat", "run.sh", "run-exasol.sh"])
+def test_judge_facing_scripts_start_in_lab_mode(name):
+    text = (ROOT / name).read_text(encoding="utf-8")
+    assert "demo --lab" in text or "demo --watch --lab" in text

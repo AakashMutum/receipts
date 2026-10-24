@@ -16,7 +16,9 @@ The `run-exasol` scripts look for the launcher on `PATH`, then in `EXASOL_HOME`,
 
 On macOS, the first double-click on a downloaded `.command` file may be blocked as coming from an unidentified developer: right-click it and choose Open once. If the repository came as a ZIP and the file will not run, make it executable with `chmod +x run.command run-exasol.command run.sh run-exasol.sh`.
 
-`receipts demo` takes the same options as `receipts serve` (`--day`, `--port`) plus `--no-browser`.
+`receipts demo` takes the same options as `receipts serve` (`--day`, `--port`, `--watch`, `--lab`) plus `--no-browser`.
+
+**Two modes.** Without `--lab` (normal mode) Receipts watches and proves but cannot change data: no scenario picker, no Break the pipeline panel, no Red team tab, and those API endpoints answer 403. With `--lab` or `RECEIPTS_LAB=1` (lab mode, for demos) they appear, and breaking the pipeline is still refused unless the loaded data is the built-in synthetic data. The one-click scripts above start in lab mode. Inbox batch files that plant a scenario (section 7) are lab-only too.
 
 ## 1. Without Exasol (anyone, two minutes)
 
@@ -144,7 +146,7 @@ make test
 `receipts serve --watch` (or `receipts demo --watch`) runs the command center and a light watcher in one process. Closing the window or pressing Ctrl+C stops both.
 
 * Every 60 seconds (`--interval` to change it) the watcher runs one cheap query: is the newest day in RAW later than the newest published day? Only then does it run the gate. Between checks it sleeps; measured on a laptop it used 0.26% of one core with a 5 second interval and the page open.
-* It also reads an inbox folder (`inbox/` by default, `--inbox` or `RECEIPTS_INBOX` to change it). A file named after a scenario, such as `ist_utc.batch`, lands that scenario's batch on the next check and is moved to `inbox/processed/`. Other files are moved to `inbox/ignored/`.
+* In lab mode it also reads an inbox folder (`inbox/` by default, `--inbox` or `RECEIPTS_INBOX` to change it). A file named after a scenario, such as `ist_utc.batch`, lands that scenario's batch on the next check and is moved to `inbox/processed/`. Other files are moved to `inbox/ignored/`.
 * When the gate holds a batch (`PROVEN_FAULT` or `UNEXPLAINED`) it prints an `ALERT` line, writes `alerts/<case>.txt` and `alerts/<case>.json` (verdict, one-line cause, last trusted value, receipt link), and shows an orange **ALERTS** banner in the command center until the case is approved, a new batch replaces it, or someone clicks Dismiss.
 * If `SLACK_WEBHOOK_URL` is set it also posts a short message to that Slack incoming webhook, with a 5 second timeout. If Slack is down the alert file is still written and the watcher keeps going.
 * A published batch prints one quiet line. A failed check prints one line and the watcher tries again next time; it never stops the server.
@@ -152,7 +154,7 @@ make test
 Try it:
 
 ```bash
-receipts demo --watch --interval 5
+receipts demo --watch --lab --interval 5
 ```
 
 Then, in a second terminal or in your file manager, drop a bad batch into the inbox:
@@ -164,6 +166,23 @@ touch inbox/ist_utc.batch          # Windows PowerShell: New-Item inbox\ist_utc.
 Within a few seconds the console prints `ALERT RC-... held (PROVEN_FAULT). Proven cause: clock shift in RAW.PAYMENTS.CAPTURED_AT (gateway GW_B) ...`, `alerts/` holds the receipt, and the page shows the banner. Drop `inbox/healthy.batch` to land a clean batch: one quiet line, no alert.
 
 Without the web server, `receipts watch --once` processes any new batch once and exits (handy in a scheduler); `receipts watch` keeps checking. On the DuckDB stand-in only one process can open the database file, so stop `receipts serve` before running `receipts watch` there; on Exasol both can run at once.
+
+## 8. Break the pipeline (lab mode)
+
+Start `receipts demo --lab --watch` (the run scripts do). Under the number, **Break the pipeline** lets you pick
+one of the six fault classes, the share of rows it affects and, for unit and clock faults, the gateway. Pressing
+the button plants that fault into tonight's RAW batch with the same SQL the scenarios use (LANDING and the
+published history are never touched) and runs the gate. The page lists each step with its time as it finishes,
+then shows the HELD banner, the receipt and the Approve button. **Reset** removes tonight's batch and its
+published row, so the demo can run again.
+
+Measured on Exasol Personal 2026.2.0-nano.3 on the laptop described in section 2, with
+`python scripts/measure_break.py --runs 5` (a headless browser that clicks the button): IST written as UTC on
+GW_B, click to HELD banner in a median of 7.3 s (6.9 to 8.5 s over 5 runs).
+
+The **Red team** tab next to it shows the detection floor per fault class from the saved red team report and
+runs one attack live (`receipts redteam` writes the report; see the README). Run it on the built-in synthetic
+data or a sandbox copy, never on live production tables.
 
 ## Troubleshooting
 

@@ -12,6 +12,7 @@ def client(data_dir, tmp_path_factory, monkeypatch_module):
     monkeypatch_module.setenv("RECEIPTS_DATA", str(data_dir))
     monkeypatch_module.delenv("ANTHROPIC_API_KEY", raising=False)
     monkeypatch_module.setenv("RECEIPTS_ALERTS", str(tmp_path_factory.mktemp("alerts")))
+    monkeypatch_module.setenv("RECEIPTS_LAB", "1")
     from receipts.db import connect
     from receipts.load import init_database
     be = connect()

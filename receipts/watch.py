@@ -6,6 +6,8 @@ published row, so the answer is yes until the gate has run. Only then does it ru
 
 An optional inbox folder lets anyone land a batch without touching the database: a file named
 after a scenario, for example `inbox/ist_utc.batch`, lands that scenario's batch on the next check.
+Scenario batches plant faults, so they are lab only: without lab mode, and on anything but the
+built-in synthetic data, the file is moved to inbox/ignored/ and nothing is landed.
 
 A hold (PROVEN_FAULT or UNEXPLAINED) prints an alert line, writes alerts/<case>.txt and .json,
 and posts to Slack when SLACK_WEBHOOK_URL is set. A published verdict prints one quiet line.
@@ -21,7 +23,7 @@ from datetime import date
 from pathlib import Path
 from typing import Callable
 
-from . import gate
+from . import gate, lab
 from .db import Backend, to_date
 from .detectors import DETECTOR_TITLES
 from .dialect import lit
@@ -80,7 +82,8 @@ def dismiss(alerts_dir: Path, case_id: str) -> bool:
 class Watcher:
     def __init__(self, connect: Callable[[], Backend], lock=None, alerts_dir: Path | str = "alerts",
                  inbox_dir: Path | str | None = None, base_url: str = "http://127.0.0.1:8000/",
-                 slack_url: str | None = None, log=print):
+                 slack_url: str | None = None, log=print, lab_mode: bool | None = None,
+                 data_dir: Path | None = None):
         self.connect = connect
         self.lock = lock or contextlib.nullcontext()
         self.alerts_dir = Path(alerts_dir)
@@ -88,6 +91,8 @@ class Watcher:
         self.base_url = base_url
         self.slack_url = slack_url
         self.log = log
+        self.lab_mode = lab.enabled() if lab_mode is None else lab_mode
+        self.data_dir = data_dir
 
     # one check ------------------------------------------------------------------------------------
     def check_once(self) -> list[dict]:
@@ -110,11 +115,20 @@ class Watcher:
             return None
         f = files[0]
         sid = f.stem.lower()
-        done = self.inbox_dir / ("processed" if sid in SCENARIOS else "ignored")
+        refused = None
+        if sid in SCENARIOS and not self.lab_mode:
+            refused = "lab mode is off (start with --lab to land planted scenarios)"
+        elif sid in SCENARIOS:
+            ok, why = lab.synthetic_check(be, self.data_dir)
+            refused = None if ok else why
+        done = self.inbox_dir / ("processed" if sid in SCENARIOS and not refused else "ignored")
         done.mkdir(exist_ok=True)
         shutil.move(str(f), str(done / f.name))
         if sid not in SCENARIOS:
             self.log(f"watch: ignored inbox file {f.name}. Name it after a scenario, for example ist_utc.batch")
+            return None
+        if refused:
+            self.log(f"watch: did not land {f.name}: {refused}")
             return None
         sc = ingest(be, incoming_day(be), sid)
         self.log(f"watch: landed batch {f.name} ({sc.title})")
