@@ -233,16 +233,40 @@ def cmd_variants(a):
 
 def cmd_backtest(a):
     """Run the gate day by day over real NYC taxi data, with and without planted faults."""
-    from .backtest import run, to_markdown
-    rep = run(Path(a.data), warmup=a.warmup, log=lambda m: print(m, flush=True))
-    out = Path(a.out)
+    from .backtest import MONTHS, run, to_markdown
+    months = tuple(a.months or MONTHS)
+    rep = run(Path(a.data), months=months, warmup=a.warmup, log=lambda m: print(m, flush=True), backend=a.backend)
+    default = ROOT / "samples" / ("exasol" if a.backend == "exasol" else "") / "real_backtest.md"
+    out = Path(a.out) if a.out else default
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(to_markdown(rep, "receipts backtest"), encoding="utf-8")
-    (out.with_suffix(".json")).write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
+    compare = None
+    other = ROOT / "samples" / "real_backtest.json"
+    if a.backend == "exasol" and other.exists():
+        compare = json.loads(other.read_text(encoding="utf-8"))
+    cmd = "receipts backtest" + (" --backend exasol" if a.backend == "exasol" else "") +         (f" --months {' '.join(months)}" if months != MONTHS else "")
+    (out.with_suffix(".json")).write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")  # first, so a
+    out.write_text(to_markdown(rep, cmd, compare), encoding="utf-8")                                 # report bug loses nothing
     held = sum(r["trust"] == "HELD" for r in rep["clean"])
     caught = sum(r["caught"] for r in rep["planted"])
     print(f"\n{len(rep['clean'])} real days judged, {held} held. Planted faults caught: {caught} of "
           f"{len(rep['planted'])}. Report: {out}")
+
+
+def cmd_scale(a):
+    """Run the IST case at increasing order volumes and write samples/exasol/scaling.md and .json."""
+    from .scale import run, to_markdown
+    rep = run(a.sizes, backend=a.backend, seed=a.seed, log=lambda m: print(m, flush=True))
+    out = Path(a.out) if a.out else ROOT / "samples" / ("exasol" if a.backend == "exasol" else "")
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "scaling.md").write_text(to_markdown(rep), encoding="utf-8")
+    (out / "scaling.json").write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
+    big = rep["results"][-1]["orders_per_day"] if rep["results"] else None
+    print(f"\nlargest size measured: {big:,} orders a day" if big else "\nno size completed")
+    if a.backend == "exasol" and not a.no_restore:
+        print("restoring the demo data (receipts init --fresh)")
+        from .model import default_incoming_day
+        _build(default_incoming_day(), 7, 20000, fresh=True)
+    return 0 if rep["results"] and all(r["right"] for r in rep["results"]) else 1
 
 
 def cmd_doctor(a):
@@ -402,8 +426,19 @@ def main(argv=None):
     bt = sub.add_parser("backtest", help="run the gate over real NYC taxi data (downloads about 150 MB once)")
     bt.add_argument("--data", default=str(ROOT / "data" / "real"), help="where the downloaded files go")
     bt.add_argument("--warmup", type=int, default=35, help="days published as trusted before judging starts")
-    bt.add_argument("--out", default=str(ROOT / "samples" / "real_backtest.md"))
+    bt.add_argument("--backend", choices=["duckdb", "exasol"], default="duckdb",
+                    help="exasol loads the mapped trips into the database at EXA_DSN and runs the gate there")
+    bt.add_argument("--months", nargs="+", help="months to load, YYYY-MM (default 2024-01 2024-02 2024-03)")
+    bt.add_argument("--out", help="report path (default samples/real_backtest.md, or samples/exasol/ for Exasol)")
     bt.set_defaults(fn=cmd_backtest)
+    sc = sub.add_parser("scale", help="run the IST case at increasing order volumes and record the timings")
+    sc.add_argument("--backend", choices=["duckdb", "exasol"], default="exasol")
+    sc.add_argument("--sizes", type=int, nargs="+", default=[20000, 100000, 200000, 400000],
+                    help="orders a day to try, smallest first; stops at the first that fails")
+    sc.add_argument("--seed", type=int, default=7)
+    sc.add_argument("--out", help="folder for scaling.md and scaling.json (default samples/exasol)")
+    sc.add_argument("--no-restore", action="store_true", help="do not run init --fresh afterwards")
+    sc.set_defaults(fn=cmd_scale)
     a = p.parse_args(argv)
     try:
         rc = a.fn(a)

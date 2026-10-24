@@ -53,3 +53,20 @@ def test_report_has_no_em_dashes():
            "first_judged": "2024-02-05", "warmup": 35, "trips": 10, "clean": [row], "planted": [], "seconds": 60}
     md = backtest.to_markdown(rep, "receipts backtest")
     assert chr(0x2014) not in md and "Days judged: **1**" in md and "REAL_CHANGE" in md
+
+
+def test_report_with_timings_and_comparison():
+    import json
+    from pathlib import Path
+    duck = json.loads((Path(__file__).resolve().parent.parent / "samples" / "real_backtest.json").read_text(encoding="utf-8"))
+    rep = json.loads(json.dumps(duck))
+    rep["backend"] = {"backend": "exasol", "standin": False, "version": "2026.2.0-nano.3", "udf": "in-database"}
+    rep["load_seconds"] = 150.0
+    for r in rep["clean"] + rep["planted"]:
+        r["db_ms"], r["statements"] = r["ms"] * 0.8, 30
+    rep["timings"] = backtest._timings(rep["clean"] + rep["planted"])
+    rep["clean"][0]["verdict"] = "UNEXPLAINED"
+    md = backtest.to_markdown(rep, "receipts backtest --backend exasol", duck)
+    assert "on Exasol 2026.2.0-nano.3" in md and "## Timings" in md and "150 s" in md
+    assert f"Same verdict and same causes: **{len(duck['clean']) + len(duck['planted']) - 1} of" in md
+    assert "Differs on 2024-02-05" in md and chr(0x2014) not in md
