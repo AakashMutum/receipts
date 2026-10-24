@@ -39,3 +39,8 @@ def test_gate_reports_exasol_measured_timings(exa):
     cube = next(s for s in m["steps"] if "GROUP BY CUBE" in s["step"])
     assert cube["statements"] == 1 and cube["db_ms"] > 0
 
+
+def test_agent_reader_is_read_only():
+    from receipts.doctor import agent_reader_checks
+    checks = agent_reader_checks()
+    assert checks and all(ok for ok, _ in checks), checks

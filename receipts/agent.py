@@ -49,8 +49,9 @@ def ask(be: Backend, day: date) -> dict:
                 q2 = f"SELECT METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY = {be.dialect.day(last)}"
                 steps.append(q2)
                 prev = be.scalar(q2)
-            cause = be.query(f"SELECT SUSPECT, SLICE_DESC FROM RECEIPTS.EVIDENCE WHERE CASE_ID = '{r['case_id']}' "
-                             f"AND OUTCOME = 'CONFIRMED'")
+            q3 = f"SELECT SUSPECT, SLICE_DESC FROM PUB.CONFIRMED_CAUSES WHERE CASE_ID = '{r['case_id']}'"
+            steps.append(q3)
+            cause = be.query(q3)
             why = ("The cause is proven: " + "; ".join(f"{DETECTOR_TITLES.get(c['suspect'], c['suspect']).lower()} ({c['slice_desc']})"
                                                       for c in cause) + ".") if cause else \
                 "The cause is not proven yet and a person is looking at it."

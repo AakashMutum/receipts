@@ -22,7 +22,7 @@ IDENTIFIERS = sorted({c for cols in SOURCE_TABLES.values() for c, _ in cols} | s
     "STG_PAYMENTS", "STG_ORDERS", "DIM_MERCHANT", "DIM_CATEGORY", "FX_DAILY", "FCT_REVENUE", "DAILY_REVENUE",
     "METRIC_TRUST", "DASHBOARD_REVENUE", "CLOCK_DRIFT", "DUP_KEYS", "EXTRA_ROWS", "MED_TODAY", "MED_BASE", "N_TODAY",
     "TABLE_NAME", "KEY_COLUMN", "DIM_ROWS", "PAYMENTS_TODAY", "ORDERS_TODAY", "ORDERS_ON_DUP_KEYS", "DUP_ROWS",
-    "RAW_PAYMENTS", "N"})
+    "RAW_PAYMENTS", "N", "CONFIRMED_CAUSES", "AGENT_READER"})
 
 
 def exasol_statements() -> list[str]:
@@ -32,6 +32,49 @@ def exasol_statements() -> list[str]:
     out += split_statements(d.render("pub.sql"))
     for s in SCENARIOS.values():
         out += [d.render_string(x, incoming=INCOMING_DAY) for x in s.inject]
+    return out
+
+
+def agent_reader_checks(cfg=None) -> list[tuple[bool, str]]:
+    """Log in as the read-only agent user and prove what it can and cannot do. Exasol only."""
+    import ssl
+
+    import pyexasol
+    cfg = cfg or settings()
+    u = cfg.agent_user
+    try:
+        kw = {"websocket_sslopt": {"cert_reqs": ssl.CERT_NONE}} if cfg.exa_insecure else {}
+        con = pyexasol.connect(dsn=cfg.exa_dsn, user=u, password=cfg.agent_password, encryption=True, **kw)
+    except Exception as e:
+        return [(False, f"{u} can log in ({type(e).__name__}). Run `receipts init` to create it.")]
+    out = []
+
+    def refused(sql):
+        try:
+            con.execute(sql)
+            return False
+        except Exception as e:
+            return "insufficient privileges" in str(e).lower()  # refused for the right reason, not a typo
+
+    try:
+        n = con.execute("SELECT COUNT(*) FROM PUB.METRIC_TRUST").fetchval()
+        out.append((True, f"{u} reads PUB.METRIC_TRUST ({n} rows)"))
+    except Exception as e:
+        out.append((False, f"{u} reads PUB.METRIC_TRUST: {str(e).splitlines()[0][:120]}"))
+    out.append((refused("SELECT COUNT(*) FROM RAW.PAYMENTS"), f"{u} cannot read RAW.PAYMENTS"))
+    out.append((refused("SELECT COUNT(*) FROM PIPE.DAILY_REVENUE"), f"{u} cannot read PIPE.DAILY_REVENUE"))
+    out.append((refused("SELECT COUNT(*) FROM RECEIPTS.CASES"), f"{u} cannot read RECEIPTS.CASES"))
+    try:
+        n = con.execute("SELECT COUNT(*) FROM PUB.CONFIRMED_CAUSES").fetchval()
+        out.append((True, f"{u} reads PUB.CONFIRMED_CAUSES ({n} rows)"))
+    except Exception as e:
+        out.append((False, f"{u} reads PUB.CONFIRMED_CAUSES: {str(e).splitlines()[0][:120]}"))
+    out.append((refused("DELETE FROM PUB.DAILY_REVENUE_PUBLISHED"), f"{u} cannot delete from PUB"))
+    out.append((refused("UPDATE PUB.DAILY_REVENUE_PUBLISHED SET METRIC_VALUE = 0"), f"{u} cannot update PUB"))
+    out.append((refused("INSERT INTO PUB.DAILY_REVENUE_PUBLISHED (TXN_DAY) VALUES (DATE '2000-01-01')"),
+                f"{u} cannot insert into PUB"))
+    out.append((refused("CREATE SCHEMA AGENT_SCRATCH"), f"{u} cannot create a schema"))
+    con.close()
     return out
 
 
@@ -80,6 +123,8 @@ def run_doctor() -> int:
         u = udf_status(be)["udf"]
         line(u == "in-database", f"Python UDF runs inside Exasol ({u})"
              + ("" if u == "in-database" else ". Run `exasol slc install python3`, then `make init`."))
+        for good, msg in agent_reader_checks(cfg):
+            line(good, msg)
     try:
         n = be.scalar("SELECT COUNT(*) FROM RAW.PAYMENTS")
         line(n and n > 0, f"data loaded ({n:,} payment rows in RAW)")

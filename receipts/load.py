@@ -68,9 +68,27 @@ def init_database(be: Backend, data_dir: Path, log=print) -> dict:
         FROM PIPE.DAILY_REVENUE d WHERE d.TXN_DAY < {be.dialect.day(incoming)}""")
     n = be.scalar("SELECT COUNT(*) FROM PUB.DAILY_REVENUE_PUBLISHED")
     log(f"published {n} trusted history days")
+    if not be.is_standin:
+        log(f"agent user: {create_agent_reader(be)}")
     meta = {"incoming_day": incoming.isoformat(), "udf": udf, "seconds": round(time.perf_counter() - t0, 1),
             "manifest": manifest}
     return meta
+
+
+def create_agent_reader(be: Backend) -> str:
+    """A read-only Exasol user for AI agents (the MCP server logs in as it): it may read PUB and nothing else.
+
+    PUB is dropped and created again on every init, which drops its grants, so they are given again here.
+    The user is kept between inits (an agent may be connected), and its password is reset to the configured one.
+    """
+    from .config import settings
+    cfg = settings()
+    u, pw = cfg.agent_user, cfg.agent_password.replace('"', '')
+    exists = be.scalar(f"SELECT COUNT(*) FROM SYS.EXA_DBA_USERS WHERE USER_NAME = '{u}'")
+    be.execute(f'{"ALTER" if exists else "CREATE"} USER {u} IDENTIFIED BY "{pw}"')
+    be.execute(f"GRANT CREATE SESSION TO {u}")
+    be.execute(f"GRANT SELECT ON SCHEMA PUB TO {u}")
+    return f"{u} can log in and SELECT from schema PUB only"
 
 
 def reset_raw(be: Backend, incoming: date, full: bool = False) -> None:

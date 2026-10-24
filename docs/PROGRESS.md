@@ -90,3 +90,22 @@ Rule added during the work: everything that can write bad data or attack the sys
   if tonight is already judged, so it cannot touch a published number). Lab-only, 403 otherwise.
 * Tests: tests/test_redteam.py (outcomes, the search keeps looking below the floor, one real attack restores
   RAW and PUB, report shows holes), red team endpoints in tests/test_lab.py.
+
+## Phase 5: A real agent through the Exasol MCP server (2026-10-24)
+
+* `receipts init` on Exasol creates (or re-passwords) `AGENT_READER` and grants CREATE SESSION and SELECT ON
+  SCHEMA PUB, again on every init because PUB is recreated. Password from RECEIPTS_AGENT_PASSWORD (default in
+  mcp/mcp_client_config.example.json). New view PUB.CONFIRMED_CAUSES (confirmed evidence only); the
+  deterministic trust-checking agent now reads only PUB (asserted in tests/test_api.py).
+* Verified on Exasol 2026.2.0-nano.3 (`receipts doctor`, `scripts/mcp_smoke.py`, tests/test_exasol_live.py):
+  reads PUB.METRIC_TRUST (43 rows) and PUB.CONFIRMED_CAUSES; refused with "insufficient privileges" on
+  RAW.PAYMENTS, PIPE.DAILY_REVENUE, RECEIPTS.CASES, DELETE/UPDATE/INSERT on PUB and CREATE SCHEMA. With the IST
+  case held it sees HELD, no trusted value, the guidance, and the proven cause clock_shift (gateway GW_B).
+* A probe script of mine first printed the writes as allowed; that was a bug in the probe (it never sent
+  them). Re-run correctly, Exasol refused every one, and PUB was unchanged (42 rows). The doctor now only
+  accepts an "insufficient privileges" error as a refusal.
+* docs/MCP_DEMO.md: Claude Desktop config and `claude mcp add` command (from the Exasol MCP server docs:
+  EXA_DSN/EXA_USER/EXA_PASSWORD, EXA_SSL_CERT_VALIDATION, EXA_MCP_SETTINGS with enable_read_query and a PUB
+  schema filter), the prompts and the expected behaviour.
+* NOT tested: the MCP server itself (uv is not installed here, so the smoke test skips that part), Claude
+  Desktop, Claude Code, and any live model answer.
