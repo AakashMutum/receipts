@@ -119,7 +119,7 @@ Each script sets up a private `.venv`, builds the demo data, starts the command 
 
 **Without Exasol:** `pip install -e ".[dev]"`, then `receipts judge-check` (reproduces the headline claims on fresh data in about a minute), `receipts init` and `receipts demo --lab` with no `EXA_*` variables set. The page header then says **Local stand-in**. The same SQL templates render for both, and the tests also run every scenario through an Exasol SQL path (rendered for Exasol, parsed with sqlglot's Exasol grammar, then executed).
 
-The incoming batch is dated yesterday (in India), with 42 days of history before it. To reproduce the screenshots exactly, pin the day: `receipts init --day 2026-10-20` and `receipts demo --lab --day 2026-10-20`. `judge-check`, `eval` and the tests always use 20 Oct 2026.
+The incoming batch is dated yesterday (in India), with 42 days of history before it. The screenshots were captured on Exasol with [`scripts/capture_screenshots.py`](scripts/capture_screenshots.py) for the batch day Fri 23 Oct 2026; to pin a day, use `receipts init --day YYYY-MM-DD` and `receipts demo --lab --day YYYY-MM-DD`. `judge-check`, `eval` and the tests always use 20 Oct 2026.
 
 More commands, alerts with `--watch`, an optional LLM explanation, and troubleshooting: [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md).
 

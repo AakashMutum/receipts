@@ -1,6 +1,6 @@
 # Demo script (3 minutes) and deck outline
 
-Rehearse with the command center already open on the healthy batch. Record at 1440 x 900. Speak over the screen; no slides in the video except the first and last five seconds.
+Rehearse with the command center already open on the healthy batch, started in lab mode (`receipts demo --lab`, which the run scripts do). Record at 1440 x 900. Speak over the screen; no slides in the video except the first and last five seconds.
 
 ## Video, 3:00
 
@@ -11,7 +11,7 @@ Rehearse with the command center already open on the healthy batch. Record at 14
 Show the big number and PUBLISHED. "Tonight's batch landed. Six checks ran on the raw rows before the dashboard saw anything. All clean, so it is published."
 
 **0:40 to 1:30. Break it: IST written as UTC.**
-Pick "IST written as UTC", press the button. The receipt prints.
+In the Break the pipeline panel pick "IST written as UTC" and press the button. Each step of the gate ticks off live, then the HELD banner and the receipt (about 7 seconds on Exasol).
 "Revenue dropped 19%. The dashboard did not show it: it is holding Monday's trusted value." Point at HELD.
 "The clock check is a Python UDF running inside Exasol. It found gateway B's day sits exactly five and a half hours late. That's IST."
 Point at the four rules. "A detector only nominates a suspect. Then we prove it: rebuild the whole pipeline in a sandbox schema with the fault undone, and re-run. Revenue comes back to normal and history does not change. That's the receipt."

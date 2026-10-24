@@ -41,14 +41,14 @@ make demo        # same as: receipts demo (builds if needed, serves, opens the b
 
 Open http://127.0.0.1:8000. The header chip says **Local stand-in** so nobody mistakes it for Exasol.
 
-The incoming batch day is yesterday in India (Asia/Kolkata), with 42 days of history generated before it. Every date on the page, the agent's question and the case IDs follow it. `receipts serve` rebuilds the database first if it holds another day. To reproduce the screenshots, pin the day on both commands:
+The incoming batch day is yesterday in India (Asia/Kolkata), with 42 days of history generated before it. Every date on the page, the agent's question and the case IDs follow it. `receipts serve` rebuilds the database first if it holds another day. To pin a day, pass it to both commands (the README screenshots use Fri 23 Oct 2026):
 
 ```bash
-receipts init --day 2026-10-20
-receipts serve --day 2026-10-20     # or: make demo DAY=2026-10-20
+receipts init --day 2026-10-23
+receipts serve --lab --day 2026-10-23     # or: make demo DAY=2026-10-23
 ```
 
-`receipts judge-check`, `receipts eval`, `receipts variants` and the tests always use 20 Oct 2026, so their results do not change with the calendar.
+`scripts/capture_screenshots.py` uses the day the server holds, so the screenshots show a current date. `receipts judge-check`, `receipts eval`, `receipts variants` and the tests always use 20 Oct 2026, so their results do not change with the calendar.
 
 ## 2. On Exasol Personal (the real target)
 

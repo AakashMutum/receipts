@@ -124,3 +124,17 @@ Rule added during the work: everything that can write bad data or attack the sys
   team (with the hole), scaling, agent demo, limits, architecture and diagrams. Test count 112 (2 live-only).
 * `receipts run` and `receipts sample` now refuse (exit 3) unless the loaded data is the synthetic data, as
   they plant faults too (lab rule).
+
+## Phase 7: Final checks and screenshots (2026-10-24)
+
+* `pytest -q`: 110 passed, 2 skipped (the live-Exasol tests); `RECEIPTS_LIVE_EXASOL=1 pytest -q
+  tests/test_exasol_live.py` on Exasol: 2 passed. `receipts judge-check`: all 8 checks pass, 20/20 runs.
+* `receipts doctor` on Exasol: all checks ok, including the 9 AGENT_READER checks.
+* `receipts init --fresh` on Exasol (15.2 s), then all screenshots retaken on Exasol with
+  scripts/capture_screenshots.py for batch day Fri 23 Oct 2026: 01 to 06 as before, 07_timings replaced by
+  10_measured_by_exasol, new 08_break_it (click to HELD 7.39 s in that capture) and 09_redteam.
+* Docs re-read for stale numbers, links (all relative links resolve) and em dashes (none). Updated the run
+  guide, demo script, security notes and architecture for lab mode and the agent user.
+* Left on Exasol: fresh demo data (`receipts init --fresh` at the end), no server running.
+* Open: the unit-change hole (fixes proposed above, not applied); the MCP server, Claude clients and Docker
+  build are untested here; GitHub issues not created (no `gh`). Nothing merged into main.
