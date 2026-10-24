@@ -303,6 +303,25 @@ def cmd_redteam(a):
     return 0
 
 
+def cmd_heldout(a):
+    """Run the frozen held-out partial unit errors and write the report. Synthetic data only."""
+    from .heldout import run, to_markdown
+    rep = run(backend=a.backend, seeds=tuple(a.seeds), orders_per_day=a.orders_per_day,
+              log=lambda m: print(m, flush=True))
+    out = Path(a.out) if a.out else ROOT / "samples" / ("exasol" if a.backend == "exasol" else "")
+    out.mkdir(parents=True, exist_ok=True)
+    name = f"heldout_unit{a.suffix}"
+    cmd = f"receipts heldout --backend {a.backend} --seeds {' '.join(map(str, a.seeds))} --orders-per-day {a.orders_per_day}"
+    (out / f"{name}.json").write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
+    (out / f"{name}.md").write_text(to_markdown(rep, a.title, cmd), encoding="utf-8")
+    print(f"holes {rep['holes']} of {len(rep['runs'])}. Report: {out / (name + '.md')}")
+    if a.backend == "exasol" and not a.no_restore:
+        print("restoring the demo data (receipts init --fresh)")
+        from .model import default_incoming_day
+        _build(default_incoming_day(), 7, 20000, fresh=True)
+    return 0
+
+
 def cmd_doctor(a):
     """Check the environment, and on Exasol check identifiers against reserved words."""
     from .doctor import run_doctor
@@ -483,6 +502,15 @@ def main(argv=None):
     rt.add_argument("--out", help="folder for redteam_report.md and .json (default samples/, or samples/exasol/)")
     rt.add_argument("--no-restore", action="store_true", help="do not run init --fresh afterwards (Exasol)")
     rt.set_defaults(fn=cmd_redteam)
+    ho = sub.add_parser("heldout", help="frozen held-out partial unit errors (synthetic data only)")
+    ho.add_argument("--backend", choices=["duckdb", "exasol"], default="duckdb")
+    ho.add_argument("--seeds", type=int, nargs="+", default=[21, 22])
+    ho.add_argument("--orders-per-day", type=int, default=20000)
+    ho.add_argument("--out", help="folder for the report (default samples/, or samples/exasol/)")
+    ho.add_argument("--suffix", default="", help="added to the file name, for example _before")
+    ho.add_argument("--title", default="Held-out partial unit errors")
+    ho.add_argument("--no-restore", action="store_true")
+    ho.set_defaults(fn=cmd_heldout)
     sc = sub.add_parser("scale", help="run the IST case at increasing order volumes and record the timings")
     sc.add_argument("--backend", choices=["duckdb", "exasol"], default="exasol")
     sc.add_argument("--sizes", type=int, nargs="+", default=[20000, 100000, 200000, 400000],

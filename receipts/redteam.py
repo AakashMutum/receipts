@@ -76,14 +76,19 @@ def attack(be: Backend, day: date, kinds: list[tuple[str, float, str | None]], t
     sql = [s for k, sh, gw in kinds for s in fault_sql(k, sh, gw)]
     sc = Scenario("redteam", " + ".join(k for k, _, _ in kinds), "", "PROVEN_FAULT",
                   frozenset(k for k, _, _ in kinds), sql, kind="redteam")
+    r = attack_sql(be, day, sc, truth)
+    r["faults"] = [{"fault": k, "share": sh, "gateway": gw or FAULT_CLASSES[k][3]} for k, sh, gw in kinds]
+    return r
+
+
+def attack_sql(be: Backend, day: date, sc: Scenario, truth: float) -> dict:
+    """Land tonight's batch with a scenario's fault SQL, run the gate without write-back, restore RAW."""
     ingest(be, day, sc)
     try:
         c = gate.run(be, day, {"id": sc.id, "title": sc.title}, write_back=False)
     finally:
         reset_raw(be, day)  # leave tonight unlanded, as the attack found it
-    r = classify(c, set(sc.expected_causes), truth)
-    r["faults"] = [{"fault": k, "share": sh, "gateway": gw or FAULT_CLASSES[k][3]} for k, sh, gw in kinds]
-    return r
+    return classify(c, set(sc.expected_causes), truth)
 
 
 def clean_value(be: Backend, day: date) -> float:
