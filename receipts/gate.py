@@ -33,13 +33,19 @@ EXPLAIN_MIN = 0.25    # in a partial explanation a cause must explain at least a
 
 
 class Timer:
-    def __init__(self):
+    def __init__(self, on_step=None, marker=None):
         self.steps = []
         self.t0 = time.perf_counter()
+        self.on_step = on_step
+        self.marker = marker or (lambda: None)
+        self.marks = [self.marker()]  # database statement ids between steps, for Exasol's own timings
 
     def step(self, name, t, rows=None, detail=None):
         self.steps.append({"step": name, "ms": round((time.perf_counter() - t) * 1000, 1),
                            "rows": rows, "detail": detail})
+        self.marks.append(self.marker())
+        if self.on_step:  # the lab's live timeline shows each step as it finishes
+            self.on_step(self.steps[-1])
 
     @property
     def total(self):
@@ -160,8 +166,8 @@ def _fix_diff(be: Backend, corrections: list) -> str:
                                         "pipeline.sql (production)", "pipeline.sql (proven by the undo test)", n=2))
 
 
-def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool = True) -> dict:
-    tm = Timer()
+def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool = True, on_step=None) -> dict:
+    tm = Timer(on_step, be.server_marker)
     be.log.clear()
     case_id = f"RC-{day:%Y%m%d}-{uuid.uuid4().hex[:6].upper()}"
 
@@ -349,16 +355,50 @@ def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool =
     case["explanation"] = {"source": "template", "text": explain.template(case)}
     case["timings"] = tm.steps
     case["total_ms"] = tm.total
+    if not write_back:
+        case["exasol_measured"] = measured(be, tm)
     if write_back:
         t = time.perf_counter()
         write(be, case)
-        case["timings"].append({"step": "Write receipts back to the database", "ms": round((time.perf_counter() - t) * 1000, 1),
-                                "rows": None, "detail": None})
+        tm.step("Write receipts back to the database", t)
         case["total_ms"] = tm.total
+        case["exasol_measured"] = measured(be, tm)
         # keep the stored JSON complete, including the write-back step
         be.execute(f"UPDATE RECEIPTS.CASES SET CASE_JSON = {lit(json.dumps(case, default=str))}, "
                    f"ELAPSED_MS = {case['total_ms']} WHERE CASE_ID = {lit(case_id)}")
     return case
+
+
+def measured(be: Backend, tm: Timer) -> dict:
+    """What the database itself recorded for this gate run: per step, the time and peak memory of its statements.
+
+    On Exasol this comes from EXA_STATISTICS.EXA_SQL_LAST_DAY after FLUSH STATISTICS. If the statistics
+    cannot be read, the receipt says so and shows the client-side timing instead. On the stand-in: n/a.
+    """
+    if be.is_standin or tm.marks[0] is None:
+        return {"source": "n/a", "note": "Only Exasol reports its own statement timings."}
+    t = time.perf_counter()
+    got = be.server_stats(tm.marks[0], tm.marks[-1])
+    if not got:
+        return {"source": "client", "note": "Exasol statistics were not readable, so these are client-side timings.",
+                "db_ms": round(sum(s["ms"] for s in tm.steps), 1)}
+    src, rows = got
+    marks = {m for m in tm.marks if m is not None}
+    # every statement autocommits, and the commit gets its own id: commits count as database time, not as
+    # statements, and the commits of the marker reads themselves are left out
+    by_id = {int(r["stmt_id"]): r for r in rows if int(r["stmt_id"]) not in marks
+             and not (r["command_name"] == "COMMIT" and int(r["stmt_id"]) - 1 in marks)}
+
+    def agg(rs):
+        return {"statements": sum(r["command_name"] != "COMMIT" for r in rs),
+                "db_ms": round(sum((r["duration"] or 0) * 1000 for r in rs), 1),
+                "cpu_pct_max": max((r["cpu"] or 0 for r in rs), default=None),
+                "temp_ram_peak_mib": max((r["temp_db_ram_peak"] or 0 for r in rs), default=None)}
+    steps = []
+    for st, a, b in zip(tm.steps, tm.marks, tm.marks[1:]):
+        mine = [by_id[i] for i in range(a + 1, b) if i in by_id] if a is not None and b is not None else []
+        steps.append({"step": st["step"]} | agg(mine))
+    return {"source": src} | agg(list(by_id.values())) | {"steps": steps, "read_ms": round((time.perf_counter() - t) * 1000, 1)}
 
 
 def write(be: Backend, case: dict) -> None:

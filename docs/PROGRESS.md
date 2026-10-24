@@ -29,3 +29,20 @@ Rule added during the work: everything that can write bad data or attack the sys
   would not hold the 800k CSVs and the database growth. `samples/exasol/scaling.md` and `.json`.
   `receipts init --fresh` ran at the end (demo day 2026-10-23, 13.7 s, AGENT_READER created).
 * Not tested: sizes above 400k; scaling on DuckDB (the command supports it, CI runs a tiny version).
+
+## Phase 2: Exasol reports its own timings (2026-10-24)
+
+* Verified live on Exasol 2026.2.0-nano.3: `EXA_STATISTICS.EXA_SQL_LAST_DAY` (after `FLUSH STATISTICS`) has
+  SESSION_ID, STMT_ID, COMMAND_NAME, DURATION (s), CPU, TEMP_DB_RAM_PEAK (MiB), ROW_COUNT and more.
+  `EXA_DBA_AUDIT_SQL` has the same columns (auditing is on here) and is the fallback. `EXA_USER_PROFILE_LAST_DAY`
+  is empty unless the session sets `PROFILE = 'ON'`, which the gate does not do (it would add overhead).
+* How: `SELECT CURRENT_STATEMENT FROM DUAL` before the gate and after every step gives statement-id markers;
+  after the run the statistics for the session between the markers are read and summed per step. Automatic
+  COMMITs count as database time but not as statements. Stored with the case as `exasol_measured`.
+* Shown in the receipt as "Measured by Exasol" and per step in "Where the time went". Unreadable statistics:
+  labelled client-side timing. Stand-in: n/a. Tests: `tests/test_measured.py` (stand-in with a fake
+  statistics source), `tests/test_exasol_live.py` (real Exasol, skipped unless RECEIPTS_LIVE_EXASOL=1; passed).
+* IST case on the demo data, two runs: Exasol measured 4,289 ms and 3,091 ms in 25 statements (client 5,252
+  and 3,849 ms end to end), CUBE 1,494 and 834 ms, peak temp memory 67.5 and 76.5 MiB. Reading the
+  statistics (FLUSH included) takes another 0.7 to 0.9 s, outside the gate's total.
+* The UI part of this phase is in the next commit, because it shares web/app.js with the lab panel.

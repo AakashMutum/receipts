@@ -96,6 +96,15 @@ class Backend:
     def describe(self) -> dict:
         return {"backend": self.name, "standin": self.is_standin}
 
+    # what the database itself measured (Exasol only) ---------------------------------------------------
+    def server_marker(self) -> int | None:
+        """The database's id for a statement run now, so later statements can be found in its statistics."""
+        return None
+
+    def server_stats(self, first: int, last: int) -> tuple[str, list[dict]] | None:
+        """(source, per-statement statistics) recorded by the database for ids strictly between first and last."""
+        return None
+
 
 class DuckDBBackend(Backend):
     """Local stand-in used for development, tests and CI where Exasol is not running."""
@@ -225,6 +234,39 @@ class ExasolBackend(Backend):
 
     def close(self) -> None:
         self.con.close()
+
+    # Exasol records every statement in EXA_STATISTICS.EXA_SQL_LAST_DAY: its duration inside the database,
+    # CPU and peak temporary memory. Rows appear once the statistics are flushed. CURRENT_STATEMENT is the
+    # id of the statement that reads it, so two markers bracket the statements in between. With auditing on,
+    # EXA_DBA_AUDIT_SQL has the same columns and is the fallback. Neither the markers nor the statistics
+    # reads go through the statement log, so they do not change the case.
+    STATS_SOURCES = ("EXA_STATISTICS.EXA_SQL_LAST_DAY", "EXA_STATISTICS.EXA_DBA_AUDIT_SQL")
+    STATS_SQL = ("SELECT STMT_ID, COMMAND_NAME, DURATION, CPU, TEMP_DB_RAM_PEAK, ROW_COUNT FROM {src} "
+                 "WHERE SESSION_ID = CURRENT_SESSION AND STMT_ID > {first} AND STMT_ID < {last} ORDER BY STMT_ID")
+
+    def server_marker(self) -> int | None:
+        try:
+            with self._lock:
+                return int(self.con.execute("SELECT CURRENT_STATEMENT FROM DUAL").fetchval())
+        except Exception:  # pragma: no cover, depends on server
+            return None
+
+    def server_stats(self, first: int, last: int) -> tuple[str, list[dict]] | None:
+        with self._lock:
+            try:
+                self.con.execute("FLUSH STATISTICS")
+            except Exception:
+                return None
+            for src in self.STATS_SOURCES:
+                try:
+                    stmt = self.con.execute(self.STATS_SQL.format(src=src, first=int(first), last=int(last)))
+                    cols = [c.lower() for c in stmt.column_names()]
+                    rows = [{c: _norm(v) for c, v in zip(cols, r)} for r in stmt.fetchall()]
+                except Exception:  # not readable for this user, for example
+                    continue
+                if rows:
+                    return src, rows
+        return None
 
     def describe(self) -> dict:
         d = super().describe()
