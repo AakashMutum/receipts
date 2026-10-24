@@ -3,9 +3,10 @@
 Run it on the built-in synthetic data or a sandbox copy, never on live production tables: every
 attack writes a planted fault into RAW.
 
-For each of the six fault classes an attacker shrinks the fault, step by step, and stops at the
-first step the gate no longer proves (the search stops early, so the cost is one run per step that
-still works plus one). The share of rows affected goes 100, 50, 25, 10, 5, 2 percent; unit errors are
+For each of the six fault classes an attacker shrinks the fault, step by step. Past the first step
+the gate no longer proves it keeps going, because a smaller fault could still be published as a
+wrong number, and stops early once a missed fault moves the number by less than 4 percent (it can no
+longer cause a wrong publish). The share of rows affected goes 100, 50, 25, 10, 5, 2 percent; unit errors are
 also tried on each gateway, from the largest to the smallest. Every step records:
 
   verdict          what the gate decided
@@ -95,15 +96,20 @@ def clean_value(be: Backend, day: date) -> float:
 def ladder(be: Backend, day: date, kind: str, truth: float, gateway: str | None = None, log=print) -> dict:
     """Shrink one fault until the gate stops proving it. Returns every step and the floor."""
     shares = SHARES if FAULT_CLASSES[kind][1] else [1.0]  # a missing FX rate has no share to shrink
-    steps, floor = [], None
+    steps, floor, missed = [], None, False
     for sh in shares:
         r = attack(be, day, [(kind, sh, gateway)], truth)
         steps.append(r)
         log(f"  {kind:14s} {gateway or FAULT_CLASSES[kind][3] or '':5s} {sh:>5.0%}  {r['outcome']:12s} "
             f"{r['verdict']:13s} error {r['error_pct']:+7.2f}%")
-        if r["outcome"] != "caught":
+        missed |= r["outcome"] != "caught"
+        if not missed:
+            floor = sh
+        # Below the floor keep shrinking while the fault is still big enough to publish a wrong number:
+        # stopping at the first miss would hide a hole further down. Once a missed fault moves the
+        # number by less than 4 percent, smaller shares can no longer cause a wrong publish, so stop.
+        if missed and abs(r["error_pct"]) < WRONG_PCT:
             break
-        floor = sh
     return {"fault": kind, "gateway": gateway or FAULT_CLASSES[kind][3], "steps": steps, "floor": floor,
             "binary": not FAULT_CLASSES[kind][1], "holes": [s for s in steps if s["outcome"] in HOLES]}
 
@@ -153,15 +159,16 @@ def summarise(per_seed: list[dict]) -> dict:
     for k in FAULT_CLASSES:
         ls = [l for s in per_seed for l in s["ladders"] if l["fault"] == k]
         floors = [l["floor"] for l in ls]
-        first_miss = [l["steps"][-1] for l in ls if l["steps"][-1]["outcome"] != "caught"]
+        first_miss = [st for l in ls for st in l["steps"] if st["outcome"] != "caught"]
         out[k] = {"title": FAULT_CLASSES[k][0], "binary": ls[0]["binary"],
                   "floor": None if None in floors else max(floors), "floors": floors,
                   "below_floor": sorted({m["outcome"] for m in first_miss}),
                   "holes": sum(len(l["holes"]) for l in ls)}
     combos = [c for s in per_seed for c in s["combos"]]
     gws = [g for s in per_seed for g in s["unit_gateways"]]
-    holes = ([{"where": f"{l['fault']} at {st['faults'][0]['share']:.0%}", **st} for s in per_seed for l in s["ladders"]
-              for st in l["holes"]] +
+    holes = ([{"where": f"{l['fault']}{' on ' + l['gateway'] if l['gateway'] else ''} at "
+                        f"{st['faults'][0]['share']:.0%} of {FAULT_CLASSES[l['fault']][1]} (seed {s['seed']})", **st}
+              for s in per_seed for l in s["ladders"] for st in l["holes"]] +
              [{"where": "unit_scale on " + g["gateway"], **g} for g in gws if g["outcome"] in HOLES] +
              [{"where": " + ".join(f"{f['fault']} at {f['share']:.0%}" for f in c["faults"]), **c}
               for c in combos if c["outcome"] in HOLES])
@@ -182,11 +189,13 @@ def to_markdown(rep: dict, command: str) -> str:
            "Every attack writes a planted fault into RAW.", "",
            f"On {where}, {rep['orders_per_day']:,} orders a day, seeds {', '.join(map(str, rep['seeds']))}. "
            f"Generated {rep['generated_at']} in {rep['seconds'] / 60:.0f} minutes. Reproduce: `{command}`.", "",
-           "For each fault class an attacker shrinks the share of rows affected (100, 50, 25, 10, 5, 2 percent) and "
-           "stops at the first step the gate no longer proves. The detection floor is the smallest share still "
-           "proven with the right cause; with several seeds the worst seed counts. Nothing was tuned for this run.", "",
+           "For each fault class an attacker shrinks the share of rows affected (100, 50, 25, 10, 5, 2 percent). "
+           "After the first step the gate no longer proves, it keeps shrinking while the fault still moves the number by "
+           f"{rep['wrong_pct']:.0f}% or more (a smaller one cannot be published as a wrong number), then stops. The detection floor "
+           "is the smallest share proven with the right cause at every step down to it; with several seeds the worst seed "
+           "counts. Nothing was tuned for this run.", "",
            "## Detection floor per fault class", "",
-           "| Fault class | Detection floor | What happened one step below | Holes |", "|---|---|---|---|"]
+           "| Fault class | Detection floor | What happened below the floor | Holes |", "|---|---|---|---|"]
     for k, c in s["classes"].items():
         below = ", ".join(OUTCOMES[o] for o in c["below_floor"]) or ("not reached: proven at every step" if not c["binary"]
                                                                        else "binary fault, nothing to shrink")

@@ -526,10 +526,10 @@
   }
 
   // lab: red team tab -----------------------------------------------------------------------------------------------------
-  const OUTCOME_TEXT = { caught: "Proven, right cause", held: "Held, nothing proven", held_partial: "Held, part of the cause proven", wrong_cause: "HOLE: named a cause that was not planted", small: "Published, under 4% off", WRONG: "HOLE: published a number more than 4% off" };
+  const OUTCOME_TEXT = { caught: "Proven, right cause", held: "Held, nothing proven", held_partial: "Held, part of the cause proven", wrong_cause: "Named a cause that was not planted", small: "Published, under 4% off", WRONG: "Published a number more than 4% off" };
   function floorChart(classes) {
     const rows = Object.entries(classes);
-    const W = 560, rowH = 34, L = 190, R = 70, H = rows.length * rowH + 24;
+    const W = 600, rowH = 34, L = 190, R = 110, H = rows.length * rowH + 24;
     const x = (v) => L + (W - L - R) * v;
     const g = [0, 0.25, 0.5, 1].map((v) => `<line class="t-grid" x1="${x(v)}" x2="${x(v)}" y1="0" y2="${H - 18}"/><text x="${x(v)}" y="${H - 4}" text-anchor="middle">${v * 100}%</text>`);
     rows.forEach(([id, c], i) => {
@@ -538,7 +538,7 @@
       const w = none ? (W - L - R) : Math.max(3, x(c.floor) - L);
       const label = none ? "not proven" : (c.binary ? "binary" : `${Math.round(c.floor * 100)}%`) + (c.holes ? `, ${c.holes} hole${c.holes > 1 ? "s" : ""}` : "");
       g.push(`<text x="${L - 10}" y="${y + 17}" text-anchor="end">${esc(c.title)}</text>`,
-        `<rect class="rt-bar${none ? " none" : ""}" x="${L}" y="${y + 4}" width="${w}" height="18" rx="3"><title>${esc(c.title)}: ${esc(label)}</title></rect>`,
+        `<rect class="rt-bar${none || c.holes ? " none" : ""}" x="${L}" y="${y + 4}" width="${w}" height="18" rx="3"><title>${esc(c.title)}: ${esc(label)}</title></rect>`,
         `<text class="rt-val" x="${L + w + 6}" y="${y + 17}">${esc(label)}</text>`);
     });
     return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Detection floor per fault class">${g.join("")}</svg>`;

@@ -64,3 +64,29 @@ Rule added during the work: everything that can write bad data or attack the sys
 * Tests: tests/test_lab.py (403 without lab for every lab endpoint, panel absent, panel present with lab,
   break shows every step then HELD, approve, reset, refusal on non-synthetic data, the --lab flag) and the
   run-script check in tests/test_scripts.py. Not tested: the page in Safari/Firefox, only headless Chromium.
+
+## Phase 4: Red team (2026-10-24)
+
+* `receipts redteam [--backend exasol|duckdb] [--seeds N ...] [--orders-per-day N]` (receipts/redteam.py). Per
+  class the share goes 100, 50, 25, 10, 5, 2 percent; past the first miss it keeps going while the missed
+  fault still moves the number by 4% or more (first version stopped at the first miss and would have hidden
+  the hole below). Unit errors also on GW_A, GW_B, GW_C at 100%. Then 9 up+down pairs at their floors.
+* Exasol (seed 11, 20,000 orders a day, 7 min): floors unit_scale on GW_C 100%, duplicate_key 2%,
+  key_fanout 2%, stale_feed binary (caught), clock_shift on GW_B 100%, orphan_code 5%. Below the floor:
+  unit 50/25/10/5% held UNEXPLAINED (+230% to +20%), clock 50/25% held, orphan 2% published -0.70% (small).
+  Pairs: 8 of 9 caught; duplicate_key 2% + orphan_code 5% held as PROVEN_FAULT naming orphan_code only.
+  DuckDB (seed 11, 8,000 orders a day): the same floors and the same outcomes at every step.
+* **HOLE, on both backends:** a unit change (x100) on 2% of GW_C's payments was published as a verified
+  REAL_CHANGE, +6.47% off (Exasol; +5.72% on DuckDB). A live attack from the Red team tab on the demo data
+  (seed 7) gave NO_INCIDENT, +8.56% off. Cause: the unit check compares medians, which a 2% change does not
+  move, and the real-change test accepts a move with flat volume when the ticket ratio is within 6%.
+* Proposed fixes, NOT applied (would need judge-check, the eval, variants and the backtest re-run):
+  (a) a tail check in the unit detector: the share of today's amounts per gateway above 20x the baseline
+  median, against its baseline share; (b) accept REAL_CHANGE only when volume carries most of the move,
+  e.g. |ticket ratio - 1| <= max(0.02, 0.5 x |value ratio - 1|). (b) must be checked against the festival
+  control and the two real changes in the taxi backtest before anyone relies on it.
+* Red team tab: floor chart from samples/exasol/redteam_report.json (bars in red where a hole was found)
+  and "Run one attack" (runs the gate without write-back, then removes the planted batch; refuses with 409
+  if tonight is already judged, so it cannot touch a published number). Lab-only, 403 otherwise.
+* Tests: tests/test_redteam.py (outcomes, the search keeps looking below the floor, one real attack restores
+  RAW and PUB, report shows holes), red team endpoints in tests/test_lab.py.

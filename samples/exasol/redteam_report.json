@@ -1,0 +1,1048 @@
+{
+  "backend": {
+    "backend": "exasol",
+    "standin": false,
+    "version": "2026.2.0-nano.3"
+  },
+  "seeds": [
+    11
+  ],
+  "orders_per_day": 20000,
+  "shares": [
+    1.0,
+    0.5,
+    0.25,
+    0.1,
+    0.05,
+    0.02
+  ],
+  "wrong_pct": 4.0,
+  "runs": [
+    {
+      "seed": 11,
+      "clean_value": 33069902.536003,
+      "ladders": [
+        {
+          "fault": "unit_scale",
+          "gateway": "GW_C",
+          "steps": [
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "unit_scale"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": 448.62,
+              "ms": 5856.8,
+              "faults": [
+                {
+                  "fault": "unit_scale",
+                  "share": 1.0,
+                  "gateway": "GW_C"
+                }
+              ]
+            },
+            {
+              "outcome": "held",
+              "verdict": "UNEXPLAINED",
+              "trust": "HELD",
+              "confirmed": [],
+              "right_cause": false,
+              "wrong_published": false,
+              "held_no_cause": true,
+              "error_pct": 230.23,
+              "ms": 2477.3,
+              "faults": [
+                {
+                  "fault": "unit_scale",
+                  "share": 0.5,
+                  "gateway": "GW_C"
+                }
+              ]
+            },
+            {
+              "outcome": "held",
+              "verdict": "UNEXPLAINED",
+              "trust": "HELD",
+              "confirmed": [],
+              "right_cause": false,
+              "wrong_published": false,
+              "held_no_cause": true,
+              "error_pct": 127.25,
+              "ms": 2925.8,
+              "faults": [
+                {
+                  "fault": "unit_scale",
+                  "share": 0.25,
+                  "gateway": "GW_C"
+                }
+              ]
+            },
+            {
+              "outcome": "held",
+              "verdict": "UNEXPLAINED",
+              "trust": "HELD",
+              "confirmed": [],
+              "right_cause": false,
+              "wrong_published": false,
+              "held_no_cause": true,
+              "error_pct": 44.2,
+              "ms": 3593.5,
+              "faults": [
+                {
+                  "fault": "unit_scale",
+                  "share": 0.1,
+                  "gateway": "GW_C"
+                }
+              ]
+            },
+            {
+              "outcome": "held",
+              "verdict": "UNEXPLAINED",
+              "trust": "HELD",
+              "confirmed": [],
+              "right_cause": false,
+              "wrong_published": false,
+              "held_no_cause": true,
+              "error_pct": 19.51,
+              "ms": 2516.1,
+              "faults": [
+                {
+                  "fault": "unit_scale",
+                  "share": 0.05,
+                  "gateway": "GW_C"
+                }
+              ]
+            },
+            {
+              "outcome": "WRONG",
+              "verdict": "REAL_CHANGE",
+              "trust": "REAL_CHANGE",
+              "confirmed": [],
+              "right_cause": false,
+              "wrong_published": true,
+              "held_no_cause": false,
+              "error_pct": 6.47,
+              "ms": 3453.6,
+              "faults": [
+                {
+                  "fault": "unit_scale",
+                  "share": 0.02,
+                  "gateway": "GW_C"
+                }
+              ]
+            }
+          ],
+          "floor": 1.0,
+          "binary": false,
+          "holes": [
+            {
+              "outcome": "WRONG",
+              "verdict": "REAL_CHANGE",
+              "trust": "REAL_CHANGE",
+              "confirmed": [],
+              "right_cause": false,
+              "wrong_published": true,
+              "held_no_cause": false,
+              "error_pct": 6.47,
+              "ms": 3453.6,
+              "faults": [
+                {
+                  "fault": "unit_scale",
+                  "share": 0.02,
+                  "gateway": "GW_C"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "fault": "duplicate_key",
+          "gateway": null,
+          "steps": [
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "duplicate_key"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": 100.0,
+              "ms": 6012.8,
+              "faults": [
+                {
+                  "fault": "duplicate_key",
+                  "share": 1.0,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "duplicate_key"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": 49.95,
+              "ms": 11395.3,
+              "faults": [
+                {
+                  "fault": "duplicate_key",
+                  "share": 0.5,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "duplicate_key"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": 24.96,
+              "ms": 7873.8,
+              "faults": [
+                {
+                  "fault": "duplicate_key",
+                  "share": 0.25,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "duplicate_key"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": 9.95,
+              "ms": 5798.2,
+              "faults": [
+                {
+                  "fault": "duplicate_key",
+                  "share": 0.1,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "duplicate_key"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": 4.92,
+              "ms": 7098.4,
+              "faults": [
+                {
+                  "fault": "duplicate_key",
+                  "share": 0.05,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "duplicate_key"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": 1.9,
+              "ms": 7772.5,
+              "faults": [
+                {
+                  "fault": "duplicate_key",
+                  "share": 0.02,
+                  "gateway": null
+                }
+              ]
+            }
+          ],
+          "floor": 0.02,
+          "binary": false,
+          "holes": []
+        },
+        {
+          "fault": "key_fanout",
+          "gateway": null,
+          "steps": [
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "key_fanout"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": 100.0,
+              "ms": 5607.4,
+              "faults": [
+                {
+                  "fault": "key_fanout",
+                  "share": 1.0,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "key_fanout"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": 68.8,
+              "ms": 6706.6,
+              "faults": [
+                {
+                  "fault": "key_fanout",
+                  "share": 0.5,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "key_fanout"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": 33.77,
+              "ms": 4455.2,
+              "faults": [
+                {
+                  "fault": "key_fanout",
+                  "share": 0.25,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "key_fanout"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": 13.24,
+              "ms": 4370.5,
+              "faults": [
+                {
+                  "fault": "key_fanout",
+                  "share": 0.1,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "key_fanout"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": 5.89,
+              "ms": 5496.0,
+              "faults": [
+                {
+                  "fault": "key_fanout",
+                  "share": 0.05,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "key_fanout"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": 1.98,
+              "ms": 7003.1,
+              "faults": [
+                {
+                  "fault": "key_fanout",
+                  "share": 0.02,
+                  "gateway": null
+                }
+              ]
+            }
+          ],
+          "floor": 0.02,
+          "binary": false,
+          "holes": []
+        },
+        {
+          "fault": "stale_feed",
+          "gateway": null,
+          "steps": [
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "stale_feed"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": -8.48,
+              "ms": 5115.2,
+              "faults": [
+                {
+                  "fault": "stale_feed",
+                  "share": 1.0,
+                  "gateway": null
+                }
+              ]
+            }
+          ],
+          "floor": 1.0,
+          "binary": true,
+          "holes": []
+        },
+        {
+          "fault": "clock_shift",
+          "gateway": "GW_B",
+          "steps": [
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "clock_shift"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": -15.93,
+              "ms": 6691.1,
+              "faults": [
+                {
+                  "fault": "clock_shift",
+                  "share": 1.0,
+                  "gateway": "GW_B"
+                }
+              ]
+            },
+            {
+              "outcome": "held",
+              "verdict": "UNEXPLAINED",
+              "trust": "HELD",
+              "confirmed": [],
+              "right_cause": false,
+              "wrong_published": false,
+              "held_no_cause": true,
+              "error_pct": -7.85,
+              "ms": 3725.7,
+              "faults": [
+                {
+                  "fault": "clock_shift",
+                  "share": 0.5,
+                  "gateway": "GW_B"
+                }
+              ]
+            },
+            {
+              "outcome": "held",
+              "verdict": "UNEXPLAINED",
+              "trust": "HELD",
+              "confirmed": [],
+              "right_cause": false,
+              "wrong_published": false,
+              "held_no_cause": true,
+              "error_pct": -3.81,
+              "ms": 2549.4,
+              "faults": [
+                {
+                  "fault": "clock_shift",
+                  "share": 0.25,
+                  "gateway": "GW_B"
+                }
+              ]
+            }
+          ],
+          "floor": 1.0,
+          "binary": false,
+          "holes": []
+        },
+        {
+          "fault": "orphan_code",
+          "gateway": null,
+          "steps": [
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "orphan_code"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": -34.14,
+              "ms": 5430.3,
+              "faults": [
+                {
+                  "fault": "orphan_code",
+                  "share": 1.0,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "orphan_code"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": -17.1,
+              "ms": 4329.4,
+              "faults": [
+                {
+                  "fault": "orphan_code",
+                  "share": 0.5,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "orphan_code"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": -8.83,
+              "ms": 4046.6,
+              "faults": [
+                {
+                  "fault": "orphan_code",
+                  "share": 0.25,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "orphan_code"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": -3.48,
+              "ms": 4067.9,
+              "faults": [
+                {
+                  "fault": "orphan_code",
+                  "share": 0.1,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "orphan_code"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": -1.79,
+              "ms": 4931.9,
+              "faults": [
+                {
+                  "fault": "orphan_code",
+                  "share": 0.05,
+                  "gateway": null
+                }
+              ]
+            },
+            {
+              "outcome": "small",
+              "verdict": "NO_INCIDENT",
+              "trust": "TRUSTED",
+              "confirmed": [],
+              "right_cause": false,
+              "wrong_published": false,
+              "held_no_cause": false,
+              "error_pct": -0.7,
+              "ms": 4522.8,
+              "faults": [
+                {
+                  "fault": "orphan_code",
+                  "share": 0.02,
+                  "gateway": null
+                }
+              ]
+            }
+          ],
+          "floor": 0.05,
+          "binary": false,
+          "holes": []
+        }
+      ],
+      "unit_gateways": [
+        {
+          "outcome": "caught",
+          "verdict": "PROVEN_FAULT",
+          "trust": "HELD",
+          "confirmed": [
+            "unit_scale"
+          ],
+          "right_cause": true,
+          "wrong_published": false,
+          "held_no_cause": false,
+          "error_pct": 4980.18,
+          "ms": 4124.5,
+          "faults": [
+            {
+              "fault": "unit_scale",
+              "share": 1.0,
+              "gateway": "GW_A"
+            }
+          ],
+          "gateway": "GW_A"
+        },
+        {
+          "outcome": "caught",
+          "verdict": "PROVEN_FAULT",
+          "trust": "HELD",
+          "confirmed": [
+            "unit_scale"
+          ],
+          "right_cause": true,
+          "wrong_published": false,
+          "held_no_cause": false,
+          "error_pct": 3621.77,
+          "ms": 3774.3,
+          "faults": [
+            {
+              "fault": "unit_scale",
+              "share": 1.0,
+              "gateway": "GW_B"
+            }
+          ],
+          "gateway": "GW_B"
+        },
+        {
+          "outcome": "caught",
+          "verdict": "PROVEN_FAULT",
+          "trust": "HELD",
+          "confirmed": [
+            "unit_scale"
+          ],
+          "right_cause": true,
+          "wrong_published": false,
+          "held_no_cause": false,
+          "error_pct": 448.62,
+          "ms": 4166.9,
+          "faults": [
+            {
+              "fault": "unit_scale",
+              "share": 1.0,
+              "gateway": "GW_C"
+            }
+          ],
+          "gateway": "GW_C"
+        }
+      ],
+      "combos": [
+        {
+          "outcome": "caught",
+          "verdict": "PROVEN_FAULT",
+          "trust": "HELD",
+          "confirmed": [
+            "clock_shift",
+            "unit_scale"
+          ],
+          "right_cause": true,
+          "wrong_published": false,
+          "held_no_cause": false,
+          "error_pct": 432.69,
+          "ms": 6844.3,
+          "faults": [
+            {
+              "fault": "unit_scale",
+              "share": 1.0,
+              "gateway": "GW_C"
+            },
+            {
+              "fault": "clock_shift",
+              "share": 1.0,
+              "gateway": "GW_B"
+            }
+          ]
+        },
+        {
+          "outcome": "caught",
+          "verdict": "PROVEN_FAULT",
+          "trust": "HELD",
+          "confirmed": [
+            "orphan_code",
+            "unit_scale"
+          ],
+          "right_cause": true,
+          "wrong_published": false,
+          "held_no_cause": false,
+          "error_pct": 438.25,
+          "ms": 6415.2,
+          "faults": [
+            {
+              "fault": "unit_scale",
+              "share": 1.0,
+              "gateway": "GW_C"
+            },
+            {
+              "fault": "orphan_code",
+              "share": 0.05,
+              "gateway": null
+            }
+          ]
+        },
+        {
+          "outcome": "caught",
+          "verdict": "PROVEN_FAULT",
+          "trust": "HELD",
+          "confirmed": [
+            "stale_feed",
+            "unit_scale"
+          ],
+          "right_cause": true,
+          "wrong_published": false,
+          "held_no_cause": false,
+          "error_pct": 440.14,
+          "ms": 10032.4,
+          "faults": [
+            {
+              "fault": "unit_scale",
+              "share": 1.0,
+              "gateway": "GW_C"
+            },
+            {
+              "fault": "stale_feed",
+              "share": 1.0,
+              "gateway": null
+            }
+          ]
+        },
+        {
+          "outcome": "caught",
+          "verdict": "PROVEN_FAULT",
+          "trust": "HELD",
+          "confirmed": [
+            "clock_shift",
+            "duplicate_key"
+          ],
+          "right_cause": true,
+          "wrong_published": false,
+          "held_no_cause": false,
+          "error_pct": -14.36,
+          "ms": 10284.4,
+          "faults": [
+            {
+              "fault": "duplicate_key",
+              "share": 0.02,
+              "gateway": null
+            },
+            {
+              "fault": "clock_shift",
+              "share": 1.0,
+              "gateway": "GW_B"
+            }
+          ]
+        },
+        {
+          "outcome": "held_partial",
+          "verdict": "PROVEN_FAULT",
+          "trust": "HELD",
+          "confirmed": [
+            "orphan_code"
+          ],
+          "right_cause": false,
+          "wrong_published": false,
+          "held_no_cause": false,
+          "error_pct": -0.58,
+          "ms": 5062.7,
+          "faults": [
+            {
+              "fault": "duplicate_key",
+              "share": 0.02,
+              "gateway": null
+            },
+            {
+              "fault": "orphan_code",
+              "share": 0.05,
+              "gateway": null
+            }
+          ]
+        },
+        {
+          "outcome": "caught",
+          "verdict": "PROVEN_FAULT",
+          "trust": "HELD",
+          "confirmed": [
+            "duplicate_key",
+            "stale_feed"
+          ],
+          "right_cause": true,
+          "wrong_published": false,
+          "held_no_cause": false,
+          "error_pct": -6.71,
+          "ms": 6489.9,
+          "faults": [
+            {
+              "fault": "duplicate_key",
+              "share": 0.02,
+              "gateway": null
+            },
+            {
+              "fault": "stale_feed",
+              "share": 1.0,
+              "gateway": null
+            }
+          ]
+        },
+        {
+          "outcome": "caught",
+          "verdict": "PROVEN_FAULT",
+          "trust": "HELD",
+          "confirmed": [
+            "clock_shift",
+            "key_fanout"
+          ],
+          "right_cause": true,
+          "wrong_published": false,
+          "held_no_cause": false,
+          "error_pct": -14.27,
+          "ms": 7593.0,
+          "faults": [
+            {
+              "fault": "key_fanout",
+              "share": 0.02,
+              "gateway": null
+            },
+            {
+              "fault": "clock_shift",
+              "share": 1.0,
+              "gateway": "GW_B"
+            }
+          ]
+        },
+        {
+          "outcome": "caught",
+          "verdict": "PROVEN_FAULT",
+          "trust": "HELD",
+          "confirmed": [
+            "key_fanout",
+            "orphan_code"
+          ],
+          "right_cause": true,
+          "wrong_published": false,
+          "held_no_cause": false,
+          "error_pct": 0.18,
+          "ms": 6277.3,
+          "faults": [
+            {
+              "fault": "key_fanout",
+              "share": 0.02,
+              "gateway": null
+            },
+            {
+              "fault": "orphan_code",
+              "share": 0.05,
+              "gateway": null
+            }
+          ]
+        },
+        {
+          "outcome": "caught",
+          "verdict": "PROVEN_FAULT",
+          "trust": "HELD",
+          "confirmed": [
+            "key_fanout",
+            "stale_feed"
+          ],
+          "right_cause": true,
+          "wrong_published": false,
+          "held_no_cause": false,
+          "error_pct": -6.65,
+          "ms": 8251.5,
+          "faults": [
+            {
+              "fault": "key_fanout",
+              "share": 0.02,
+              "gateway": null
+            },
+            {
+              "fault": "stale_feed",
+              "share": 1.0,
+              "gateway": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "classes": {
+      "unit_scale": {
+        "title": "Unit change (amounts x100)",
+        "binary": false,
+        "floor": 1.0,
+        "floors": [
+          1.0
+        ],
+        "below_floor": [
+          "WRONG",
+          "held"
+        ],
+        "holes": 1
+      },
+      "duplicate_key": {
+        "title": "Payment rows loaded twice",
+        "binary": false,
+        "floor": 0.02,
+        "floors": [
+          0.02
+        ],
+        "below_floor": [],
+        "holes": 0
+      },
+      "key_fanout": {
+        "title": "Merchant table fans out",
+        "binary": false,
+        "floor": 0.02,
+        "floors": [
+          0.02
+        ],
+        "below_floor": [],
+        "holes": 0
+      },
+      "stale_feed": {
+        "title": "FX feed misses today",
+        "binary": true,
+        "floor": 1.0,
+        "floors": [
+          1.0
+        ],
+        "below_floor": [],
+        "holes": 0
+      },
+      "clock_shift": {
+        "title": "IST written as UTC",
+        "binary": false,
+        "floor": 1.0,
+        "floors": [
+          1.0
+        ],
+        "below_floor": [
+          "held"
+        ],
+        "holes": 0
+      },
+      "orphan_code": {
+        "title": "New category code",
+        "binary": false,
+        "floor": 0.05,
+        "floors": [
+          0.05
+        ],
+        "below_floor": [
+          "small"
+        ],
+        "holes": 0
+      }
+    },
+    "combos": {
+      "caught": 8,
+      "held": 0,
+      "held_partial": 1,
+      "wrong_cause": 0,
+      "small": 0,
+      "WRONG": 0
+    },
+    "combo_runs": 9,
+    "holes": [
+      {
+        "where": "unit_scale on GW_C at 2% of payments on the gateway (seed 11)",
+        "outcome": "WRONG",
+        "verdict": "REAL_CHANGE",
+        "trust": "REAL_CHANGE",
+        "confirmed": [],
+        "right_cause": false,
+        "wrong_published": true,
+        "held_no_cause": false,
+        "error_pct": 6.47,
+        "ms": 3453.6,
+        "faults": [
+          {
+            "fault": "unit_scale",
+            "share": 0.02,
+            "gateway": "GW_C"
+          }
+        ]
+      }
+    ]
+  },
+  "seconds": 432,
+  "generated_at": "2026-10-24 17:08:43"
+}

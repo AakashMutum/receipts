@@ -346,7 +346,7 @@ button { font: inherit; cursor: pointer; }
 .lab-flag { margin-left: auto; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--on-hold); background: var(--hold); padding: 3px 8px; border-radius: 4px; }
 .rt-grid { grid-template-columns: 1fr minmax(260px, 360px); }
 .rt-chart svg { width: 100%; height: auto; display: block; }
-.rt-chart .rt-bar { fill: var(--green); }
+.rt-chart .rt-bar { fill: var(--ink-soft); }
 .rt-chart .rt-bar.none { fill: var(--reject); }
 .rt-chart text { fill: var(--ink-soft); font-size: 12px; font-family: var(--body); }
 .rt-chart .rt-val { fill: var(--ink); font-weight: 600; }

@@ -94,9 +94,9 @@ def test_break_shows_every_step_then_held_and_reset(client, mp):
     assert j["case"]["confirmed"] == ["unit_scale"]
 
 
-def test_break_refuses_data_that_is_not_synthetic(client, mp, tmp_path):
+def test_break_refuses_data_that_is_not_synthetic(client, mp, monkeypatch, tmp_path):
     mp.setenv("RECEIPTS_LAB", "1")
-    mp.setenv("RECEIPTS_DATA", str(tmp_path))
+    monkeypatch.setenv("RECEIPTS_DATA", str(tmp_path))  # this test only
     r = client.post("/api/lab/break", json={"fault": "clock_shift"})
     assert r.status_code == 409 and "synthetic" in r.json()["detail"]
     (tmp_path / "manifest.json").write_text(json.dumps({"config": {"seed": 1}, "rows": {"PAYMENTS": 1, "ORDERS": 1}}))
@@ -133,3 +133,18 @@ def test_serve_lab_flag_turns_lab_on(mp):
     cli._serve(args, browser=False)
     cli._serve(argparse.Namespace(**{**vars(args), "lab": True}), browser=False)
     assert seen == [False, True]
+
+
+def test_redteam_endpoints(client, mp):
+    mp.setenv("RECEIPTS_LAB", "1")
+    client.post("/api/lab/reset")
+    r = client.post("/api/lab/redteam/attack", json={"fault": "orphan_code", "share": 0.5})
+    assert r.status_code == 200, r.text
+    assert r.json()["outcome"] == "caught" and r.json()["meaning"]
+    rep = client.get("/api/lab/redteam")
+    assert rep.status_code in (200, 404)
+    if rep.status_code == 200:
+        assert set(rep.json()["summary"]["classes"]) == set(FAULT_CLASSES)
+    mp.delenv("RECEIPTS_LAB")
+    assert client.get("/api/lab/redteam").status_code == 403
+    assert client.post("/api/lab/redteam/attack", json={"fault": "orphan_code"}).status_code == 403
