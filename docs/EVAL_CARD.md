@@ -31,8 +31,9 @@ Core 5, Podman on WSL2, about 7.7 GiB visible to the VM), unless a line says the
 | Real data, 56 days judged (before the tail check; not re-run) | 0 held, 54 NO_INCIDENT, 2 verified REAL_CHANGE; 6 of 6 planted faults caught; 62 of 62 runs agree with the DuckDB run | [`samples/exasol/real_backtest.md`](../samples/exasol/real_backtest.md) |
 | Red team, seed 11, 20,000 orders a day | Floors: unit 2%, duplicates 2%, fan-out 2%, new codes 5%, clock faults 100%, stale FX caught. 0 holes (1 before the tail check). 8 of 9 opposite-direction pairs caught, 1 held with one cause |
 | Held-out partial unit changes, 24, frozen before the tail check | before: caught 0, held 24; after: caught 12 (all x1000), held 12 (all x10); published 0 both times | [`samples/exasol/heldout_unit_after.md`](../samples/exasol/heldout_unit_after.md) | [`samples/exasol/redteam_report.md`](../samples/exasol/redteam_report.md) |
-| Scaling, IST case | Right verdict at 20k, 100k, 200k and 400k orders a day; at 400k (17,346,085 payment rows) the gate takes 27.5 s, 26.3 s measured by Exasol, peak temporary memory 353 MiB | [`samples/exasol/scaling.md`](../samples/exasol/scaling.md) |
-| Live demo, click to HELD | median 7.3 s over 5 runs (6.9 to 8.5 s) | [`docs/RUN_GUIDE.md`](RUN_GUIDE.md#8-break-the-pipeline-lab-mode) |
+| Scaling, IST case (24 Oct, before the unit tail check) | Right verdict at 20k, 100k, 200k and 400k orders a day; at 400k (17,346,085 payment rows) the gate takes 27.5 s, 26.3 s measured by Exasol, peak temporary memory 353 MiB | [`samples/exasol/scaling.md`](../samples/exasol/scaling.md) |
+| Live demo, click to HELD | median 8.4 s over 5 runs (6.8 to 20.5 s) | [`samples/exasol/timings.md`](../samples/exasol/timings.md) |
+| IST case, `receipts run ist_utc`, one session on an idle laptop | median 5.6 s end to end over 4 repeats, 4.6 s measured by Exasol, 63 to 69 MiB peak temporary memory | [`samples/exasol/timings.md`](../samples/exasol/timings.md) |
 | Read-only agent user | reads PUB; refused on RAW, PIPE, RECEIPTS, insert, update, delete, create schema | [`docs/MCP_DEMO.md`](MCP_DEMO.md) |
 
 ## The unit-change hole: before and after the tail check

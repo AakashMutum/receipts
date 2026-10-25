@@ -164,3 +164,18 @@ Rule added during the work: everything that can write bad data or attack the sys
 * **Not re-run: the real-data backtest.** It was stopped while exporting its CSVs at 556 MB free disk on C:;
   deleting the regenerable files in the project freed 0.13 GB (2.3 GB free, 6 GB wanted). So whether 13 Feb and
   27 Feb still publish as REAL_CHANGE with the tail check is not verified; the docs say so.
+
+## Phase 9: One set of timings on an idle laptop (2026-10-26)
+
+* Waited until 30 s of CPU samples averaged 11.5% (max 19.7%), then one job at a time on Exasol: `init --fresh`
+  15.9 s; `receipts run ist_utc` x5, all PROVEN_FAULT clock_shift: first run 6.6 s end to end (5.4 s by Exasol),
+  repeats median 5.6 s (4.2 to 5.7 s), 4.6 s by Exasol, 27 client statements, 37 in EXA_STATISTICS, peak temp
+  memory 63 to 69 MiB; click to HELD (`scripts/measure_break.py --runs 5`, port 8765) median 8.4 s, runs 9.4,
+  8.4, 8.4, 6.8 and 20.5 s (the slow run kept). Report: `samples/exasol/timings.md` and `.json`.
+* README, RUN_GUIDE, EVAL_CARD and DEMO_SCRIPT now quote this set. Slower than the 24 Oct figures (4.2 s, 7.3 s);
+  the tail check adds a query and the laptop was not otherwise controlled, so no step-by-step comparison is made.
+  Scaling, the backtest timings and screenshot 10 are from 24 Oct and are labelled so.
+* Found: `receipts run` crashes with a charmap UnicodeEncodeError on Windows when stdout is redirected to a file
+  (cp1252); the gate finished and the case was written, but `--json` was not. Worked around with
+  PYTHONIOENCODING=utf-8; not fixed.
+* Left on Exasol: demo data from `init --fresh` (batch day 2026-10-25) after the timing runs; no server running.

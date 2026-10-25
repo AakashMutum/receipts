@@ -26,7 +26,7 @@ Every number below was measured on Exasol Personal 2026.2.0-nano.3 on one laptop
 | Red team: shrink each fault until the gate stops proving it | Floors: unit change 2%, duplicates 2%, fan-out 2%, new codes 5%, clock faults 100%, stale FX caught. **0 holes** (1 before the unit tail check: a x100 unit change on 2% of one gateway was published, 6.5% off) | [`redteam_report.md`](samples/exasol/redteam_report.md) |
 | Held-out partial unit changes (24, frozen before the tail check was written) | Before: caught 0, held 24. After: **caught 12** (every x1000 case), held 12 (every x10 case). Published 0 in both | [`heldout_unit_after.md`](samples/exasol/heldout_unit_after.md) |
 | Scaling: the IST case after a fresh load | Right verdict at every size up to **400,000 orders a day, 17,346,085 payment rows**: gate 27.5 s, CUBE over 5.95 million rows 5.9 s. Nothing larger was measured | [`scaling.md`](samples/exasol/scaling.md) |
-| Live demo: click Break the pipeline to the HELD banner | **7.3 s** median over 5 runs (6.9 to 8.5 s), every gate step shown as it finishes | [`RUN_GUIDE.md`](docs/RUN_GUIDE.md#8-break-the-pipeline-lab-mode) |
+| Live demo: click Break the pipeline to the HELD banner | **8.4 s** median over 5 runs (6.8 to 20.5 s), every gate step shown as it finishes | [`timings.md`](samples/exasol/timings.md) |
 | Held-out fault variants (17, written after the detectors were fixed) | caught 15, held 1, published but under 4% off 1, published wrong 0 (before the unit tail check: caught 13, held 3) | [`variants_report.md`](samples/exasol/variants_report.md) |
 | A read-only agent user | `AGENT_READER` reads `PUB.METRIC_TRUST`; Exasol refuses it on RAW, PIPE, RECEIPTS and on every write | [`MCP_DEMO.md`](docs/MCP_DEMO.md) |
 
@@ -57,17 +57,19 @@ Receipts runs in two modes:
 | `SYS.EXA_SQL_KEYWORDS` | `receipts doctor` checks every identifier against reserved words |
 | Exasol MCP server | Agents read `PUB.METRIC_TRUST` before quoting a number |
 
-One incident on Exasol, `receipts run ist_utc` at 20,000 orders a day: 26 SQL statements, 4.2 s end to end. Exasol's own statistics for the same case on a repeat run: 3.1 s inside the database over 25 statements, the CUBE 0.8 s, peak temporary memory 77 MiB.
+One incident on Exasol, `receipts run ist_utc` at 20,000 orders a day, measured in one session on an idle laptop ([`samples/exasol/timings.md`](samples/exasol/timings.md)): 27 SQL statements from the client, median 5.6 s end to end over 4 repeats (6.6 s on the first run after a fresh load). Exasol's own statistics: median 4.6 s inside the database over 37 statements, the CUBE 0.9 s, peak temporary memory 63 to 69 MiB. Median per step over the 4 repeats, end to end:
 
 | Step | Time |
 |---|---|
-| Read candidate and five weeks of trusted history | 192 ms |
-| Run six detectors on the incoming batch (clock check is a Python UDF inside Exasol) | 692 ms |
-| Read lineage from view definitions (`EXA_ALL_VIEWS`) | 44 ms |
-| Test 11,074 slices over 296,484 rows in one `GROUP BY CUBE` | 1,091 ms |
-| Reconcile raw payments to revenue rows | 354 ms |
-| Undo each suspect in a sandbox schema | 997 ms |
-| Write receipts back to the database | 761 ms |
+| Read candidate and five weeks of trusted history | 166 ms |
+| Run six detectors on the incoming batch (clock check is a Python UDF inside Exasol) | 890 ms |
+| Read lineage from view definitions (`EXA_ALL_VIEWS`) | 46 ms |
+| Test 11,074 slices over 296,484 rows in one `GROUP BY CUBE` | 1,306 ms |
+| Reconcile raw payments to revenue rows | 466 ms |
+| Undo each suspect in a sandbox schema | 1,420 ms |
+| Write receipts back to the database | 825 ms |
+
+The screenshot below is from an earlier run (24 Oct, before the unit tail check), so its numbers differ.
 
 ![Where the time went, with the time measured by Exasol](docs/screenshots/10_measured_by_exasol.png)
 
@@ -131,7 +133,7 @@ More commands, alerts with `--watch`, an optional LLM explanation, and troublesh
 * **Real days, no faults planted: 56 judged, 0 held, 0 called PROVEN_FAULT.** 54 published as `NO_INCIDENT`, 2 as a verified `REAL_CHANGE`: Tue 13 Feb (-33.9%, a snowstorm day when New York City schools went remote) and Tue 27 Feb (+26.0%, the busiest Tuesday so far).
 * **Planted faults on real days: 6 of 6 caught with the right cause.** Three unit changes (one vendor in cents, +2,111% to +2,371%) and three duplicated payment files (+8.2% to +8.3%, inside the normal range, so a threshold alert would have missed them).
 * **The same on both databases:** all 62 gate runs reach the same verdict and causes on Exasol and on the DuckDB stand-in; the daily values differ by at most 6.5e-05 relative.
-* **Timing on Exasol:** median 14.8 s per gate run (max 47.5 s) as RAW grows to 9.5 million rows; loading and building took 150 s.
+* **Timing on Exasol (24 Oct, before the unit tail check):** median 14.8 s per gate run (max 47.5 s) as RAW grows to 9.5 million rows; loading and building took 150 s.
 * **What it also shows:** real revenue is noisy, with a normal range of plus or minus 21.7% at the median, so a fault without a detector that moves the total less than that is published. The clock check fired on five Saturdays and the undo test ruled it out every time.
 
 ## Red team
@@ -167,7 +169,7 @@ The **Red team** tab in lab mode charts these floors and runs one attack live.
 
 ## Scaling
 
-`receipts scale --backend exasol` runs the IST case after `receipts init --fresh --orders-per-day N`, one gate run per size. Full report: [`samples/exasol/scaling.md`](samples/exasol/scaling.md).
+Measured on 24 Oct, before the unit tail check; not re-measured since (not enough free disk). `receipts scale --backend exasol` runs the IST case after `receipts init --fresh --orders-per-day N`, one gate run per size. Full report: [`samples/exasol/scaling.md`](samples/exasol/scaling.md).
 
 | Orders a day | Payment rows | Load and build | Gate end to end | Measured by Exasol | CUBE | Peak temp memory | Verdict |
 |---|---|---|---|---|---|---|---|
