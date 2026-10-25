@@ -2,15 +2,15 @@
 
 17 variants x 1 seeds, 8,000 orders a day, backend exasol. Written after the detectors were fixed. See `receipts/variants.py`.
 
-caught 13, held 3, small (published, under 4% error) 1, **published a wrong number 0** of 17 runs.
+caught 15, held 1, small (published, under 4% error) 1, **published a wrong number 0** of 17 runs.
 
 | Variant | Real error | Outcome | Verdict | Causes named |
 |---|---|---|---|---|
 | Unit change x10 on GW_B | +334.9% | caught | PROVEN_FAULT | unit_scale |
 | Unit change x1000 on GW_C | +4434.0% | caught | PROVEN_FAULT | unit_scale |
 | Unit change x100 on GW_A (largest gateway) | +4967.9% | caught | PROVEN_FAULT | unit_scale |
-| Unit change x100 on 25% of GW_A rows | +1310.2% | held | UNEXPLAINED | none |
-| Unit change x100 on 5% of GW_A rows | +274.3% | held | UNEXPLAINED | none |
+| Unit change x100 on 25% of GW_A rows | +1310.2% | caught | PROVEN_FAULT | unit_scale |
+| Unit change x100 on 5% of GW_A rows | +274.3% | caught | PROVEN_FAULT | unit_scale |
 | Three payment files loaded twice | +38.4% | caught | PROVEN_FAULT | duplicate_key |
 | Two other files loaded twice | +25.3% | caught | PROVEN_FAULT | duplicate_key |
 | A quarter of one file loaded twice | +3.6% | caught | PROVEN_FAULT | duplicate_key |
