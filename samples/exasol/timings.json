@@ -1,0 +1,124 @@
+{
+  "date": "2026-10-26",
+  "machine": "Windows 11 laptop, Intel Core 5, Podman on WSL2 (about 7.7 GiB visible to the VM), Exasol 2026.2.0-nano.3",
+  "idle_check": "30 s of CPU samples just before: average 11.5%, max 19.7% (a browser was open, no other job running)",
+  "init_fresh_s": 15.9,
+  "ist_runs": [
+    {
+      "run": 1,
+      "verdict": "PROVEN_FAULT",
+      "causes": [
+        "clock_shift"
+      ],
+      "client_ms": 6622.5,
+      "exasol_ms": 5415.0,
+      "exasol_statements": 37,
+      "client_statements": 27,
+      "cube_exasol_ms": 1072.0,
+      "temp_ram_peak_mib": 68.8
+    },
+    {
+      "run": 2,
+      "verdict": "PROVEN_FAULT",
+      "causes": [
+        "clock_shift"
+      ],
+      "client_ms": 5464.0,
+      "exasol_ms": 4597.0,
+      "exasol_statements": 37,
+      "client_statements": 27,
+      "cube_exasol_ms": 922.0,
+      "temp_ram_peak_mib": 67.0
+    },
+    {
+      "run": 3,
+      "verdict": "PROVEN_FAULT",
+      "causes": [
+        "clock_shift"
+      ],
+      "client_ms": 4239.9,
+      "exasol_ms": 3310.0,
+      "exasol_statements": 37,
+      "client_statements": 27,
+      "cube_exasol_ms": 657.0,
+      "temp_ram_peak_mib": 65.6
+    },
+    {
+      "run": 4,
+      "verdict": "PROVEN_FAULT",
+      "causes": [
+        "clock_shift"
+      ],
+      "client_ms": 5742.1,
+      "exasol_ms": 4579.0,
+      "exasol_statements": 37,
+      "client_statements": 27,
+      "cube_exasol_ms": 980.0,
+      "temp_ram_peak_mib": 62.8
+    },
+    {
+      "run": 5,
+      "verdict": "PROVEN_FAULT",
+      "causes": [
+        "clock_shift"
+      ],
+      "client_ms": 5693.1,
+      "exasol_ms": 4609.0,
+      "exasol_statements": 37,
+      "client_statements": 27,
+      "cube_exasol_ms": 915.0,
+      "temp_ram_peak_mib": 65.7
+    }
+  ],
+  "repeat_median": {
+    "client_ms": 5579,
+    "exasol_ms": 4588
+  },
+  "steps_repeat_median": [
+    {
+      "step": "Read candidate and trusted history",
+      "client_ms": 166,
+      "exasol_ms": 139
+    },
+    {
+      "step": "Run six detectors on the incoming batch",
+      "client_ms": 890,
+      "exasol_ms": 816
+    },
+    {
+      "step": "Read lineage from view definitions",
+      "client_ms": 46,
+      "exasol_ms": 15
+    },
+    {
+      "step": "Test 11,074 slices in one GROUP BY CUBE",
+      "client_ms": 1306,
+      "exasol_ms": 918
+    },
+    {
+      "step": "Reconcile raw payments to revenue rows",
+      "client_ms": 466,
+      "exasol_ms": 440
+    },
+    {
+      "step": "Undo each suspect in a sandbox schema",
+      "client_ms": 1420,
+      "exasol_ms": 1258
+    },
+    {
+      "step": "Write receipts back to the database",
+      "client_ms": 825,
+      "exasol_ms": 718
+    }
+  ],
+  "click_to_held_ms": [
+    9449,
+    8404,
+    8363,
+    6760,
+    20490
+  ],
+  "click_to_held_median_ms": 8404,
+  "eval_gate_median_ms": 3410,
+  "eval_gate_max_ms": 11667
+}

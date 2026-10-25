@@ -1,6 +1,6 @@
 # Receipts evaluation
 
-50 runs: 10 scenarios x 5 seeds (20,000 orders a day, 42 days of history, backend exasol). Generated 2026-10-21 20:31:03.
+50 runs: 10 scenarios x 5 seeds (20,000 orders a day, 42 days of history, backend exasol). Generated 2026-10-26 01:50:51.
 
 **Receipts passed 50 of 50 runs** (right verdict and exactly the right causes).
 
@@ -11,7 +11,7 @@
 | Threshold alert (typical monitor) | 88% | 100% | 0% | 0 | 40 |
 
 Corrected value after the proven fix, against the true clean value: mean error 0.001%, max 0.017%.
-Gate latency per run: median 3439 ms, max 26983 ms.
+Gate latency per run: median 3410 ms, max 11667 ms.
 
 ## Per scenario
 

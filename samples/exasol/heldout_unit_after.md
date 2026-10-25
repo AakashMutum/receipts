@@ -1,0 +1,36 @@
+# Held-out partial unit errors, after the fix
+
+Partial unit errors written before the fix and frozen: factors x10 and x1000, gateways GW_A and GW_B, 2, 5 and 10 percent of the gateway's payments, seeds 21 and 22. Run on synthetic data only.
+
+On Exasol 2026.2.0-nano.3, 20,000 orders a day. Generated 2026-10-26 01:18:40 in 5 minutes. Reproduce: `receipts heldout --backend exasol --seeds 21 22 --orders-per-day 20000`.
+
+**24 cases: caught 12, held without a proven cause 12, published under 4% off 0, wrong cause named 0, published a number more than 4% off 0.**
+
+| Seed | Gateway | Factor | Share | Outcome | Verdict | Causes named | Error |
+|---|---|---|---|---|---|---|---|
+| 21 | GW_A | x10 | 2% | held | UNEXPLAINED | none | +8.68% |
+| 21 | GW_A | x10 | 5% | held | UNEXPLAINED | none | +21.89% |
+| 21 | GW_A | x10 | 10% | held | UNEXPLAINED | none | +42.74% |
+| 21 | GW_A | x1000 | 2% | caught | PROVEN_FAULT | unit_scale | +962.97% |
+| 21 | GW_A | x1000 | 5% | caught | PROVEN_FAULT | unit_scale | +2429.97% |
+| 21 | GW_A | x1000 | 10% | caught | PROVEN_FAULT | unit_scale | +4743.92% |
+| 21 | GW_B | x10 | 2% | held | UNEXPLAINED | none | +7.41% |
+| 21 | GW_B | x10 | 5% | held | UNEXPLAINED | none | +17.27% |
+| 21 | GW_B | x10 | 10% | held | UNEXPLAINED | none | +30.78% |
+| 21 | GW_B | x1000 | 2% | caught | PROVEN_FAULT | unit_scale | +822.31% |
+| 21 | GW_B | x1000 | 5% | caught | PROVEN_FAULT | unit_scale | +1917.18% |
+| 21 | GW_B | x1000 | 10% | caught | PROVEN_FAULT | unit_scale | +3416.32% |
+| 22 | GW_A | x10 | 2% | held | UNEXPLAINED | none | +8.36% |
+| 22 | GW_A | x10 | 5% | held | UNEXPLAINED | none | +21.91% |
+| 22 | GW_A | x10 | 10% | held | UNEXPLAINED | none | +45.12% |
+| 22 | GW_A | x1000 | 2% | caught | PROVEN_FAULT | unit_scale | +928.46% |
+| 22 | GW_A | x1000 | 5% | caught | PROVEN_FAULT | unit_scale | +2431.48% |
+| 22 | GW_A | x1000 | 10% | caught | PROVEN_FAULT | unit_scale | +5008.66% |
+| 22 | GW_B | x10 | 2% | held | UNEXPLAINED | none | +6.69% |
+| 22 | GW_B | x10 | 5% | held | UNEXPLAINED | none | +16.13% |
+| 22 | GW_B | x10 | 10% | held | UNEXPLAINED | none | +31.24% |
+| 22 | GW_B | x1000 | 2% | caught | PROVEN_FAULT | unit_scale | +742.30% |
+| 22 | GW_B | x1000 | 5% | caught | PROVEN_FAULT | unit_scale | +1790.13% |
+| 22 | GW_B | x1000 | 10% | caught | PROVEN_FAULT | unit_scale | +3468.03% |
+
+Outcomes: `caught` proven, right cause; `held` held, nothing proven; `held_partial` held, part of the cause proven; `wrong_cause` a cause that was not planted was named; `small` published, under 4% off; `WRONG` published a number more than 4% off.

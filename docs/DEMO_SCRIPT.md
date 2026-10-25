@@ -36,7 +36,7 @@ Scroll to the scoreboard. "50 runs on fresh data. 100% right calls, zero wrong c
 2. **Why today fails:** every check is green; the faults are unit changes, double loads, fan-outs, stale feeds, clock shifts, new codes. One line each.
 3. **Three layers:** gate, investigate, explain. The LLM never decides.
 4. **Prove by undoing:** the four rules and the undo chart from the IST case.
-5. **Exasol at the centre:** CUBE over 11,000 slices, Python SET UDF, lineage from `EXA_ALL_VIEWS`, sandbox schemas, write-back, MCP. Real timings from Exasol Personal: the IST incident is proven in 4.2 s end to end, with the CUBE over 11,074 slices in 1.1 s and the sandbox undo in 1.0 s; at 4.2 million payment rows it takes 6.8 s.
+5. **Exasol at the centre:** CUBE over 11,000 slices, Python SET UDF, lineage from `EXA_ALL_VIEWS`, sandbox schemas, write-back, MCP. Real timings from Exasol Personal: the IST incident is proven in a median of 5.6 s end to end, with the CUBE over 11,074 slices in 1.3 s and the sandbox undo in 1.4 s (one session, `samples/exasol/timings.md`); at 17.3 million payment rows the gate took 27.5 s (scaling run, before the unit tail check).
 6. **Agents:** the two answers side by side.
 7. **Results:** the three-row scoreboard from the Exasol evaluation (50 of 50 runs, median gate latency 3.4 s) and the masked-pair and festival examples.
 8. **Limitations and next steps:** the seven honest bullets from the README, then: more detector classes, seasonality-aware baseline, a second metric.

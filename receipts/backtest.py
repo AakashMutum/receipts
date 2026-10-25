@@ -157,11 +157,13 @@ def build(db_path: Path, files: list[Path], start: date, end: date, first_judged
     else:
         csvs = _export(duck, db_path.parent / "exasol_csv", log)
         duck.close()
+        db_path.unlink(missing_ok=True)  # the staging copy is not needed once the CSVs exist
         be = connect(replace(settings(), backend="exasol"))
         be.run_script(be.render("schema.sql", tables=SOURCE_TABLES, festival=FESTIVAL_TABLES))
         for tbl, f in csvs:
             t1 = time.perf_counter()
             be.load_csv(f, "LANDING", tbl)
+            f.unlink()  # about 1 GB in all; free the disk as soon as Exasol has the rows
             log(f"IMPORT INTO LANDING.{tbl} in {time.perf_counter() - t1:.0f}s")
     create_pipeline(be)
     be.run_script(be.render("pub.sql"))

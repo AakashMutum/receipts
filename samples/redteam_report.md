@@ -2,7 +2,7 @@
 
 **Run this on the built-in synthetic data or a sandbox copy, never on live production tables.** Every attack writes a planted fault into RAW.
 
-On the DuckDB stand-in, 8,000 orders a day, seeds 11. Generated 2026-10-24 16:59:25 in 1 minutes. Reproduce: `receipts redteam --backend duckdb --seeds 11 --orders-per-day 8000`.
+On the DuckDB stand-in, 8,000 orders a day, seeds 11. Generated 2026-10-26 01:25:55 in 1 minutes. Reproduce: `receipts redteam --backend duckdb --seeds 11 --orders-per-day 8000`.
 
 For each fault class an attacker shrinks the share of rows affected (100, 50, 25, 10, 5, 2 percent). After the first step the gate no longer proves, it keeps shrinking while the fault still moves the number by 4% or more (a smaller one cannot be published as a wrong number), then stops. The detection floor is the smallest share proven with the right cause at every step down to it; with several seeds the worst seed counts. Nothing was tuned for this run.
 
@@ -10,7 +10,7 @@ For each fault class an attacker shrinks the share of rows affected (100, 50, 25
 
 | Fault class | Detection floor | What happened below the floor | Holes |
 |---|---|---|---|
-| Unit change (amounts x100) | 100% | published a number more than 4% off, held, nothing proven | 1 |
+| Unit change (amounts x100) | 2% | not reached: proven at every step | 0 |
 | Payment rows loaded twice | 2% | not reached: proven at every step | 0 |
 | Merchant table fans out | 2% | not reached: proven at every step | 0 |
 | FX feed misses today | 100% (binary: one rate is missing or not) | binary fault, nothing to shrink | 0 |
@@ -22,11 +22,11 @@ For each fault class an attacker shrinks the share of rows affected (100, 50, 25
 | Seed | Fault | Gateway | Share | Outcome | Verdict | Causes named | Error |
 |---|---|---|---|---|---|---|---|
 | 11 | unit_scale | GW_C | 100% | caught | PROVEN_FAULT | unit_scale | +439.41% |
-| 11 | unit_scale | GW_C | 50% | held | UNEXPLAINED | none | +231.56% |
-| 11 | unit_scale | GW_C | 25% | held | UNEXPLAINED | none | +126.32% |
-| 11 | unit_scale | GW_C | 10% | held | UNEXPLAINED | none | +43.87% |
-| 11 | unit_scale | GW_C | 5% | held | UNEXPLAINED | none | +18.96% |
-| 11 | unit_scale | GW_C | 2% | WRONG | REAL_CHANGE | none | +5.72% |
+| 11 | unit_scale | GW_C | 50% | caught | PROVEN_FAULT | unit_scale | +231.56% |
+| 11 | unit_scale | GW_C | 25% | caught | PROVEN_FAULT | unit_scale | +126.32% |
+| 11 | unit_scale | GW_C | 10% | caught | PROVEN_FAULT | unit_scale | +43.87% |
+| 11 | unit_scale | GW_C | 5% | caught | PROVEN_FAULT | unit_scale | +18.96% |
+| 11 | unit_scale | GW_C | 2% | caught | PROVEN_FAULT | unit_scale | +5.72% |
 | 11 | duplicate_key | - | 100% | caught | PROVEN_FAULT | duplicate_key | +100.00% |
 | 11 | duplicate_key | - | 50% | caught | PROVEN_FAULT | duplicate_key | +50.73% |
 | 11 | duplicate_key | - | 25% | caught | PROVEN_FAULT | duplicate_key | +24.84% |
@@ -64,9 +64,9 @@ For each fault class an attacker shrinks the share of rows affected (100, 50, 25
 
 | Seed | Faults | Outcome | Verdict | Causes named | Error |
 |---|---|---|---|---|---|
-| 11 | unit_scale 100% + clock_shift 100% | caught | PROVEN_FAULT | clock_shift, unit_scale | +424.04% |
-| 11 | unit_scale 100% + orphan_code 5% | caught | PROVEN_FAULT | orphan_code, unit_scale | +430.49% |
-| 11 | unit_scale 100% + stale_feed 100% | caught | PROVEN_FAULT | stale_feed, unit_scale | +431.33% |
+| 11 | unit_scale 2% + clock_shift 100% | caught | PROVEN_FAULT | clock_shift, unit_scale | -9.65% |
+| 11 | unit_scale 2% + orphan_code 5% | caught | PROVEN_FAULT | orphan_code, unit_scale | +3.97% |
+| 11 | unit_scale 2% + stale_feed 100% | caught | PROVEN_FAULT | stale_feed, unit_scale | -2.36% |
 | 11 | duplicate_key 2% + clock_shift 100% | caught | PROVEN_FAULT | clock_shift, duplicate_key | -13.97% |
 | 11 | duplicate_key 2% + orphan_code 5% | held_partial | PROVEN_FAULT | orphan_code | -0.48% |
 | 11 | duplicate_key 2% + stale_feed 100% | caught | PROVEN_FAULT | duplicate_key, stale_feed | -6.34% |
@@ -76,9 +76,7 @@ For each fault class an attacker shrinks the share of rows affected (100, 50, 25
 
 ## Holes
 
-Each of these is a way to get past Receipts today. None is hidden.
-
-* **unit_scale on GW_C at 2% of payments on the gateway (seed 11)**: published a number +5.72% off as trusted, verdict REAL_CHANGE.
+No attack got a wrong number published or a wrong cause named. Below each floor the gate either held the number with nothing proven (safe, a person looks) or published a number that was less than 4% off (inside the normal noise).
 
 ## What the outcomes mean
 

@@ -37,7 +37,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 448.62,
-              "ms": 5856.8,
+              "ms": 3352.7,
               "faults": [
                 {
                   "fault": "unit_scale",
@@ -47,15 +47,17 @@
               ]
             },
             {
-              "outcome": "held",
-              "verdict": "UNEXPLAINED",
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
               "trust": "HELD",
-              "confirmed": [],
-              "right_cause": false,
+              "confirmed": [
+                "unit_scale"
+              ],
+              "right_cause": true,
               "wrong_published": false,
-              "held_no_cause": true,
+              "held_no_cause": false,
               "error_pct": 230.23,
-              "ms": 2477.3,
+              "ms": 3104.5,
               "faults": [
                 {
                   "fault": "unit_scale",
@@ -65,15 +67,17 @@
               ]
             },
             {
-              "outcome": "held",
-              "verdict": "UNEXPLAINED",
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
               "trust": "HELD",
-              "confirmed": [],
-              "right_cause": false,
+              "confirmed": [
+                "unit_scale"
+              ],
+              "right_cause": true,
               "wrong_published": false,
-              "held_no_cause": true,
+              "held_no_cause": false,
               "error_pct": 127.25,
-              "ms": 2925.8,
+              "ms": 3276.1,
               "faults": [
                 {
                   "fault": "unit_scale",
@@ -83,15 +87,17 @@
               ]
             },
             {
-              "outcome": "held",
-              "verdict": "UNEXPLAINED",
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
               "trust": "HELD",
-              "confirmed": [],
-              "right_cause": false,
+              "confirmed": [
+                "unit_scale"
+              ],
+              "right_cause": true,
               "wrong_published": false,
-              "held_no_cause": true,
+              "held_no_cause": false,
               "error_pct": 44.2,
-              "ms": 3593.5,
+              "ms": 3768.0,
               "faults": [
                 {
                   "fault": "unit_scale",
@@ -101,15 +107,17 @@
               ]
             },
             {
-              "outcome": "held",
-              "verdict": "UNEXPLAINED",
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
               "trust": "HELD",
-              "confirmed": [],
-              "right_cause": false,
+              "confirmed": [
+                "unit_scale"
+              ],
+              "right_cause": true,
               "wrong_published": false,
-              "held_no_cause": true,
+              "held_no_cause": false,
               "error_pct": 19.51,
-              "ms": 2516.1,
+              "ms": 3330.9,
               "faults": [
                 {
                   "fault": "unit_scale",
@@ -119,15 +127,17 @@
               ]
             },
             {
-              "outcome": "WRONG",
-              "verdict": "REAL_CHANGE",
-              "trust": "REAL_CHANGE",
-              "confirmed": [],
-              "right_cause": false,
-              "wrong_published": true,
+              "outcome": "caught",
+              "verdict": "PROVEN_FAULT",
+              "trust": "HELD",
+              "confirmed": [
+                "unit_scale"
+              ],
+              "right_cause": true,
+              "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 6.47,
-              "ms": 3453.6,
+              "ms": 3038.9,
               "faults": [
                 {
                   "fault": "unit_scale",
@@ -137,28 +147,9 @@
               ]
             }
           ],
-          "floor": 1.0,
+          "floor": 0.02,
           "binary": false,
-          "holes": [
-            {
-              "outcome": "WRONG",
-              "verdict": "REAL_CHANGE",
-              "trust": "REAL_CHANGE",
-              "confirmed": [],
-              "right_cause": false,
-              "wrong_published": true,
-              "held_no_cause": false,
-              "error_pct": 6.47,
-              "ms": 3453.6,
-              "faults": [
-                {
-                  "fault": "unit_scale",
-                  "share": 0.02,
-                  "gateway": "GW_C"
-                }
-              ]
-            }
-          ]
+          "holes": []
         },
         {
           "fault": "duplicate_key",
@@ -175,7 +166,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 100.0,
-              "ms": 6012.8,
+              "ms": 3858.6,
               "faults": [
                 {
                   "fault": "duplicate_key",
@@ -195,7 +186,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 49.95,
-              "ms": 11395.3,
+              "ms": 3709.3,
               "faults": [
                 {
                   "fault": "duplicate_key",
@@ -215,7 +206,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 24.96,
-              "ms": 7873.8,
+              "ms": 3209.4,
               "faults": [
                 {
                   "fault": "duplicate_key",
@@ -235,7 +226,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 9.95,
-              "ms": 5798.2,
+              "ms": 3142.5,
               "faults": [
                 {
                   "fault": "duplicate_key",
@@ -255,7 +246,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 4.92,
-              "ms": 7098.4,
+              "ms": 5666.4,
               "faults": [
                 {
                   "fault": "duplicate_key",
@@ -275,7 +266,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 1.9,
-              "ms": 7772.5,
+              "ms": 4542.3,
               "faults": [
                 {
                   "fault": "duplicate_key",
@@ -304,7 +295,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 100.0,
-              "ms": 5607.4,
+              "ms": 3622.1,
               "faults": [
                 {
                   "fault": "key_fanout",
@@ -324,7 +315,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 68.8,
-              "ms": 6706.6,
+              "ms": 4749.4,
               "faults": [
                 {
                   "fault": "key_fanout",
@@ -344,7 +335,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 33.77,
-              "ms": 4455.2,
+              "ms": 3456.3,
               "faults": [
                 {
                   "fault": "key_fanout",
@@ -364,7 +355,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 13.24,
-              "ms": 4370.5,
+              "ms": 3669.9,
               "faults": [
                 {
                   "fault": "key_fanout",
@@ -384,7 +375,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 5.89,
-              "ms": 5496.0,
+              "ms": 3257.6,
               "faults": [
                 {
                   "fault": "key_fanout",
@@ -404,7 +395,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 1.98,
-              "ms": 7003.1,
+              "ms": 3387.5,
               "faults": [
                 {
                   "fault": "key_fanout",
@@ -433,7 +424,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -8.48,
-              "ms": 5115.2,
+              "ms": 3580.0,
               "faults": [
                 {
                   "fault": "stale_feed",
@@ -462,7 +453,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -15.93,
-              "ms": 6691.1,
+              "ms": 3196.7,
               "faults": [
                 {
                   "fault": "clock_shift",
@@ -480,7 +471,7 @@
               "wrong_published": false,
               "held_no_cause": true,
               "error_pct": -7.85,
-              "ms": 3725.7,
+              "ms": 3424.5,
               "faults": [
                 {
                   "fault": "clock_shift",
@@ -498,7 +489,7 @@
               "wrong_published": false,
               "held_no_cause": true,
               "error_pct": -3.81,
-              "ms": 2549.4,
+              "ms": 2198.9,
               "faults": [
                 {
                   "fault": "clock_shift",
@@ -527,7 +518,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -34.14,
-              "ms": 5430.3,
+              "ms": 3367.2,
               "faults": [
                 {
                   "fault": "orphan_code",
@@ -547,7 +538,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -17.1,
-              "ms": 4329.4,
+              "ms": 5174.1,
               "faults": [
                 {
                   "fault": "orphan_code",
@@ -567,7 +558,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -8.83,
-              "ms": 4046.6,
+              "ms": 6236.5,
               "faults": [
                 {
                   "fault": "orphan_code",
@@ -587,7 +578,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -3.48,
-              "ms": 4067.9,
+              "ms": 5337.1,
               "faults": [
                 {
                   "fault": "orphan_code",
@@ -607,7 +598,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -1.79,
-              "ms": 4931.9,
+              "ms": 3976.3,
               "faults": [
                 {
                   "fault": "orphan_code",
@@ -625,7 +616,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -0.7,
-              "ms": 4522.8,
+              "ms": 4214.4,
               "faults": [
                 {
                   "fault": "orphan_code",
@@ -652,7 +643,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": 4980.18,
-          "ms": 4124.5,
+          "ms": 4193.8,
           "faults": [
             {
               "fault": "unit_scale",
@@ -673,7 +664,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": 3621.77,
-          "ms": 3774.3,
+          "ms": 3635.9,
           "faults": [
             {
               "fault": "unit_scale",
@@ -694,7 +685,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": 448.62,
-          "ms": 4166.9,
+          "ms": 3900.8,
           "faults": [
             {
               "fault": "unit_scale",
@@ -717,12 +708,12 @@
           "right_cause": true,
           "wrong_published": false,
           "held_no_cause": false,
-          "error_pct": 432.69,
-          "ms": 6844.3,
+          "error_pct": -9.47,
+          "ms": 6304.6,
           "faults": [
             {
               "fault": "unit_scale",
-              "share": 1.0,
+              "share": 0.02,
               "gateway": "GW_C"
             },
             {
@@ -743,12 +734,12 @@
           "right_cause": true,
           "wrong_published": false,
           "held_no_cause": false,
-          "error_pct": 438.25,
-          "ms": 6415.2,
+          "error_pct": 1.91,
+          "ms": 6096.5,
           "faults": [
             {
               "fault": "unit_scale",
-              "share": 1.0,
+              "share": 0.02,
               "gateway": "GW_C"
             },
             {
@@ -769,12 +760,12 @@
           "right_cause": true,
           "wrong_published": false,
           "held_no_cause": false,
-          "error_pct": 440.14,
-          "ms": 10032.4,
+          "error_pct": -2.01,
+          "ms": 7353.1,
           "faults": [
             {
               "fault": "unit_scale",
-              "share": 1.0,
+              "share": 0.02,
               "gateway": "GW_C"
             },
             {
@@ -796,7 +787,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": -14.36,
-          "ms": 10284.4,
+          "ms": 9701.1,
           "faults": [
             {
               "fault": "duplicate_key",
@@ -821,7 +812,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": -0.58,
-          "ms": 5062.7,
+          "ms": 8483.7,
           "faults": [
             {
               "fault": "duplicate_key",
@@ -847,7 +838,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": -6.71,
-          "ms": 6489.9,
+          "ms": 10948.1,
           "faults": [
             {
               "fault": "duplicate_key",
@@ -873,7 +864,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": -14.27,
-          "ms": 7593.0,
+          "ms": 5390.2,
           "faults": [
             {
               "fault": "key_fanout",
@@ -899,7 +890,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": 0.18,
-          "ms": 6277.3,
+          "ms": 6504.6,
           "faults": [
             {
               "fault": "key_fanout",
@@ -925,7 +916,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": -6.65,
-          "ms": 8251.5,
+          "ms": 7701.6,
           "faults": [
             {
               "fault": "key_fanout",
@@ -947,15 +938,12 @@
       "unit_scale": {
         "title": "Unit change (amounts x100)",
         "binary": false,
-        "floor": 1.0,
+        "floor": 0.02,
         "floors": [
-          1.0
+          0.02
         ],
-        "below_floor": [
-          "WRONG",
-          "held"
-        ],
-        "holes": 1
+        "below_floor": [],
+        "holes": 0
       },
       "duplicate_key": {
         "title": "Payment rows loaded twice",
@@ -1021,28 +1009,8 @@
       "WRONG": 0
     },
     "combo_runs": 9,
-    "holes": [
-      {
-        "where": "unit_scale on GW_C at 2% of payments on the gateway (seed 11)",
-        "outcome": "WRONG",
-        "verdict": "REAL_CHANGE",
-        "trust": "REAL_CHANGE",
-        "confirmed": [],
-        "right_cause": false,
-        "wrong_published": true,
-        "held_no_cause": false,
-        "error_pct": 6.47,
-        "ms": 3453.6,
-        "faults": [
-          {
-            "fault": "unit_scale",
-            "share": 0.02,
-            "gateway": "GW_C"
-          }
-        ]
-      }
-    ]
+    "holes": []
   },
-  "seconds": 432,
-  "generated_at": "2026-10-24 17:08:43"
+  "seconds": 364,
+  "generated_at": "2026-10-26 01:25:06"
 }
