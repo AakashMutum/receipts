@@ -144,3 +144,23 @@ Rule added during the work: everything that can write bad data or attack the sys
 * `receipts demo` and the run scripts rebuild when the data is not for yesterday in India (no --day), also at midnight while running; `serve` only shows "The data is for <date>. Run receipts demo to refresh." (API `stale`).
 * In lab mode `demo` lands the IST written as UTC batch after a rebuild, so the page opens on a held number; normal mode waits and says "Run receipts demo, or load a batch". "Where the time went" says "No run yet" until a run exists.
 * Tests: tests/test_stale_day.py (stand-in). Phase 8 work (unit tail check, held-out reruns) is in the working tree, not committed, and paused as asked.
+
+## Phase 8: Close the unit-change hole (2026-10-26)
+
+* Held-out partial unit errors (`receipts heldout`, 24 cases: x10 and x1000, GW_A and GW_B, 2/5/10%, seeds 21
+  and 22) were committed before the fix (cf597ca) and not changed after.
+* Fix (a) applied in `receipts/detectors.py` (`_unit_tail`): per gateway and currency, today's rows above 20x
+  the baseline median against the baseline share, Poisson test with a 1e-6 false-alarm budget per slice and
+  night (lambda floored at 0.5); the factor (10, 100, 1000) is fitted from the baseline's upper tail and the
+  correction divides only the rows above the cut. Tests: `tests/test_unit_tail.py`. Fix (b) was not needed: no
+  re-run published a wrong number, so it is not applied.
+* Re-run on Exasol, in order, one job at a time: judge-check 8 of 8 (20/20); held-out before 0 caught / 24 held,
+  after 12 caught (all x1000) / 12 held (all x10), 0 published either time; red team seed 11 unit floor 100% ->
+  2%, holes 1 -> 0, pairs 8 of 9 as before; variants caught 13 -> 15, held 3 -> 1, wrong 0; eval 50 of 50,
+  identical precision, recall and ablation figures, festival REAL_CHANGE on all 5 seeds, gate median 3,410 ms.
+  DuckDB copies (held-out, red team, variants with 2 seeds: caught 26 -> 30) agree.
+* **Not closed:** x10 on 2 to 10% of a gateway is held without a cause (amounts stay below the 20x cut). The cut
+  was not lowered after seeing the held-out results.
+* **Not re-run: the real-data backtest.** It was stopped while exporting its CSVs at 556 MB free disk on C:;
+  deleting the regenerable files in the project freed 0.13 GB (2.3 GB free, 6 GB wanted). So whether 13 Feb and
+  27 Feb still publish as REAL_CHANGE with the tail check is not verified; the docs say so.

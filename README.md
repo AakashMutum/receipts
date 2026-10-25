@@ -22,14 +22,15 @@ Every number below was measured on Exasol Personal 2026.2.0-nano.3 on one laptop
 | What | Result on Exasol | Report |
 |---|---|---|
 | Scored evaluation, 10 scenarios x 5 seeds, 20,000 orders a day | **50 of 50** right verdict and exactly the right causes; cause precision and recall 100%, 0 wrong causes. Without the undo test: 5 wrong causes. A threshold alert: 0% of causes found | [`eval_report.md`](samples/exasol/eval_report.md) |
-| Real data: NYC taxi trips, Jan to Mar 2024, 9,554,757 trips | 56 real days judged, **0 held**, 2 verified real changes; **6 of 6** planted faults caught with the right cause; 62 of 62 gate runs agree with the DuckDB run | [`real_backtest.md`](samples/exasol/real_backtest.md) |
-| Red team: shrink each fault until the gate stops proving it | Floors: duplicates 2%, fan-out 2%, new codes 5%, unit and clock faults 100%, stale FX caught. **1 hole**: a x100 unit change on 2% of one gateway was published, 6.5% off | [`redteam_report.md`](samples/exasol/redteam_report.md) |
+| Real data: NYC taxi trips, Jan to Mar 2024, 9,554,757 trips (run before the unit tail check, not re-run since) | 56 real days judged, **0 held**, 2 verified real changes; **6 of 6** planted faults caught with the right cause; 62 of 62 gate runs agree with the DuckDB run | [`real_backtest.md`](samples/exasol/real_backtest.md) |
+| Red team: shrink each fault until the gate stops proving it | Floors: unit change 2%, duplicates 2%, fan-out 2%, new codes 5%, clock faults 100%, stale FX caught. **0 holes** (1 before the unit tail check: a x100 unit change on 2% of one gateway was published, 6.5% off) | [`redteam_report.md`](samples/exasol/redteam_report.md) |
+| Held-out partial unit changes (24, frozen before the tail check was written) | Before: caught 0, held 24. After: **caught 12** (every x1000 case), held 12 (every x10 case). Published 0 in both | [`heldout_unit_after.md`](samples/exasol/heldout_unit_after.md) |
 | Scaling: the IST case after a fresh load | Right verdict at every size up to **400,000 orders a day, 17,346,085 payment rows**: gate 27.5 s, CUBE over 5.95 million rows 5.9 s. Nothing larger was measured | [`scaling.md`](samples/exasol/scaling.md) |
 | Live demo: click Break the pipeline to the HELD banner | **7.3 s** median over 5 runs (6.9 to 8.5 s), every gate step shown as it finishes | [`RUN_GUIDE.md`](docs/RUN_GUIDE.md#8-break-the-pipeline-lab-mode) |
-| Held-out fault variants (17, written after the detectors were fixed) | caught 13, held 3, published but under 4% off 1, published wrong 0 | [`variants_report.md`](samples/exasol/variants_report.md) |
+| Held-out fault variants (17, written after the detectors were fixed) | caught 15, held 1, published but under 4% off 1, published wrong 0 (before the unit tail check: caught 13, held 3) | [`variants_report.md`](samples/exasol/variants_report.md) |
 | A read-only agent user | `AGENT_READER` reads `PUB.METRIC_TRUST`; Exasol refuses it on RAW, PIPE, RECEIPTS and on every write | [`MCP_DEMO.md`](docs/MCP_DEMO.md) |
 
-The ten scenarios were used to build the detectors, so 50 of 50 shows consistency, not generality. The real-data backtest, the variants and the red team are the tests of generality, and the red team found a hole that is described, not fixed, below.
+The ten scenarios were used to build the detectors, so 50 of 50 shows consistency, not generality. The real-data backtest, the variants and the red team are the tests of generality, and the red team found a hole, which the unit tail check closed (below).
 
 ## The demo in 30 seconds
 
@@ -135,19 +136,29 @@ More commands, alerts with `--watch`, an optional LLM explanation, and troublesh
 
 ## Red team
 
-`receipts redteam` attacks the gate: for each fault class it shrinks the share of rows affected (100, 50, 25, 10, 5, 2 percent), and past the first step the gate no longer proves it keeps going while the fault could still publish a number more than 4% off. Then it plants two faults that push in opposite directions, each at its floor. **Run it on the built-in synthetic data or a sandbox copy, never on live production tables:** every attack writes a planted fault into RAW, and on Exasol it rebuilds the database. Full report: [`samples/exasol/redteam_report.md`](samples/exasol/redteam_report.md) (seed 11, 20,000 orders a day, 7 minutes).
+`receipts redteam` attacks the gate: for each fault class it shrinks the share of rows affected (100, 50, 25, 10, 5, 2 percent), and past the first step the gate no longer proves it keeps going while the fault could still publish a number more than 4% off. Then it plants two faults that push in opposite directions, each at its floor. **Run it on the built-in synthetic data or a sandbox copy, never on live production tables:** every attack writes a planted fault into RAW, and on Exasol it rebuilds the database. Full report: [`samples/exasol/redteam_report.md`](samples/exasol/redteam_report.md) (seed 11, 20,000 orders a day, 6 minutes); before the fix: [`redteam_report_before.md`](samples/exasol/redteam_report_before.md).
 
 | Fault class | Detection floor (smallest share still proven) | Below the floor |
 |---|---|---|
+| Unit change (x100) on the smallest gateway | 2% (was 100%) | not reached (was: held at 50% to 5%, **published at 2%**) |
 | Payment rows loaded twice | 2% | not reached |
 | Merchant table fans out | 2% | not reached |
 | New category code | 5% | published, 0.7% off |
 | FX feed misses today | caught (one rate is there or not) | nothing to shrink |
 | IST written as UTC on one gateway | 100% | held, nothing proven, at 50% and 25% |
-| Unit change (x100) on the smallest gateway | 100% | held at 50% to 5%; **published at 2%: the hole** |
 
-* **The hole:** a x100 unit change on 2% of one small gateway's payments moves revenue up 6.5%. The unit check compares medians, which 2% of rows do not move, and the real-change test accepts a move with flat volume when the average ticket moves less than 6%. So it was published as a verified `REAL_CHANGE`. The same attack on the demo data was published as `NO_INCIDENT`, 8.6% off. The DuckDB run finds the same hole.
-* Two fixes are proposed in [`docs/PROGRESS.md`](docs/PROGRESS.md) (a tail check in the unit detector, and a stricter real-change test). Neither is applied: each would need the evaluation, the variants and the backtest re-run first.
+* **The hole, and the fix.** A x100 unit change on 2% of one small gateway's payments moved revenue up 6.5% and was published as a verified `REAL_CHANGE`: the unit check compared medians, which 2% of rows do not move. The unit detector now also counts, per gateway and currency, today's amounts above 20 times the baseline median and compares that count with the baseline share (a Poisson test, false-alarm budget one in a million per slice and night); it then works out the factor (10, 100 or 1000) and the undo test divides only those rows. The stricter real-change test that was also proposed turned out not to be needed and is not applied.
+* **Before and after the tail check, same seeds, same thresholds otherwise:**
+
+| Test on Exasol | Before | After |
+|---|---|---|
+| Red team, seed 11 | unit floor 100%, 1 hole | unit floor 2%, **0 holes** |
+| Held-out partial unit changes, 24 cases (x10 and x1000; GW_A, GW_B; 2, 5, 10%; seeds 21, 22) | caught 0, held 24, published 0 | caught 12, held 12, published 0 |
+| Fault variants, 17 | caught 13, held 3, small 1, wrong 0 | caught 15, held 1, small 1, wrong 0 |
+| Scored evaluation, 50 runs | 50 of 50 | 50 of 50, same precision, recall and ablation numbers, festival control published as REAL_CHANGE on all 5 seeds |
+| Real-data backtest | 0 held, 2 REAL_CHANGE (13 Feb, 27 Feb), 6 of 6 | **not re-run** (not enough free disk on the laptop) |
+
+* **Not closed:** a x10 change on 2% to 10% of a gateway is still held without a proven cause (12 of the 24 held-out cases). A x10 amount is mostly below the 20x cut, so the tail check does not see it. It is held, not published, but a person has to look. The cut was not lowered after seeing these cases, because they were written to test the fix, not to tune it. The DuckDB stand-in gives the same before and after counts ([`samples/heldout_unit_after.md`](samples/heldout_unit_after.md)).
 * Of 9 opposite-direction pairs at the floors, 8 were caught with both causes, and 1 was held with one of the two causes proven.
 
 The **Red team** tab in lab mode charts these floors and runs one attack live.
@@ -180,8 +191,8 @@ The command center shows the same contrast with two deterministic agents, so the
 ## Limits
 
 * It only proves fault classes it has a detector for. Six today. Anything else becomes `UNEXPLAINED`: held, no cause guessed, a person decides.
-* The red team hole above: a unit change on a small share of one gateway can be published.
-* Partial faults are often held without a proven cause (unit changes on 5% to 50% of a gateway, clock shifts on 25% to 50%): safe, but a person has to look.
+* A x10 unit change on a small share of one gateway (2% to 10%) is held without a proven cause, and partial clock shifts (25% to 50%) too: safe, but a person has to look.
+* The real-data backtest has not been re-run since the unit tail check was added (not enough free disk); its numbers are from before the fix.
 * The baseline learns a weekly pattern from five weeks of trusted history but has no holiday calendar, and a verified real change enters that history.
 * On real taxi data the normal range is wide (plus or minus 22% at the median), so a fault without a detector that moves the total less than that is published.
 * One metric, one pipeline. A generic configuration layer for other metrics is not built; the real-data backtest uses an adapter. What a company would provide is listed in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#connecting-your-own-metric).
