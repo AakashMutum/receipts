@@ -40,7 +40,7 @@ Core 5, Podman on WSL2, about 7.7 GiB visible to the VM), unless a line says the
 
 The red team found that a x100 unit change on 2% of one small gateway's payments was published (REAL_CHANGE on
 seed 11, +6.47%): the unit check compared medians, which 2% of rows do not move. Fix (a) from
-[`PROGRESS.md`](PROGRESS.md) was applied: per gateway and currency, today's count of amounts above 20 times the
+[`dev/PROGRESS.md`](dev/PROGRESS.md) was applied: per gateway and currency, today's count of amounts above 20 times the
 baseline median against the baseline share (Poisson test, false-alarm budget 1e-6 per slice and night). Fix
 (b), a stricter real-change test, was not needed and is not applied. The held-out cases were committed before
 the fix was written and were not used to tune it.

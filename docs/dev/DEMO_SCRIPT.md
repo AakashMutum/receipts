@@ -1,3 +1,5 @@
+> Working note for contributors, not part of the user documentation.
+
 # Demo script (3 minutes) and deck outline
 
 Rehearse with the command center already open on the healthy batch, started in lab mode (`receipts demo --lab`, which the run scripts do). Record at 1440 x 900. Speak over the screen; no slides in the video except the first and last five seconds.

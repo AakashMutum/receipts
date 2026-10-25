@@ -1,3 +1,5 @@
+> Working note for contributors, not part of the user documentation.
+
 # Progress log
 
 Work on the `exasol-first-evidence` branch, one entry per phase, so a later session can continue from
@@ -117,7 +119,7 @@ Rule added during the work: everything that can write bad data or attack the sys
   Chromium decodes and scales the screenshots, numpy writes the GIF. Checked by decoding it in Chromium.
 * Dockerfile and .dockerignore for the stand-in demo in lab mode. NOT built: Docker Desktop was not running,
   and Podman is busy hosting Exasol on the same small VM.
-* docs/EVAL_CARD.md (scope, data, results, holes, what is not claimed), docs/starter_issues.md (6 issues;
+* docs/EVAL_CARD.md (scope, data, results, holes, what is not claimed), docs/starter_issues.md, now docs/dev/starter_issues.md (6 issues;
   `gh` is not installed, so none were opened on GitHub).
 * README restructured: pitch, results table, tour GIF and the two modes, how Exasol is used (with the
   Exasol-measured timings), quick start for Windows, macOS and Linux (plus Docker), real-data backtest, red
@@ -179,3 +181,9 @@ Rule added during the work: everything that can write bad data or attack the sys
   (cp1252); the gate finished and the case was written, but `--json` was not. Worked around with
   PYTHONIOENCODING=utf-8; not fixed.
 * Left on Exasol: demo data from `init --fresh` (batch day 2026-10-25) after the timing runs; no server running.
+
+## Housekeeping and judge docs (2026-10-26)
+
+* Moved PROGRESS.md, DEMO_SCRIPT.md and starter_issues.md into docs/dev/ with a working-note line; links updated (relative-link check: 0 broken).
+* Added JUDGES.md (criteria to evidence, Exasol features, metrics copied from samples/, verify commands, limits) and NOVELTY.md; README opens with a Start here note.
+* `pytest -q`: 124 passed, 2 skipped (live Exasol). No Exasol runs or evals in this step.

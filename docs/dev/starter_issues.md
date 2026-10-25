@@ -1,3 +1,5 @@
+> Working note for contributors, not part of the user documentation.
+
 # Good first issues
 
 Six concrete, self-contained tasks for a first contribution. Each says where to start and how to know it
