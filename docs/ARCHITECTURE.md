@@ -19,7 +19,10 @@
                                     PUB.DASHBOARD_REVENUE <- dashboards
 ```
 
-Dashboards and agents read only `PUB`. Only the gate writes `PUB`.
+Dashboards and agents read only `PUB`. Only the gate writes `PUB`. On Exasol, `receipts init` creates the user
+`AGENT_READER` with `CREATE SESSION` and `SELECT ON SCHEMA PUB` and nothing else; the MCP server logs in as it
+(see [`MCP_DEMO.md`](MCP_DEMO.md)). `PUB.CONFIRMED_CAUSES` exposes only the causes the undo test confirmed, so an
+agent can say why a value is held without reading `RECEIPTS`.
 
 ## The gate, step by step
 

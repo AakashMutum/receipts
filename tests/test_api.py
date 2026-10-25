@@ -12,6 +12,7 @@ def client(data_dir, tmp_path_factory, monkeypatch_module):
     monkeypatch_module.setenv("RECEIPTS_DATA", str(data_dir))
     monkeypatch_module.delenv("ANTHROPIC_API_KEY", raising=False)
     monkeypatch_module.setenv("RECEIPTS_ALERTS", str(tmp_path_factory.mktemp("alerts")))
+    monkeypatch_module.setenv("RECEIPTS_LAB", "1")
     from receipts.db import connect
     from receipts.load import init_database
     be = connect()
@@ -40,6 +41,10 @@ def test_run_agent_approve(client):
     assert c["verdict"] == "PROVEN_FAULT" and c["trust_status"] == "HELD"
     a = client.get("/api/agent").json()
     assert "held" in a["trusted"]["answer"] and a["trusted"]["status"] == "HELD"
+    # the agent that checks trust reads PUB only, as the read-only AGENT_READER user on Exasol must
+    tables = {t for line in a["trusted"]["sql"].splitlines() for t in line.split() if "." in t and t.isupper()}
+    assert tables and all(t.startswith("PUB.") for t in tables), tables
+    assert "clock shift" in a["trusted"]["answer"]
     assert "was" in a["naive"]["answer"]
     r = client.post(f"/api/case/{c['case_id']}/approve", json={"note": "ok"}).json()
     assert r["case"]["trust_status"] == "CORRECTED"

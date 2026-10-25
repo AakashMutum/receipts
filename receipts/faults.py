@@ -85,3 +85,60 @@ SCENARIOS: dict[str, Scenario] = {s.id: s for s in [
 
 DEMO_ORDER = ["healthy", "ist_utc", "unit_paise", "duplicate_load", "join_fanout", "stale_fx", "new_code",
               "masked_pair", "festival", "unknown_discount"]
+
+
+# ---------------------------------------------------------------------------------------------------
+# The same six faults with a dial: the share of rows affected, and for some of them the gateway.
+# Used by the lab's "Break the pipeline" panel and by `receipts redteam`. At their defaults they hit
+# the same rows as the scripted scenarios above where that is expressible as a share.
+
+FAULT_CLASSES = {  # id: (title, what the share applies to, gateways it can target or None, default gateway)
+    "unit_scale": ("Unit change (amounts x100)", "payments on the gateway", ["GW_A", "GW_B", "GW_C"], "GW_C"),
+    "duplicate_key": ("Payment rows loaded twice", "today's payment rows", None, None),
+    "key_fanout": ("Merchant table fans out", "merchants", None, None),
+    "stale_feed": ("FX feed misses today", None, None, None),
+    "clock_shift": ("IST written as UTC", "payments on the gateway", ["GW_A", "GW_B", "GW_C"], "GW_B"),
+    "orphan_code": ("New category code", "Electronics orders", None, None),
+}
+
+
+def _share(col: str, share: float) -> str:
+    """A deterministic share of rows by id: MOD(id, 1000) below share x 1000."""
+    k = max(0, min(1000, round(share * 1000)))
+    return "1 = 1" if k >= 1000 else f"MOD({col}, 1000) < {k}"
+
+
+def fault_sql(kind: str, share: float = 1.0, gateway: str | None = None) -> list[str]:
+    """SQL statements that plant one fault class into RAW for the incoming day."""
+    if kind not in FAULT_CLASSES:
+        raise KeyError(kind)
+    gws, default = FAULT_CLASSES[kind][2], FAULT_CLASSES[kind][3]
+    gw = gateway or default
+    if gws is not None and gw not in gws:
+        raise ValueError(f"{kind} can target {', '.join(gws)}, not {gw}")
+    if kind == "unit_scale":
+        return [f"UPDATE RAW.PAYMENTS SET AMOUNT = AMOUNT * 100 WHERE BATCH_DAY = {D} AND GATEWAY = '{gw}' "
+                f"AND {_share('PAYMENT_ID', share)}"]
+    if kind == "duplicate_key":
+        return [f"INSERT INTO RAW.PAYMENTS SELECT PAYMENT_ID, ORDER_ID, BATCH_DAY, LOAD_FILE, GATEWAY, CURRENCY_CODE, "
+                f"AMOUNT, PAY_STATUS, CAPTURED_AT FROM RAW.PAYMENTS WHERE BATCH_DAY = {D} AND {_share('PAYMENT_ID', share)}"]
+    if kind == "key_fanout":
+        return [f"INSERT INTO RAW.MERCHANTS SELECT MERCHANT_ID, MERCHANT_NAME, "
+                f"CASE WHEN TIER = 'BRONZE' THEN 'SILVER' ELSE 'GOLD' END, {D} "
+                f"FROM RAW.MERCHANTS WHERE {_share('MERCHANT_ID', share)}"]
+    if kind == "stale_feed":
+        return [STALE]  # one rate is either there or not, so there is no share to dial
+    if kind == "clock_shift":
+        return [f"UPDATE RAW.PAYMENTS SET CAPTURED_AT = {{{{ add_minutes('CAPTURED_AT', 330) }}}} "
+                f"WHERE BATCH_DAY = {D} AND GATEWAY = '{gw}' AND {_share('PAYMENT_ID', share)}"]
+    return [f"UPDATE RAW.ORDERS SET CATEGORY_CODE = 'ELC2' WHERE BATCH_DAY = {D} AND CATEGORY_CODE = 'ELEC' "
+            f"AND {_share('ORDER_ID', share)}"]
+
+
+def fault_scenario(kind: str, share: float = 1.0, gateway: str | None = None) -> Scenario:
+    title = FAULT_CLASSES[kind][0]
+    scope = "" if kind == "stale_feed" else f", {share:.0%} of {FAULT_CLASSES[kind][1]}"
+    gw = gateway or FAULT_CLASSES[kind][3]
+    return Scenario(f"lab_{kind}", f"{title}{scope}{f' ({gw})' if FAULT_CLASSES[kind][2] else ''}",
+                    "Planted from the lab.", "PROVEN_FAULT", frozenset({kind}), fault_sql(kind, share, gateway),
+                    kind="lab")

@@ -34,7 +34,7 @@ echo.
 echo   Starting the command center. Your browser opens when it is ready.
 echo   Keep this window open while you use it. Press Ctrl+C here to stop.
 echo.
-".venv\Scripts\receipts.exe" demo || goto :fail_run
+".venv\Scripts\receipts.exe" demo --lab || goto :fail_run
 goto :end
 
 :fail_venv

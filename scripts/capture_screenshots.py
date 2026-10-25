@@ -1,9 +1,10 @@
 """Capture the README screenshots from the running command center.
 
 Needs `pip install playwright` and `playwright install chromium`, a database built with
-`receipts init --day 2026-10-20`, and `receipts serve --day 2026-10-20` running. Between
-scenarios it rebuilds the database with `receipts init --fresh --day 2026-10-20`, so each
-scenario starts clean. Run with the same RECEIPTS_* / EXA_* variables as the server:
+`receipts init`, and `receipts serve --lab` running (lab mode, because it lands planted scenarios).
+Between scenarios it rebuilds the database with `receipts init --fresh --day DAY`, so each scenario
+starts clean. DAY defaults to the server's incoming day (yesterday in India), so the screenshots show
+a current date. Run with the same RECEIPTS_* / EXA_* variables as the server:
 
     python scripts/capture_screenshots.py --url http://127.0.0.1:8000
 """
@@ -19,7 +20,7 @@ from playwright.sync_api import Page, sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "screenshots"
-DAY = "2026-10-20"
+DAY = ""
 
 
 def rebuild() -> None:
@@ -50,8 +51,16 @@ def shot(target, name: str) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
+    global DAY
     ap.add_argument("--url", default="http://127.0.0.1:8000")
-    url = ap.parse_args().url
+    ap.add_argument("--day", help="incoming day, YYYY-MM-DD (default: the one the server holds)")
+    a = ap.parse_args()
+    url = a.url
+    import json
+    import urllib.request
+    with urllib.request.urlopen(url.rstrip("/") + "/api/overview", timeout=60) as r:
+        DAY = a.day or json.load(r)["incoming_day"]
+    print(f"incoming day {DAY}")
     OUT.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
         browser = p.chromium.launch()
@@ -70,7 +79,7 @@ def main() -> None:
             page.click("#ask")
         page.wait_for_function("document.querySelector('#question').textContent.length > 0")
         shot(page.locator("section.agents"), "04_agents_held.png")
-        shot(page.locator(".ev-grid > div:nth-child(2)"), "07_timings.png")
+        shot(page.locator(".ev-grid > div:nth-child(2)"), "10_measured_by_exasol.png")
 
         rebuild()
         open_page(page, url)
@@ -89,6 +98,20 @@ def main() -> None:
         page.screenshot(path=str(OUT / "06_festival_published.png"), full_page=True,
                         clip={"x": 0, "y": top["y"], "width": 1440, "height": paper["y"] + paper["height"] - top["y"] + 24})
         print(f"06_festival_published.png: {(OUT / '06_festival_published.png').stat().st_size // 1024} KB")
+
+        # lab: break the pipeline, then the red team tab
+        with page.expect_response(lambda r: r.url.endswith("/api/lab/reset")):
+            page.click("#lab-reset")
+        page.select_option("#lab-fault", "clock_shift")
+        page.click("#lab-break")
+        page.wait_for_function("document.querySelector('#lab-result').textContent.includes('HELD')", timeout=120_000)
+        page.evaluate("document.querySelector('#lab').scrollIntoView({block: 'start'})")
+        page.wait_for_timeout(800)
+        shot(page.locator("#lab"), "08_break_it.png")
+        page.click("#tab-redteam")
+        page.wait_for_selector("#rt-chart svg")
+        page.wait_for_timeout(500)
+        shot(page.locator("#lab"), "09_redteam.png")
         browser.close()
 
 

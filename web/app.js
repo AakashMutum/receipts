@@ -61,6 +61,7 @@
 
   // scenario picker --------------------------------------------------------------------------
   function renderScenarios(list) {
+    if (!$("#scenarios")) return;  // lab only: absent in normal mode
     const kinds = { control: "control", fault: "planted fault", unknown: "no detector" };
     $("#scenarios").innerHTML = list.map((s) => `
       <button type="button" class="sc" role="radio" aria-checked="${s.id === state.selected}" data-id="${s.id}" tabindex="${s.id === state.selected ? 0 : -1}">
@@ -81,11 +82,11 @@
     });
   }
 
-  $("#scenarios").addEventListener("click", (e) => {
+  if ($("#scenarios")) $("#scenarios").addEventListener("click", (e) => {
     const b = e.target.closest(".sc");
     if (b) select(b.dataset.id, false);
   });
-  $("#scenarios").addEventListener("keydown", (e) => {
+  if ($("#scenarios")) $("#scenarios").addEventListener("keydown", (e) => {
     if (!["ArrowDown", "ArrowUp", "ArrowRight", "ArrowLeft"].includes(e.key)) return;
     e.preventDefault();
     const ids = [...document.querySelectorAll(".sc")].map((b) => b.dataset.id);
@@ -105,10 +106,16 @@
     const [n, u] = inrParts(today && today.day === day ? today.value : null);
     $("#big-value").innerHTML = `${esc(n)}<span class="unit">${esc(u)}</span>`;
 
+    if (state.overview.stale) {  // the database holds another day than the one the page should show
+      big.classList.remove("is-held");
+      status.className = "status";
+      status.innerHTML = `<span class="flag">STALE</span><span class="msg">${esc(state.overview.stale.message)}</span>`;
+      return;
+    }
     if (!today || today.day !== day) {
       big.classList.remove("is-held");
       status.className = "status";
-      status.innerHTML = `<span class="flag">WAITING</span><span class="msg">Tonight's batch has not landed. Pick a scenario and run the gate.</span>`;
+      status.innerHTML = `<span class="flag">WAITING</span><span class="msg">Tonight's batch has not landed. ${state.overview.lab ? "Pick a scenario and run the gate, or break the pipeline." : "Run receipts demo, or load a batch."}</span>`;
       return;
     }
     const prev = pts.filter((p) => p.day < day && !p.held).slice(-1)[0];
@@ -239,6 +246,7 @@
       <div class="r-row"><span>Rows in scope</span><span class="v">${num(d.rows_in_scope)}</span></div>
       <div class="r-row"><span>SQL statements</span><span class="v">${num(c.statements)}</span></div>
       <div class="r-row"><span>Total time</span><span class="v">${esc(ms(c.total_ms))}</span></div>
+      <div class="r-row"><span>Measured by Exasol</span><span class="v">${esc(c.exasol_measured && c.exasol_measured.source && c.exasol_measured.source.startsWith("EXA_") ? ms(c.exasol_measured.db_ms) : c.exasol_measured && c.exasol_measured.source === "client" ? "unavailable" : "n/a")}</span></div>
       <hr class="r-rule double">
       <div class="r-row"><span class="r-verdict">Verdict</span><span class="r-verdict">${esc(VERDICT_TEXT[c.verdict])}</span></div>
       <div class="r-explain" id="explain-text">${esc(c.explanation.text)}<span class="src">${src}</span>${llmBtn}</div>
@@ -378,11 +386,26 @@
   });
 
   // timings and evaluation ------------------------------------------------------------------------------------------
+  // what Exasol itself recorded for the run, from EXA_STATISTICS.EXA_SQL_LAST_DAY
+  function measuredText(c) {
+    const m = c.exasol_measured;
+    if (!m) return "Measured by Exasol: not recorded for this case.";
+    if (m.source === "n/a") return "Measured by Exasol: n/a on the local stand-in.";
+    if (m.source === "client") return `Measured by Exasol: unavailable (${m.note}) Client-side: ${ms(m.db_ms)}.`;
+    return `Measured by Exasol: ${num(m.statements)} statements, ${ms(m.db_ms)} inside the database` +
+      (m.temp_ram_peak_mib != null ? `, peak temporary memory ${num(m.temp_ram_peak_mib)} MiB` : "") + `, from ${m.source}.`;
+  }
+
   function renderTimings(c) {
     const max = Math.max(...c.timings.map((t) => t.ms), 1);
-    $("#time-sub").textContent = `${ms(c.total_ms)} from batch landed to verdict, ${num(c.statements)} SQL statements, ${ms(c.db_ms)} of it inside the database.`;
-    $("#timings").innerHTML = c.timings.map((t) => `<li><span>${esc(t.step)}</span><span class="ms">${esc(ms(t.ms))}</span>
-      <span class="tb"><span style="width:${(t.ms / max) * 100}%"></span></span>${t.detail ? `<span class="detail">${esc(t.detail)}</span>` : ""}</li>`).join("");
+    const m = c.exasol_measured && c.exasol_measured.steps ? c.exasol_measured.steps : null;
+    $("#time-sub").textContent = `${ms(c.total_ms)} from batch landed to verdict, ${num(c.statements)} SQL statements, ${ms(c.db_ms)} of it inside the database as seen by the client. ${measuredText(c)}`;
+    $("#timings").innerHTML = c.timings.map((t, i) => {
+      const x = m && m[i] && m[i].step === t.step ? m[i] : null;
+      const ex = x ? `<span class="detail exa">Measured by Exasol: ${esc(ms(x.db_ms))} in ${x.statements} statement${x.statements === 1 ? "" : "s"}${x.temp_ram_peak_mib ? `, peak ${num(x.temp_ram_peak_mib)} MiB` : ""}</span>` : "";
+      return `<li><span>${esc(t.step)}</span><span class="ms">${esc(ms(t.ms))}</span>
+      <span class="tb"><span style="width:${(t.ms / max) * 100}%"></span></span>${t.detail ? `<span class="detail">${esc(t.detail)}</span>` : ""}${ex}</li>`;
+    }).join("");
   }
 
   function renderEval(ev) {
@@ -410,8 +433,8 @@
   }
   $("#ask").addEventListener("click", askAgents);
 
-  // run ------------------------------------------------------------------------------------------------------------------
-  $("#go").addEventListener("click", async () => {
+  // run (lab only) -------------------------------------------------------------------------------------------------------
+  if ($("#go")) $("#go").addEventListener("click", async () => {
     if (state.busy) return;
     state.busy = true;
     const go = $("#go");
@@ -422,19 +445,154 @@
       state.case = r.case;
       state.overview.board = r.board;
       renderAll(true);
-      $("#question").textContent = "";
-      $("#naive-answer").textContent = $("#trusted-answer").textContent = "Ask a question to see the answer.";
-      document.querySelector(".agent.naive").classList.remove("wrong");
+      resetAgents();
     } catch (e) { toast(e.message); }
     go.disabled = false;
     go.textContent = "Land batch and run the gate";
     state.busy = false;
   });
 
+  function resetAgents() {
+    $("#question").textContent = "";
+    $("#naive-answer").textContent = $("#trusted-answer").textContent = "Ask a question to see the answer.";
+    document.querySelector(".agent.naive").classList.remove("wrong");
+  }
+
+  // lab: break the pipeline and watch the gate live ----------------------------------------------------------------------
+  function renderLab(o) {
+    if (!$("#lab") || !o.faults) return;
+    const sel = $("#lab-fault");
+    const opts = o.faults.map((f) => `<option value="${esc(f.id)}">${esc(f.title)}</option>`).join("");
+    if (!sel.options.length) sel.innerHTML = opts;
+    if ($("#rt-fault") && !$("#rt-fault").options.length) $("#rt-fault").innerHTML = opts;
+    syncLab();
+  }
+  function syncLab() {
+    const f = state.overview.faults.find((x) => x.id === $("#lab-fault").value);
+    const share = $("#lab-share"), gw = $("#lab-gw");
+    share.disabled = !f.share_of;
+    $("#lab-share-out").textContent = f.share_of ? `${share.value}%` : "all";
+    $("#lab-of").textContent = f.share_of ? `of ${f.share_of}` : "One rate is either there or not, so this fault has no share.";
+    gw.hidden = $("#lab-gw-label").hidden = !f.gateways;
+    if (f.gateways) gw.innerHTML = f.gateways.map((g) => `<option${g === f.gateway ? " selected" : ""}>${esc(g)}</option>`).join("");
+  }
+  function timeline(steps, running) {
+    const li = steps.map((s) => `<li><span>${esc(s.step)}</span><span class="ms">${esc(ms(s.ms))}</span></li>`);
+    if (running) li.push(`<li class="running"><span>Working</span><span class="ms"></span></li>`);
+    $("#lab-timeline").innerHTML = li.join("") || `<li class="running"><span>Starting</span><span class="ms"></span></li>`;
+  }
+  if ($("#lab")) {
+    $("#lab-fault").addEventListener("change", syncLab);
+    $("#lab-share").addEventListener("input", () => { $("#lab-share-out").textContent = `${$("#lab-share").value}%`; });
+    $("#lab-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (state.busy) return;
+      state.busy = true;
+      const btn = $("#lab-break");
+      btn.disabled = true;
+      $("#lab-result").textContent = "";
+      const t0 = performance.now();
+      try {
+        const f = $("#lab-fault").value;
+        const body = { fault: f, share: Number($("#lab-share").value) / 100, gateway: $("#lab-gw").hidden ? null : $("#lab-gw").value };
+        const { job } = await api("/api/lab/break", { method: "POST", body: JSON.stringify(body) });
+        let j;
+        for (;;) {
+          j = await api(`/api/lab/job/${job}`);
+          timeline(j.steps, j.status === "running");
+          if (j.status !== "running") break;
+          await new Promise((r) => setTimeout(r, 250));
+        }
+        if (j.status === "error") throw new Error(j.error);
+        state.case = j.case;
+        state.overview.board = j.board;
+        renderAll(false);
+        resetAgents();
+        const clickMs = performance.now() - t0;
+        const held = j.case.trust_status === "HELD";
+        $("#lab-result").innerHTML = `<span class="flag${held ? "" : " ok"}">${held ? "HELD" : "PUBLISHED"}</span>${esc(VERDICT_TEXT[j.case.verdict])}${j.case.confirmed.length ? ", cause " + esc(j.case.confirmed.join(" and ")) : ""}. Click to ${held ? "HELD" : "verdict"} in <b>${esc(ms(clickMs))}</b> (server ${esc(ms(j.server_ms))}).`;
+        window.receiptsLastClickMs = clickMs;  // read by the screenshot script
+      } catch (err) { toast(err.message); $("#lab-timeline").innerHTML = `<li class="idle">${esc(err.message)}</li>`; }
+      btn.disabled = false;
+      state.busy = false;
+    });
+    $("#lab-reset").addEventListener("click", async () => {
+      if (state.busy) return;
+      try {
+        const r = await api("/api/lab/reset", { method: "POST" });
+        state.overview.board = r.board;
+        state.case = null;
+        $("#case").hidden = true;
+        resetAgents();
+        $("#lab-timeline").innerHTML = `<li class="idle">Reset. Tonight's batch is not landed and nothing is published for it.</li>`;
+        $("#lab-result").textContent = "";
+        renderAll(false);
+      } catch (err) { toast(err.message); }
+    });
+  }
+
+  // lab: red team tab -----------------------------------------------------------------------------------------------------
+  const OUTCOME_TEXT = { caught: "Proven, right cause", held: "Held, nothing proven", held_partial: "Held, part of the cause proven", wrong_cause: "Named a cause that was not planted", small: "Published, under 4% off", WRONG: "Published a number more than 4% off" };
+  function floorChart(classes) {
+    const rows = Object.entries(classes);
+    const W = 600, rowH = 34, L = 190, R = 110, H = rows.length * rowH + 24;
+    const x = (v) => L + (W - L - R) * v;
+    const g = [0, 0.25, 0.5, 1].map((v) => `<line class="t-grid" x1="${x(v)}" x2="${x(v)}" y1="0" y2="${H - 18}"/><text x="${x(v)}" y="${H - 4}" text-anchor="middle">${v * 100}%</text>`);
+    rows.forEach(([id, c], i) => {
+      const y = i * rowH + 6;
+      const none = c.floor == null;
+      const w = none ? (W - L - R) : Math.max(3, x(c.floor) - L);
+      const label = none ? "not proven" : (c.binary ? "binary" : `${Math.round(c.floor * 100)}%`) + (c.holes ? `, ${c.holes} hole${c.holes > 1 ? "s" : ""}` : "");
+      g.push(`<text x="${L - 10}" y="${y + 17}" text-anchor="end">${esc(c.title)}</text>`,
+        `<rect class="rt-bar${none || c.holes ? " none" : ""}" x="${L}" y="${y + 4}" width="${w}" height="18" rx="3"><title>${esc(c.title)}: ${esc(label)}</title></rect>`,
+        `<text class="rt-val" x="${L + w + 6}" y="${y + 17}">${esc(label)}</text>`);
+    });
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Detection floor per fault class">${g.join("")}</svg>`;
+  }
+  async function loadRedteam() {
+    try {
+      const r = await api("/api/lab/redteam");
+      const b = r.backend;
+      $("#rt-sub").textContent = `From ${r.file}: ${b.backend === "exasol" && !b.standin ? "Exasol " + (b.version || "") : "the DuckDB stand-in"}, ${num(r.orders_per_day)} orders a day, ${r.generated_at}. Run receipts redteam on synthetic data or a sandbox copy, never on live production tables.`;
+      $("#rt-chart").innerHTML = floorChart(r.summary.classes);
+      const holes = r.summary.holes;
+      $("#rt-holes").innerHTML = holes.length ? `<b>${holes.length} hole${holes.length > 1 ? "s" : ""} found:</b><ul>${holes.map((h) => `<li>${esc(h.where)}: ${esc(OUTCOME_TEXT[h.outcome])} (${esc(pct(h.error_pct / 100, 2))})</li>`).join("")}</ul>` : "No attack got a wrong number published or a wrong cause named.";
+    } catch (e) { $("#rt-chart").textContent = e.message; }
+  }
+  if ($("#redteam")) {
+    const tabs = [["#tab-break", "#lab-break-panel"], ["#tab-redteam", "#redteam"]];
+    const show = (i) => tabs.forEach(([t, p], k) => { $(t).setAttribute("aria-selected", k === i); $(t).tabIndex = k === i ? 0 : -1; $(p).hidden = k !== i; if (k === i && k === 1) loadRedteam(); });
+    tabs.forEach(([t], i) => $(t).addEventListener("click", () => show(i)));
+    document.querySelector(".lab-tabs").addEventListener("keydown", (e) => {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      const i = $("#tab-break").getAttribute("aria-selected") === "true" ? 1 : 0;
+      show(i); $(tabs[i][0]).focus();
+    });
+    $("#rt-share").addEventListener("input", () => { $("#rt-share-out").textContent = `${$("#rt-share").value}%`; });
+    $("#rt-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (state.busy) return;
+      state.busy = true;
+      $("#rt-go").disabled = true;
+      $("#rt-result").textContent = "Attacking";
+      try {
+        const r = await api("/api/lab/redteam/attack", { method: "POST", body: JSON.stringify({ fault: $("#rt-fault").value, share: Number($("#rt-share").value) / 100 }) });
+        const hole = r.outcome === "wrong_cause" || r.outcome === "WRONG";
+        $("#rt-result").innerHTML = `<span class="flag${r.outcome === "caught" ? " ok" : ""}">${hole ? "HOLE" : r.outcome === "caught" ? "CAUGHT" : r.trust === "HELD" ? "HELD" : "MISSED"}</span>${esc(OUTCOME_TEXT[r.outcome])}. Verdict ${esc(r.verdict)}, causes ${esc(r.confirmed.join(", ") || "none")}, the pipeline was ${esc(pct(r.error_pct / 100, 2))} off. ${esc(ms(r.ms))}.`;
+      } catch (err) { $("#rt-result").textContent = err.message; }
+      $("#rt-go").disabled = false;
+      state.busy = false;
+    });
+  }
+
   function renderAll(animate) {
     const o = state.overview, c = state.case;
     renderHero(o.board, c);
     renderTrend(o.board, c);
+    if (!c) {
+      $("#time-sub").textContent = "No run yet. The time of every step shows here after the gate first runs.";
+      $("#timings").innerHTML = `<li class="none">No run yet</li>`;
+    }
     if (c) {
       $("#case").hidden = false;
       renderPaper(c, animate);
@@ -495,6 +653,7 @@
       if (o.case && o.case.scenario && o.case.scenario.id) state.selected = o.case.scenario.id;
       renderChips(o);
       renderScenarios(o.scenarios);
+      renderLab(o);
       renderAll(false);
       const linked = new URLSearchParams(location.search).get("case");  // the link in an alert file
       if (linked) await openCase(linked);
@@ -502,6 +661,7 @@
       setInterval(loadAlerts, 20000);
     } catch (e) {
       $("#status").innerHTML = `<span class="flag">OFFLINE</span><span class="msg">${esc(e.message)}</span>`;
+      $("#time-sub").textContent = "No run yet.";
     }
   }
   boot();

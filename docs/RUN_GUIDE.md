@@ -16,7 +16,9 @@ The `run-exasol` scripts look for the launcher on `PATH`, then in `EXASOL_HOME`,
 
 On macOS, the first double-click on a downloaded `.command` file may be blocked as coming from an unidentified developer: right-click it and choose Open once. If the repository came as a ZIP and the file will not run, make it executable with `chmod +x run.command run-exasol.command run.sh run-exasol.sh`.
 
-`receipts demo` takes the same options as `receipts serve` (`--day`, `--port`) plus `--no-browser`.
+`receipts demo` takes the same options as `receipts serve` (`--day`, `--port`, `--watch`, `--lab`) plus `--no-browser`.
+
+**Two modes.** Without `--lab` (normal mode) Receipts watches and proves but cannot change data: no scenario picker, no Break the pipeline panel, no Red team tab, and those API endpoints answer 403. With `--lab` or `RECEIPTS_LAB=1` (lab mode, for demos) they appear, and breaking the pipeline is still refused unless the loaded data is the built-in synthetic data. The one-click scripts above start in lab mode. Inbox batch files that plant a scenario (section 7) are lab-only too.
 
 ## 1. Without Exasol (anyone, two minutes)
 
@@ -39,14 +41,14 @@ make demo        # same as: receipts demo (builds if needed, serves, opens the b
 
 Open http://127.0.0.1:8000. The header chip says **Local stand-in** so nobody mistakes it for Exasol.
 
-The incoming batch day is yesterday in India (Asia/Kolkata), with 42 days of history generated before it. Every date on the page, the agent's question and the case IDs follow it. `receipts serve` rebuilds the database first if it holds another day. To reproduce the screenshots, pin the day on both commands:
+The incoming batch day is yesterday in India (Asia/Kolkata), with 42 days of history generated before it. Every date on the page, the agent's question and the case IDs follow it. `receipts demo` (and the run scripts) rebuild the database when it holds another day, also when the day turns while it runs, and in lab mode land the IST written as UTC batch so the page opens on a held number. `receipts serve` never rebuilds; it says "The data is for <date>. Run receipts demo to refresh." To pin a day, pass it to both commands (the README screenshots use Fri 23 Oct 2026):
 
 ```bash
-receipts init --day 2026-10-20
-receipts serve --day 2026-10-20     # or: make demo DAY=2026-10-20
+receipts init --day 2026-10-23
+receipts serve --lab --day 2026-10-23     # or: make demo DAY=2026-10-23
 ```
 
-`receipts judge-check`, `receipts eval`, `receipts variants` and the tests always use 20 Oct 2026, so their results do not change with the calendar.
+`scripts/capture_screenshots.py` uses the day the server holds, so the screenshots show a current date. `receipts judge-check`, `receipts eval`, `receipts variants` and the tests always use 20 Oct 2026, so their results do not change with the calendar.
 
 ## 2. On Exasol Personal (the real target)
 
@@ -108,15 +110,22 @@ receipts export-sql           # writes all Exasol SQL to sql/exasol for reading
 receipts demo --watch         # command center plus the batch watcher and alerts (section 7)
 receipts watch --once         # judge any newly landed batch once and exit
 receipts backtest             # the gate over real NYC taxi data, writes samples/real_backtest.md
+receipts backtest --backend exasol  # the same inside Exasol, writes samples/exasol/real_backtest.md
+receipts scale                # the IST case at 20k to 400k orders a day on Exasol, writes samples/exasol/scaling.md
+receipts redteam              # shrink each fault until the gate stops proving it (synthetic data only)
 ```
 
-`receipts backtest` downloads about 150 MB of NYC TLC yellow taxi trip records (January to March 2024) once into `data/real/` with a progress line, then judges 56 real days one night at a time and plants six faults on real days. It runs on the local stand-in and takes a few minutes after the download.
+`receipts backtest` downloads about 150 MB of NYC TLC yellow taxi trip records (January to March 2024) once into `data/real/` with a progress line, then judges 56 real days one night at a time and plants six faults on real days. It runs on the local stand-in and takes a few minutes after the download. With `--backend exasol` the mapped trips are bulk loaded into Exasol (about 2.5 minutes for 9.5 million trips on the laptop above) and every gate run happens there, about 35 minutes in all.
+
+`receipts scale` and `receipts redteam --backend exasol` rebuild the database at `EXA_DSN` with synthetic data (the red team plants faults into it) and run `receipts init --fresh` at the end to restore the demo data. Never point them at a database that holds anything else.
 
 Scenarios: `healthy`, `festival`, `unit_paise`, `duplicate_load`, `join_fanout`, `stale_fx`, `ist_utc`, `new_code`, `masked_pair`, `unknown_discount`.
 
 ## 4. Connect a real AI agent (MCP)
 
-1. Install `uv`, then add the Exasol MCP server to any MCP client (for example a desktop AI assistant) using [`mcp/mcp_client_config.example.json`](../mcp/mcp_client_config.example.json).
+Full steps for Claude Desktop and Claude Code, with the read-only `AGENT_READER` user that `receipts init` creates on Exasol, are in [`MCP_DEMO.md`](MCP_DEMO.md). In short:
+
+1. Install `uv`, then add the Exasol MCP server to any MCP client (for example a desktop AI assistant) using [`mcp/mcp_client_config.example.json`](../mcp/mcp_client_config.example.json). It logs in as `AGENT_READER`, which can read `PUB` and nothing else. `python scripts/mcp_smoke.py` checks that path without any AI client.
 2. Put [`mcp/AGENT_INSTRUCTIONS.md`](../mcp/AGENT_INSTRUCTIONS.md) into the agent's instructions.
 3. Run `receipts run unit_paise`, then ask the agent for revenue on the incoming day (the date `receipts init` printed; yesterday unless you passed `--day`), for example "What was revenue on 20 October?" after `--day 2026-10-20`. With the instructions it reads `PUB.METRIC_TRUST`, sees the value is held, and quotes the last trusted day instead. Remove the instructions and ask again to see it quote the broken number.
 
@@ -137,14 +146,14 @@ A button appears on each receipt. The model receives only the aggregated case (v
 make test
 ```
 
-35 tests. `tests/test_scenarios.py` runs all ten scenarios twice: once on the DuckDB stand-in and once on the Exasol SQL path, where every statement is rendered for Exasol, parsed by sqlglot's Exasol grammar, translated and executed.
+112 tests, 2 of which run only against a live Exasol (`RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.py`). `tests/test_scenarios.py` runs all ten scenarios twice: once on the DuckDB stand-in and once on the Exasol SQL path, where every statement is rendered for Exasol, parsed by sqlglot's Exasol grammar, translated and executed.
 
 ## 7. Watch for new batches and get alerts
 
 `receipts serve --watch` (or `receipts demo --watch`) runs the command center and a light watcher in one process. Closing the window or pressing Ctrl+C stops both.
 
 * Every 60 seconds (`--interval` to change it) the watcher runs one cheap query: is the newest day in RAW later than the newest published day? Only then does it run the gate. Between checks it sleeps; measured on a laptop it used 0.26% of one core with a 5 second interval and the page open.
-* It also reads an inbox folder (`inbox/` by default, `--inbox` or `RECEIPTS_INBOX` to change it). A file named after a scenario, such as `ist_utc.batch`, lands that scenario's batch on the next check and is moved to `inbox/processed/`. Other files are moved to `inbox/ignored/`.
+* In lab mode it also reads an inbox folder (`inbox/` by default, `--inbox` or `RECEIPTS_INBOX` to change it). A file named after a scenario, such as `ist_utc.batch`, lands that scenario's batch on the next check and is moved to `inbox/processed/`. Other files are moved to `inbox/ignored/`.
 * When the gate holds a batch (`PROVEN_FAULT` or `UNEXPLAINED`) it prints an `ALERT` line, writes `alerts/<case>.txt` and `alerts/<case>.json` (verdict, one-line cause, last trusted value, receipt link), and shows an orange **ALERTS** banner in the command center until the case is approved, a new batch replaces it, or someone clicks Dismiss.
 * If `SLACK_WEBHOOK_URL` is set it also posts a short message to that Slack incoming webhook, with a 5 second timeout. If Slack is down the alert file is still written and the watcher keeps going.
 * A published batch prints one quiet line. A failed check prints one line and the watcher tries again next time; it never stops the server.
@@ -152,7 +161,7 @@ make test
 Try it:
 
 ```bash
-receipts demo --watch --interval 5
+receipts demo --watch --lab --interval 5
 ```
 
 Then, in a second terminal or in your file manager, drop a bad batch into the inbox:
@@ -164,6 +173,23 @@ touch inbox/ist_utc.batch          # Windows PowerShell: New-Item inbox\ist_utc.
 Within a few seconds the console prints `ALERT RC-... held (PROVEN_FAULT). Proven cause: clock shift in RAW.PAYMENTS.CAPTURED_AT (gateway GW_B) ...`, `alerts/` holds the receipt, and the page shows the banner. Drop `inbox/healthy.batch` to land a clean batch: one quiet line, no alert.
 
 Without the web server, `receipts watch --once` processes any new batch once and exits (handy in a scheduler); `receipts watch` keeps checking. On the DuckDB stand-in only one process can open the database file, so stop `receipts serve` before running `receipts watch` there; on Exasol both can run at once.
+
+## 8. Break the pipeline (lab mode)
+
+Start `receipts demo --lab --watch` (the run scripts do). Under the number, **Break the pipeline** lets you pick
+one of the six fault classes, the share of rows it affects and, for unit and clock faults, the gateway. Pressing
+the button plants that fault into tonight's RAW batch with the same SQL the scenarios use (LANDING and the
+published history are never touched) and runs the gate. The page lists each step with its time as it finishes,
+then shows the HELD banner, the receipt and the Approve button. **Reset** removes tonight's batch and its
+published row, so the demo can run again.
+
+Measured on Exasol Personal 2026.2.0-nano.3 on the laptop described in section 2, with
+`python scripts/measure_break.py --runs 5` (a headless browser that clicks the button): IST written as UTC on
+GW_B, click to HELD banner in a median of 7.3 s (6.9 to 8.5 s over 5 runs).
+
+The **Red team** tab next to it shows the detection floor per fault class from the saved red team report and
+runs one attack live (`receipts redteam` writes the report; see the README). Run it on the built-in synthetic
+data or a sandbox copy, never on live production tables.
 
 ## Troubleshooting
 

@@ -73,11 +73,22 @@ def _print_case(c):
           f"total {c['total_ms']:.0f} ms, {c['statements']} SQL statements")
 
 
+def _synthetic_or_exit(be) -> None:
+    """Commands that plant faults only run on the built-in synthetic data."""
+    from .lab import synthetic_check
+    ok, why = synthetic_check(be)
+    if not ok:
+        print(f"Refused: this command plants faults into RAW and only runs on the built-in synthetic data. {why}",
+              file=sys.stderr)
+        sys.exit(3)
+
+
 def cmd_run(a):
     from . import gate
     from .faults import SCENARIOS
     from .load import incoming_day, ingest
     be = _be()
+    _synthetic_or_exit(be)
     day = incoming_day(be)
     sc = ingest(be, day, a.scenario)
     c = gate.run(be, day, {"id": sc.id, "title": sc.title, "story": sc.story, "kind": sc.kind})
@@ -139,6 +150,7 @@ def cmd_sample(a):
     from .faults import DEMO_ORDER, SCENARIOS
     from .load import incoming_day, ingest
     be = _be()
+    _synthetic_or_exit(be)
     day = incoming_day(be)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -233,16 +245,81 @@ def cmd_variants(a):
 
 def cmd_backtest(a):
     """Run the gate day by day over real NYC taxi data, with and without planted faults."""
-    from .backtest import run, to_markdown
-    rep = run(Path(a.data), warmup=a.warmup, log=lambda m: print(m, flush=True))
-    out = Path(a.out)
+    from .backtest import MONTHS, run, to_markdown
+    months = tuple(a.months or MONTHS)
+    rep = run(Path(a.data), months=months, warmup=a.warmup, log=lambda m: print(m, flush=True), backend=a.backend)
+    default = ROOT / "samples" / ("exasol" if a.backend == "exasol" else "") / "real_backtest.md"
+    out = Path(a.out) if a.out else default
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(to_markdown(rep, "receipts backtest"), encoding="utf-8")
-    (out.with_suffix(".json")).write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
+    compare = None
+    other = ROOT / "samples" / "real_backtest.json"
+    if a.backend == "exasol" and other.exists():
+        compare = json.loads(other.read_text(encoding="utf-8"))
+    cmd = "receipts backtest" + (" --backend exasol" if a.backend == "exasol" else "") +         (f" --months {' '.join(months)}" if months != MONTHS else "")
+    (out.with_suffix(".json")).write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")  # first, so a
+    out.write_text(to_markdown(rep, cmd, compare), encoding="utf-8")                                 # report bug loses nothing
     held = sum(r["trust"] == "HELD" for r in rep["clean"])
     caught = sum(r["caught"] for r in rep["planted"])
     print(f"\n{len(rep['clean'])} real days judged, {held} held. Planted faults caught: {caught} of "
           f"{len(rep['planted'])}. Report: {out}")
+
+
+def cmd_scale(a):
+    """Run the IST case at increasing order volumes and write samples/exasol/scaling.md and .json."""
+    from .scale import run, to_markdown
+    rep = run(a.sizes, backend=a.backend, seed=a.seed, log=lambda m: print(m, flush=True))
+    out = Path(a.out) if a.out else ROOT / "samples" / ("exasol" if a.backend == "exasol" else "")
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "scaling.md").write_text(to_markdown(rep), encoding="utf-8")
+    (out / "scaling.json").write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
+    big = rep["results"][-1]["orders_per_day"] if rep["results"] else None
+    print(f"\nlargest size measured: {big:,} orders a day" if big else "\nno size completed")
+    if a.backend == "exasol" and not a.no_restore:
+        print("restoring the demo data (receipts init --fresh)")
+        from .model import default_incoming_day
+        _build(default_incoming_day(), 7, 20000, fresh=True)
+    return 0 if rep["results"] and all(r["right"] for r in rep["results"]) else 1
+
+
+def cmd_redteam(a):
+    """Shrink each fault until the gate stops proving it; write the red team report. Synthetic data only."""
+    from .redteam import run, to_markdown
+    print("Red team: run this on the built-in synthetic data or a sandbox copy, never on live production tables.\n")
+    rep = run(backend=a.backend, seeds=tuple(a.seeds), orders_per_day=a.orders_per_day, log=lambda m: print(m, flush=True))
+    out = Path(a.out) if a.out else ROOT / "samples" / ("exasol" if a.backend == "exasol" else "")
+    out.mkdir(parents=True, exist_ok=True)
+    cmd = (f"receipts redteam --backend {a.backend} --seeds {' '.join(map(str, a.seeds))} "
+           f"--orders-per-day {a.orders_per_day}")
+    (out / "redteam_report.json").write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
+    (out / "redteam_report.md").write_text(to_markdown(rep, cmd), encoding="utf-8")
+    s = rep["summary"]
+    print("\ndetection floor: " + ", ".join(f"{k} {'none' if c['floor'] is None else format(c['floor'], '.0%')}"
+                                         for k, c in s["classes"].items()))
+    print(f"holes: {len(s['holes'])}. Report: {out / 'redteam_report.md'}")
+    if a.backend == "exasol" and not a.no_restore:
+        print("restoring the demo data (receipts init --fresh)")
+        from .model import default_incoming_day
+        _build(default_incoming_day(), 7, 20000, fresh=True)
+    return 0
+
+
+def cmd_heldout(a):
+    """Run the frozen held-out partial unit errors and write the report. Synthetic data only."""
+    from .heldout import run, to_markdown
+    rep = run(backend=a.backend, seeds=tuple(a.seeds), orders_per_day=a.orders_per_day,
+              log=lambda m: print(m, flush=True))
+    out = Path(a.out) if a.out else ROOT / "samples" / ("exasol" if a.backend == "exasol" else "")
+    out.mkdir(parents=True, exist_ok=True)
+    name = f"heldout_unit{a.suffix}"
+    cmd = f"receipts heldout --backend {a.backend} --seeds {' '.join(map(str, a.seeds))} --orders-per-day {a.orders_per_day}"
+    (out / f"{name}.json").write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
+    (out / f"{name}.md").write_text(to_markdown(rep, a.title, cmd), encoding="utf-8")
+    print(f"holes {rep['holes']} of {len(rep['runs'])}. Report: {out / (name + '.md')}")
+    if a.backend == "exasol" and not a.no_restore:
+        print("restoring the demo data (receipts init --fresh)")
+        from .model import default_incoming_day
+        _build(default_incoming_day(), 7, 20000, fresh=True)
+    return 0
 
 
 def cmd_doctor(a):
@@ -251,8 +328,8 @@ def cmd_doctor(a):
     return run_doctor()
 
 
-def _ensure_day(day: date) -> None:
-    """Build the database for `day` unless it already holds that day."""
+def _data_day() -> date | None:
+    """The incoming day the database holds, or None if it is not built."""
     from .load import incoming_day
     current = be = None
     try:
@@ -262,11 +339,32 @@ def _ensure_day(day: date) -> None:
         pass
     finally:
         if be is not None:
-            be.close()  # DuckDB keeps a file lock, and the rebuild below may need to delete the file
-    if current != day:
-        print(f"database holds {current or 'no data'}, building it for {day}")
-        conf = (_manifest() or {}).get("config", {})
-        _build(day, conf.get("seed", 7), conf.get("orders_per_day", 20000), fresh=False)
+            be.close()  # DuckDB keeps a file lock, and a rebuild may need to delete the file
+    return current
+
+
+def preland_headline() -> dict:
+    """Land the headline IST written as UTC batch and run the gate, so the page opens on a held number."""
+    from . import gate
+    from .load import incoming_day, ingest
+    be = _be()
+    try:
+        day = incoming_day(be)
+        sc = ingest(be, day, "ist_utc")
+        return gate.run(be, day, {"id": sc.id, "title": sc.title, "story": sc.story, "kind": sc.kind})
+    finally:
+        be.close()
+
+
+def _ensure_day(day: date) -> bool:
+    """Build the database for `day` unless it already holds that day. True if it was built."""
+    current = _data_day()
+    if current == day:
+        return False
+    print(f"database holds {current or 'no data'}, building it for {day}")
+    conf = (_manifest() or {}).get("config", {})
+    _build(day, conf.get("seed", 7), conf.get("orders_per_day", 20000), fresh=False)
+    return True
 
 
 def _open_browser_when_up(url: str, timeout: float = 120) -> None:
@@ -290,11 +388,29 @@ def _open_browser_when_up(url: str, timeout: float = 120) -> None:
     threading.Thread(target=wait_and_open, daemon=True).start()
 
 
-def _serve(a, browser: bool) -> None:
+def _serve(a, browser: bool, rebuild: bool = False) -> None:
+    """Start the command center. `demo` (rebuild=True) rebuilds stale data, at start and later at midnight;
+    `serve` only says the data is stale, so it never replaces a database behind someone's back."""
     import uvicorn
 
-    from .model import default_incoming_day
-    _ensure_day(a.day or default_incoming_day())
+    from .model import default_incoming_day, stale_message
+    if a.lab:
+        os.environ["RECEIPTS_LAB"] = "1"  # read by the API and the watcher in this process
+    lab_on = os.environ.get("RECEIPTS_LAB") == "1"
+    print("Lab mode: break it and red team, for demos, on synthetic data only." if lab_on else
+          "Normal mode: watches and proves, cannot change data. Add --lab for the break-it demo and the red team.")
+    if a.day:
+        os.environ["RECEIPTS_DAY"] = a.day.isoformat()  # pinned: the page compares the data with this day
+        _ensure_day(a.day)
+    elif rebuild:
+        os.environ["RECEIPTS_AUTO_REBUILD"] = "1"  # the API rebuilds again if the day turns while it runs
+        if _ensure_day(default_incoming_day()) and lab_on:
+            c = preland_headline()
+            print(f"landed the IST written as UTC batch: {c['verdict']}, revenue {c['trust_status']}")
+    else:
+        current = _data_day()
+        if current != default_incoming_day():
+            print(stale_message(current))
     url = f"http://{a.host}:{a.port}/"
     print(f"Receipts command center on {url}  (press Ctrl+C to stop)")
     if browser:
@@ -335,7 +451,7 @@ def cmd_serve(a):
 
 def cmd_demo(a):
     """Build the database if needed, start the command center and open it in the browser."""
-    _serve(a, browser=not (a.no_browser or os.environ.get("RECEIPTS_NO_BROWSER") == "1"))
+    _serve(a, browser=not (a.no_browser or os.environ.get("RECEIPTS_NO_BROWSER") == "1"), rebuild=True)
 
 
 def main(argv=None):
@@ -393,6 +509,9 @@ def main(argv=None):
     dm.set_defaults(fn=cmd_demo)
     for sp in (sv, dm):
         sp.add_argument("--watch", action="store_true", help="also watch for new batches and raise alerts")
+        sp.add_argument("--lab", action="store_true",
+                        help="lab mode (or RECEIPTS_LAB=1): plant faults, break the pipeline and run the red team, "
+                             "on the built-in synthetic data only. Without it the command center cannot change data")
     wt = sub.add_parser("watch", help="judge new batches and raise alerts, without the web server")
     wt.add_argument("--once", action="store_true", help="process any new batch once and exit")
     for sp in (sv, dm, wt):
@@ -402,8 +521,38 @@ def main(argv=None):
     bt = sub.add_parser("backtest", help="run the gate over real NYC taxi data (downloads about 150 MB once)")
     bt.add_argument("--data", default=str(ROOT / "data" / "real"), help="where the downloaded files go")
     bt.add_argument("--warmup", type=int, default=35, help="days published as trusted before judging starts")
-    bt.add_argument("--out", default=str(ROOT / "samples" / "real_backtest.md"))
+    bt.add_argument("--backend", choices=["duckdb", "exasol"], default="duckdb",
+                    help="exasol loads the mapped trips into the database at EXA_DSN and runs the gate there")
+    bt.add_argument("--months", nargs="+", help="months to load, YYYY-MM (default 2024-01 2024-02 2024-03)")
+    bt.add_argument("--out", help="report path (default samples/real_backtest.md, or samples/exasol/ for Exasol)")
     bt.set_defaults(fn=cmd_backtest)
+    rt = sub.add_parser("redteam", help="find the smallest fault each detector still proves (synthetic data only)",
+                        description="Run on the built-in synthetic data or a sandbox copy, never on live production "
+                                    "tables: every attack writes a planted fault into RAW. Generates its own data per seed.")
+    rt.add_argument("--backend", choices=["duckdb", "exasol"], default="duckdb",
+                    help="exasol rebuilds the database at EXA_DSN with synthetic data, then restores the demo data")
+    rt.add_argument("--seeds", type=int, nargs="+", default=[11])
+    rt.add_argument("--orders-per-day", type=int, default=8000)
+    rt.add_argument("--out", help="folder for redteam_report.md and .json (default samples/, or samples/exasol/)")
+    rt.add_argument("--no-restore", action="store_true", help="do not run init --fresh afterwards (Exasol)")
+    rt.set_defaults(fn=cmd_redteam)
+    ho = sub.add_parser("heldout", help="frozen held-out partial unit errors (synthetic data only)")
+    ho.add_argument("--backend", choices=["duckdb", "exasol"], default="duckdb")
+    ho.add_argument("--seeds", type=int, nargs="+", default=[21, 22])
+    ho.add_argument("--orders-per-day", type=int, default=20000)
+    ho.add_argument("--out", help="folder for the report (default samples/, or samples/exasol/)")
+    ho.add_argument("--suffix", default="", help="added to the file name, for example _before")
+    ho.add_argument("--title", default="Held-out partial unit errors")
+    ho.add_argument("--no-restore", action="store_true")
+    ho.set_defaults(fn=cmd_heldout)
+    sc = sub.add_parser("scale", help="run the IST case at increasing order volumes and record the timings")
+    sc.add_argument("--backend", choices=["duckdb", "exasol"], default="exasol")
+    sc.add_argument("--sizes", type=int, nargs="+", default=[20000, 100000, 200000, 400000],
+                    help="orders a day to try, smallest first; stops at the first that fails")
+    sc.add_argument("--seed", type=int, default=7)
+    sc.add_argument("--out", help="folder for scaling.md and scaling.json (default samples/exasol)")
+    sc.add_argument("--no-restore", action="store_true", help="do not run init --fresh afterwards")
+    sc.set_defaults(fn=cmd_scale)
     a = p.parse_args(argv)
     try:
         rc = a.fn(a)

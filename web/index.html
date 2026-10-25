@@ -40,13 +40,80 @@
       </figure>
     </div>
 
+    <!-- lab -->
     <aside class="break" aria-labelledby="break-title">
       <h2 id="break-title">Land tonight's batch</h2>
       <p class="hint">Pick what happens upstream. Receipts checks the batch before the dashboard sees it.</p>
       <div class="scenarios" id="scenarios" role="radiogroup" aria-labelledby="break-title"></div>
       <button class="go" id="go" type="button">Land batch and run the gate</button>
     </aside>
+    <!-- /lab -->
+    <!-- normal -->
+    <aside class="break normal-mode" aria-labelledby="mode-title">
+      <h2 id="mode-title">Normal mode</h2>
+      <p class="hint">Receipts watches every batch and proves why a number moved. In this mode it cannot change data: nothing here plants a fault or rewrites a table. The only write a person can make is approving a proven correction.</p>
+      <p class="hint">To plant faults, break the pipeline or run the red team on the built-in synthetic data, start it in lab mode: <code>receipts demo --lab</code>.</p>
+    </aside>
+    <!-- /normal -->
   </section>
+
+  <!-- lab -->
+  <section class="lab wrap" id="lab" aria-labelledby="lab-title">
+    <div class="lab-tabs" role="tablist" aria-label="Lab">
+      <button type="button" role="tab" id="tab-break" aria-controls="lab-break-panel" aria-selected="true">Break the pipeline</button>
+      <button type="button" role="tab" id="tab-redteam" aria-controls="redteam" aria-selected="false" tabindex="-1">Red team</button>
+      <span class="lab-flag">LAB MODE</span>
+    </div>
+    <div id="lab-break-panel" role="tabpanel" aria-labelledby="tab-break">
+    <div class="lab-head">
+      <h2 id="lab-title" class="sec-title">Break the pipeline</h2>
+      <p class="sub">Lab mode, synthetic data only. Plant one fault into tonight's incoming RAW batch with the same SQL the scenarios use. Published history and the clean copies in LANDING are never touched. Then watch the gate work, step by step.</p>
+    </div>
+    <div class="lab-grid">
+      <form class="lab-form" id="lab-form">
+        <label for="lab-fault">Fault</label>
+        <select id="lab-fault"></select>
+        <label for="lab-share">Share of rows affected <output id="lab-share-out" for="lab-share">100%</output></label>
+        <input type="range" id="lab-share" min="1" max="100" step="1" value="100">
+        <p class="lab-of" id="lab-of"></p>
+        <label for="lab-gw" id="lab-gw-label">Gateway</label>
+        <select id="lab-gw"></select>
+        <div class="lab-buttons">
+          <button type="submit" class="go danger" id="lab-break">Break the pipeline</button>
+          <button type="button" class="ask" id="lab-reset">Reset</button>
+        </div>
+      </form>
+      <div class="lab-live" aria-live="polite">
+        <h3>The gate, live</h3>
+        <ol class="timeline" id="lab-timeline"><li class="idle">Nothing running. Pick a fault and break the pipeline.</li></ol>
+        <p class="lab-result" id="lab-result"></p>
+      </div>
+    </div>
+    </div>
+    <div id="redteam" role="tabpanel" aria-labelledby="tab-redteam" hidden>
+      <h2 class="sec-title">Red team: where Receipts breaks</h2>
+      <p class="sub" id="rt-sub">An attacker shrinks each fault until the gate stops proving it. Run <code>receipts redteam</code> on synthetic data or a sandbox copy, never on live production tables.</p>
+      <div class="lab-grid rt-grid">
+        <div class="lab-live">
+          <h3>Detection floor per fault class</h3>
+          <p class="lab-of">Smallest share of rows still proven with the right cause. Shorter is better. Red: a hole was found in that class.</p>
+          <div id="rt-chart" class="rt-chart"></div>
+          <div id="rt-holes" class="rt-holes"></div>
+        </div>
+        <form class="lab-form" id="rt-form">
+          <h3>Run one attack</h3>
+          <label for="rt-fault">Fault</label>
+          <select id="rt-fault"></select>
+          <label for="rt-share">Share of rows affected <output id="rt-share-out" for="rt-share">5%</output></label>
+          <input type="range" id="rt-share" min="1" max="100" step="1" value="5">
+          <div class="lab-buttons"><button type="submit" class="go danger" id="rt-go">Run one attack</button></div>
+          <p class="lab-of">Runs the gate without writing anything back, then removes the planted batch again.</p>
+          <p class="lab-result" id="rt-result"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+  <!-- /lab -->
 
   <section class="case wrap" id="case" aria-labelledby="case-title" hidden>
     <h2 id="case-title" class="sec-title">The receipt</h2>
@@ -113,8 +180,8 @@
       </div>
       <div>
         <h2 class="sec-title">Where the time went</h2>
-        <p class="sub" id="time-sub"></p>
-        <ol class="timings" id="timings"></ol>
+        <p class="sub" id="time-sub">No run yet.</p>
+        <ol class="timings" id="timings"><li class="none">No run yet</li></ol>
       </div>
     </div>
   </section>

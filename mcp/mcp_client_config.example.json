@@ -5,8 +5,10 @@
       "args": ["exasol-mcp-server@latest"],
       "env": {
         "EXA_DSN": "localhost:8563",
-        "EXA_USER": "sys",
-        "EXA_PASSWORD": "exasol"
+        "EXA_USER": "AGENT_READER",
+        "EXA_PASSWORD": "receipts-agent-local",
+        "EXA_SSL_CERT_VALIDATION": "false",
+        "EXA_MCP_SETTINGS": "{\"enable_read_query\": true, \"schemas\": {\"like_pattern\": \"PUB\"}}"
       }
     }
   }
