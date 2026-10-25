@@ -13,6 +13,8 @@
 
 **When a daily business number moves, Receipts holds it back, proves inside Exasol which upstream fault caused it by undoing that fault in a sandbox, and tells dashboards and AI agents whether to trust it.**
 
+> **Start here:** [`JUDGES.md`](JUDGES.md) (a three-minute brief with the evidence per judging criterion), [`NOVELTY.md`](NOVELTY.md) (what is new and what is not), [`docs/EVAL_CARD.md`](docs/EVAL_CARD.md) (what was tested and what is not claimed) and [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md) (how to run it).
+
 Built for ExaThon India 2026, Track 4: The Work Behind the Work. Exasol Personal is the platform: every check, the slice decomposition, the Python UDF, lineage, the undo test and the write-back run inside Exasol, and agents read the result from Exasol through the Exasol MCP server. A DuckDB stand-in exists only for CI and for people without Exasol.
 
 ## Results
@@ -366,12 +368,12 @@ receipts/
 │   ├── backtest.py      the real-data backtest on NYC taxi trips
 │   └── api.py           FastAPI endpoints for the command center
 ├── web/                 command center: index.html, app.css, app.js
-├── tests/               112 tests (2 of them run only against a live Exasol)
+├── tests/               126 tests (2 of them run only against a live Exasol)
 ├── samples/             committed, unedited reports and case files (samples/exasol from Exasol)
 ├── sql/exasol/          all rendered Exasol SQL, for reading
 ├── mcp/                 MCP client config and agent instructions
 ├── scripts/             screenshots, the tour GIF, the click-to-HELD timer, the MCP smoke test
-└── docs/                run guide, architecture, eval card, MCP demo, progress log, screenshots
+└── docs/                run guide, architecture, eval card, MCP demo, screenshots
 ```
 
 ## Running tests
@@ -381,11 +383,11 @@ pytest -q
 receipts judge-check
 ```
 
-On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.py`. Good first issues: [`docs/starter_issues.md`](docs/starter_issues.md).
+On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.py`.
 
-## Team
+## Author
 
-Receipts is built by a team of one: **Aakash Singh Mutum** ([@AakashMutum](https://github.com/AakashMutum)).
+Aakash Singh Mutum
 
 ## Judging criteria map
 
@@ -396,7 +398,7 @@ Receipts is built by a team of one: **Aakash Singh Mutum** ([@AakashMutum](https
 | Technical excellence | [Results](#results), [Real-data backtest](#real-data-backtest), [Red team](#red-team), [Scaling](#scaling), [`tests/`](tests/), [`samples/exasol/`](samples/exasol/) |
 | Solution design and user experience | [The demo in 30 seconds](#the-demo-in-30-seconds), [Architecture](#architecture), [`web/`](web/) |
 | Documentation and reproducibility | [Quick start](#quick-start), [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md), [`docs/EVAL_CARD.md`](docs/EVAL_CARD.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
-| Open-source quality | [`LICENSE`](LICENSE), [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md), [`Dockerfile`](Dockerfile), [`.github/`](.github/), [`docs/starter_issues.md`](docs/starter_issues.md) |
+| Open-source quality | [`LICENSE`](LICENSE), [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md), [`Dockerfile`](Dockerfile), [`.github/`](.github/) |
 
 ## License
 

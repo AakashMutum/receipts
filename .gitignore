@@ -9,3 +9,6 @@ __pycache__/
 alerts/
 inbox/
 logs/
+
+# contributor notes, kept locally only
+docs/dev/
