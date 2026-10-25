@@ -28,6 +28,6 @@ The comparison below is based on the vendors' public pages as read in October 20
 | Elementary | Data observability built around dbt: test results, anomaly monitors, lineage | Receipts reads lineage from the database catalog and acts on one metric's publication |
 | Datafold | Data diffing, comparing tables or the results of a code change before deployment | The undo test is also a comparison, but of today's metric with one suspect corrected, at run time rather than at deploy time |
 | Anomalo | Automated detection of anomalies in table data, with root-cause hints | Receipts treats a hint as a suspect and confirms it only through the undo test and the four rules |
-| Monte Carlo | Data observability: monitors, lineage, incident management | Receipts adds a gate that keeps the number off the dashboard until the cause is proven, and a trust flag that agents read |
+| Monte Carlo | Data observability: monitoring, troubleshooting agents, root cause analysis and lineage | Receipts adds a gate that keeps the number off the dashboard until the cause is proven, and a trust flag that agents read |
 
 Receipts is a narrow prototype: one metric, one pipeline, six fault classes. These tools cover many tables and sources; the comparison is about the idea, not about coverage.

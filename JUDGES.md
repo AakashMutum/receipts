@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Project | **Receipts: Proof for Every Number That Moves** |
-| Author | Aakash Singh Mutum ([@AakashMutum](https://github.com/AakashMutum)), team of one |
+| Author | Aakash Singh Mutum |
 | Track | ExaThon India 2026, Track 4: The Work Behind the Work |
 | Repository | https://github.com/AakashMutum/receipts |
 | Licence | MIT ([`LICENSE`](LICENSE)) |
@@ -24,7 +24,7 @@ Every number on this page is copied from a committed report in [`samples/`](samp
 | Technical excellence (20%) | 50 of 50 scored runs; a red team that shrinks every fault until it is no longer proven, with its hole and the fix reported before and after; held-out cases frozen before the fix; a real-data backtest on 9,554,757 taxi trips. | [`samples/exasol/eval_report.md`](samples/exasol/eval_report.md), [`redteam_report.md`](samples/exasol/redteam_report.md), [`heldout_unit_after.md`](samples/exasol/heldout_unit_after.md), [`real_backtest.md`](samples/exasol/real_backtest.md); [`tests/`](tests/) | `receipts eval --backend exasol --out samples/exasol`; `receipts redteam --backend exasol --seeds 11 --orders-per-day 20000` |
 | Solution design and user experience (15%) | A command center with the held banner, the receipt (evidence, proof, fix as a diff), one-click approval, and two agents side by side. Normal mode cannot change data; planting faults is lab-only. | README [The demo in 30 seconds](README.md#the-demo-in-30-seconds); [`docs/tour.gif`](docs/tour.gif); [`docs/screenshots/`](docs/screenshots/); [`web/`](web/); [`receipts/lab.py`](receipts/lab.py) | `run.bat`, `run.command` or `./run.sh` |
 | Documentation and reproducibility (10%) | One-click scripts per OS, a run guide, an evaluation card, and reports that each state the command that produced them. | [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md), [`docs/EVAL_CARD.md`](docs/EVAL_CARD.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | the "Reproduce:" line at the top of each report |
-| Open-source quality (5%) | MIT licence, contributing guide, security notes, CI workflow, pull request template, starter issues. | [`LICENSE`](LICENSE), [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md), [`.github/`](.github/), [`docs/dev/starter_issues.md`](docs/dev/starter_issues.md) | `pytest -q` |
+| Open-source quality (5%) | MIT licence, contributing guide, security notes, CI workflow, pull request and issue templates. | [`LICENSE`](LICENSE), [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md), [`.github/`](.github/) | `pytest -q` |
 
 ## How Exasol is used
 
@@ -75,6 +75,8 @@ No Exasol needed for the first three.
 * Six fault classes have detectors; anything else is held as UNEXPLAINED if it leaves the normal range, and published if it does not.
 * One metric and one pipeline; the backtest connects real data through an adapter, not configuration.
 * Nothing beyond 400,000 orders a day or 17.3 million payment rows; timings on one laptop only.
+* `run.command` and `run.sh` were tested only under Git Bash on Windows, not on a real Mac or Linux machine.
+* The Slack alert (`SLACK_WEBHOOK_URL`) was tested only for failing safely: an unreachable webhook does not stop the alert file or the watcher. No message was posted to a real Slack workspace.
 * Full list: [`docs/EVAL_CARD.md`](docs/EVAL_CARD.md).
 
 ## Files that matter
@@ -90,4 +92,3 @@ No Exasol needed for the first three.
 | [`receipts/detectors.py`](receipts/detectors.py) | The six detectors, including the unit tail check |
 | [`receipts/udf/clock_drift.py`](receipts/udf/clock_drift.py) | The Python UDF that runs inside Exasol |
 | [`samples/exasol/`](samples/exasol/) | Every committed report from Exasol |
-| [`docs/dev/PROGRESS.md`](docs/dev/PROGRESS.md) | Working log of each phase, including what failed |

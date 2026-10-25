@@ -373,7 +373,7 @@ receipts/
 ├── sql/exasol/          all rendered Exasol SQL, for reading
 ├── mcp/                 MCP client config and agent instructions
 ├── scripts/             screenshots, the tour GIF, the click-to-HELD timer, the MCP smoke test
-└── docs/                run guide, architecture, eval card, MCP demo, screenshots; docs/dev/ holds contributor notes
+└── docs/                run guide, architecture, eval card, MCP demo, screenshots
 ```
 
 ## Running tests
@@ -383,11 +383,11 @@ pytest -q
 receipts judge-check
 ```
 
-On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.py`. Good first issues: [`docs/dev/starter_issues.md`](docs/dev/starter_issues.md).
+On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.py`.
 
-## Team
+## Author
 
-Receipts is built by a team of one: **Aakash Singh Mutum** ([@AakashMutum](https://github.com/AakashMutum)).
+Aakash Singh Mutum
 
 ## Judging criteria map
 
@@ -398,7 +398,7 @@ Receipts is built by a team of one: **Aakash Singh Mutum** ([@AakashMutum](https
 | Technical excellence | [Results](#results), [Real-data backtest](#real-data-backtest), [Red team](#red-team), [Scaling](#scaling), [`tests/`](tests/), [`samples/exasol/`](samples/exasol/) |
 | Solution design and user experience | [The demo in 30 seconds](#the-demo-in-30-seconds), [Architecture](#architecture), [`web/`](web/) |
 | Documentation and reproducibility | [Quick start](#quick-start), [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md), [`docs/EVAL_CARD.md`](docs/EVAL_CARD.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
-| Open-source quality | [`LICENSE`](LICENSE), [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md), [`Dockerfile`](Dockerfile), [`.github/`](.github/), [`docs/dev/starter_issues.md`](docs/dev/starter_issues.md) |
+| Open-source quality | [`LICENSE`](LICENSE), [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md), [`Dockerfile`](Dockerfile), [`.github/`](.github/) |
 
 ## License
 

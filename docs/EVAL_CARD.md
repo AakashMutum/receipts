@@ -39,10 +39,10 @@ Core 5, Podman on WSL2, about 7.7 GiB visible to the VM), unless a line says the
 ## The unit-change hole: before and after the tail check
 
 The red team found that a x100 unit change on 2% of one small gateway's payments was published (REAL_CHANGE on
-seed 11, +6.47%): the unit check compared medians, which 2% of rows do not move. Fix (a) from
-[`dev/PROGRESS.md`](dev/PROGRESS.md) was applied: per gateway and currency, today's count of amounts above 20 times the
-baseline median against the baseline share (Poisson test, false-alarm budget 1e-6 per slice and night). Fix
-(b), a stricter real-change test, was not needed and is not applied. The held-out cases were committed before
+seed 11, +6.47%): the unit check compared medians, which 2% of rows do not move. A tail check was
+added: per gateway and currency, today's count of amounts above 20 times the
+baseline median against the baseline share (Poisson test, false-alarm budget 1e-6 per slice and night). A stricter
+real-change test was also proposed; it was not needed and is not applied. The held-out cases were committed before
 the fix was written and were not used to tune it.
 
 | Test on Exasol | Before | After |
@@ -68,6 +68,9 @@ held-out counts and the same red team floors.
 * No holiday calendar; a verified real change becomes part of the baseline.
 * One metric and one pipeline; the backtest connects real data through an adapter, not configuration.
 * Red team and scaling ran on one seed and one laptop. The eval ran on 5 seeds.
+* `run.command` and `run.sh` were tested only under Git Bash on Windows, not on a real Mac or Linux machine.
+* The Slack alert was tested only for failing safely (an unreachable webhook does not stop the watcher); no
+  message was posted to a real Slack workspace.
 
 ## What is not claimed
 

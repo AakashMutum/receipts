@@ -105,8 +105,7 @@ Check it with `claude mcp list`, then add the instructions file to the conversat
 
 * **Tested on Exasol Personal 2026.2.0-nano.3:** the user is created by `receipts init`, can read
   `PUB.METRIC_TRUST` and `PUB.CONFIRMED_CAUSES`, and is refused on `RAW`, `PIPE`, `RECEIPTS`, on insert
-  and delete in `PUB`, and on creating a schema (`receipts doctor`, `scripts/mcp_smoke.py`). The results
-  are in [`dev/PROGRESS.md`](dev/PROGRESS.md).
+  and delete in `PUB`, and on creating a schema (`receipts doctor`, `scripts/mcp_smoke.py`).
 * **Not tested here:** the MCP server itself, Claude Desktop and Claude Code. `uv` is not installed on the
   machine this was built on, so `scripts/mcp_smoke.py` skipped its MCP part, and no live model was asked.
   The config and the `claude mcp add` command follow the Exasol MCP server documentation (server setup,
