@@ -103,25 +103,99 @@ ORDER BY p.GATEWAY, p.CURRENCY_CODE""")
         if 1 <= abs(round(k)) <= 3 and abs(k - round(k)) <= 0.15:
             r["factor"] = 10 ** round(k)
             hits.append(r)
-    f = Finding("unit_scale", DETECTOR_TITLES["unit_scale"], bool(hits), "", "RAW.PAYMENTS", "AMOUNT", "value",
-                rows=rows, sql=sql, ms=ms)
-    if not hits:
-        f.summary = "Median payment amount per gateway is within the usual range everywhere."
+    # a unit change on a small share of a slice does not move its median, but it puts rows in the far tail
+    tails, ms2, sql2 = _unit_tail(c, {(r["gateway"], r["currency_code"]) for r in hits})
+    ms += ms2
+    sql += ";\n\n" + sql2
+    f = Finding("unit_scale", DETECTOR_TITLES["unit_scale"], bool(hits or tails), "", "RAW.PAYMENTS", "AMOUNT", "value",
+                rows=rows + tails, sql=sql, ms=ms)
+    if not hits and not tails:
+        f.summary = ("Median payment amount per gateway is within the usual range everywhere, and no gateway has an "
+                     "unusual number of amounts above 20x its usual median.")
         return f
-    h = max(hits, key=lambda r: abs(math.log10(r["ratio"])))
-    f.slice = {"GATEWAY": h["gateway"], "CURRENCY_CODE": h["currency_code"]}
-    f.metrics = {"median_today": h["med_today"], "median_baseline": h["med_base"], "ratio": h["ratio"],
-                 "factor": h["factor"], "rows_today": h["n_today"]}
-    f.summary = (f"Median amount on {h['gateway']} ({h['currency_code']}) is {h['ratio']:,.1f}x its baseline, "
-                 f"almost exactly a factor of {h['factor']:g}. That is a unit change, not a price change.")
-    cond = " OR ".join(f"(GATEWAY = '{r['gateway']}' AND CURRENCY_CODE = '{r['currency_code']}')" for r in hits)
-    fac = {(r["gateway"], r["currency_code"]): r["factor"] for r in hits}
-    case = "CASE " + " ".join(
-        f"WHEN BATCH_DAY = {c.D} AND GATEWAY = '{g}' AND CURRENCY_CODE = '{cc}' THEN AMOUNT / {v:g}"
-        for (g, cc), v in fac.items()) + " ELSE AMOUNT END"
+    whens = [f"WHEN BATCH_DAY = {c.D} AND GATEWAY = '{r['gateway']}' AND CURRENCY_CODE = '{r['currency_code']}' "
+             f"THEN AMOUNT / {r['factor']:g}" for r in hits]
+    whens += [f"WHEN BATCH_DAY = {c.D} AND GATEWAY = '{r['gateway']}' AND CURRENCY_CODE = '{r['currency_code']}' "
+              f"AND AMOUNT > {r['cut']!r} THEN AMOUNT / {r['factor']:g}" for r in tails]
+    case = "CASE " + " ".join(whens) + " ELSE AMOUNT END"
+    cond = " OR ".join([f"(GATEWAY = '{r['gateway']}' AND CURRENCY_CODE = '{r['currency_code']}')" for r in hits] +
+                       [f"(GATEWAY = '{r['gateway']}' AND CURRENCY_CODE = '{r['currency_code']}' AND AMOUNT > "
+                        f"{r['cut']:,.2f})" for r in tails])
     f.correction = Correction("PAYMENTS", f"SELECT\n  {_sel(PAY_COLS, {'AMOUNT': case + ' AS AMOUNT'})}\nFROM {{{{ inp }}}}",
                               f"Divide amounts by the detected factor for {cond}.")
+    if hits:
+        h = max(hits, key=lambda r: abs(math.log10(r["ratio"])))
+        f.slice = {"GATEWAY": h["gateway"], "CURRENCY_CODE": h["currency_code"]}
+        f.metrics = {"median_today": h["med_today"], "median_baseline": h["med_base"], "ratio": h["ratio"],
+                     "factor": h["factor"], "rows_today": h["n_today"]}
+        f.summary = (f"Median amount on {h['gateway']} ({h['currency_code']}) is {h['ratio']:,.1f}x its baseline, "
+                     f"almost exactly a factor of {h['factor']:g}. That is a unit change, not a price change.")
+        return f
+    h = max(tails, key=lambda r: r["tail_today"])
+    f.slice = {"GATEWAY": h["gateway"], "CURRENCY_CODE": h["currency_code"]}
+    f.metrics = {"tail_rows_today": h["tail_today"], "tail_rows_expected": round(h["expected"], 2),
+                 "median_baseline": h["med_base"], "cut": h["cut"], "factor": h["factor"], "rows_today": h["n_today"]}
+    f.summary = (f"{h['tail_today']:,} of {h['n_today']:,} payments on {h['gateway']} ({h['currency_code']}) today are "
+                 f"above 20x the usual median, where about {h['expected']:.1f} would be normal. Their amounts look "
+                 f"like ordinary payments multiplied by {h['factor']:g}: a unit change on part of the slice.")
     return f
+
+
+TAIL_X = 20             # "far tail": above 20 times the slice's baseline median
+TAIL_P = 1e-6           # false-alarm budget per gateway and currency per night
+TAIL_LAMBDA_MIN = 0.5   # a baseline with no tail rows at all still expects some
+
+
+def _poisson_sf(k: int, lam: float) -> float:
+    """P(X >= k) for X ~ Poisson(lam), computed in log space."""
+    if k <= 0:
+        return 1.0
+    term = math.exp(-lam)  # P(X = 0)
+    cdf = term
+    for i in range(1, k):
+        term *= lam / i
+        cdf += term
+    return max(0.0, 1.0 - cdf)
+
+
+def _unit_tail(c: Ctx, skip: set) -> tuple[list[dict], float, str]:
+    """Slices where today has far more amounts above 20x the usual median than the baseline share predicts."""
+    rows, ms, sql = c.q("""SELECT t.GATEWAY, t.CURRENCY_CODE, b.MED_BASE,
+  SUM(CASE WHEN t.BATCH_DAY = {{ D }} THEN 1 ELSE 0 END) AS N_TODAY,
+  SUM(CASE WHEN t.BATCH_DAY = {{ D }} AND t.AMOUNT > 20 * b.MED_BASE THEN 1 ELSE 0 END) AS TAIL_TODAY,
+  SUM(CASE WHEN t.BATCH_DAY < {{ D }} THEN 1 ELSE 0 END) AS N_BASE,
+  SUM(CASE WHEN t.BATCH_DAY < {{ D }} AND t.AMOUNT > 20 * b.MED_BASE THEN 1 ELSE 0 END) AS TAIL_BASE,
+  MEDIAN(CASE WHEN t.BATCH_DAY = {{ D }} AND t.AMOUNT > 20 * b.MED_BASE THEN t.AMOUNT END) AS MED_TAIL_TODAY,
+  MEDIAN(CASE WHEN t.BATCH_DAY < {{ D }} AND t.AMOUNT > 2 * b.MED_BASE THEN t.AMOUNT END) AS UPPER_10,
+  MEDIAN(CASE WHEN t.BATCH_DAY < {{ D }} AND t.AMOUNT > 0.2 * b.MED_BASE THEN t.AMOUNT END) AS UPPER_100,
+  MEDIAN(CASE WHEN t.BATCH_DAY < {{ D }} AND t.AMOUNT > 0.02 * b.MED_BASE THEN t.AMOUNT END) AS UPPER_1000
+FROM RAW.PAYMENTS t
+JOIN (SELECT GATEWAY, CURRENCY_CODE, MEDIAN(AMOUNT) AS MED_BASE FROM RAW.PAYMENTS
+      WHERE BATCH_DAY >= {{ B0 }} AND BATCH_DAY < {{ D }} AND PAY_STATUS = 'CAPTURED'
+      GROUP BY GATEWAY, CURRENCY_CODE) b
+  ON b.GATEWAY = t.GATEWAY AND b.CURRENCY_CODE = t.CURRENCY_CODE
+WHERE t.BATCH_DAY >= {{ B0 }} AND t.BATCH_DAY <= {{ D }} AND t.PAY_STATUS = 'CAPTURED'
+GROUP BY t.GATEWAY, t.CURRENCY_CODE, b.MED_BASE
+ORDER BY t.GATEWAY, t.CURRENCY_CODE""")
+    out = []
+    for r in rows:
+        if (r["gateway"], r["currency_code"]) in skip or not r["med_base"] or not r["n_base"] or r["n_today"] < 30:
+            continue
+        r["expected"] = (r["tail_base"] or 0) / r["n_base"] * r["n_today"]
+        k = r["tail_today"] or 0
+        r["p_value"] = _poisson_sf(k, max(r["expected"], TAIL_LAMBDA_MIN))
+        if k < 3 * r["expected"] or r["p_value"] >= TAIL_P or not r["med_tail_today"]:
+            continue
+        # which factor turns the tail back into ordinary payments: if every affected amount was multiplied by f,
+        # the rows above 20x the median are the baseline's rows above (20 / f)x the median, multiplied by f
+        fit = {f: abs(math.log(r["med_tail_today"] / (f * r[f"upper_{f}"])))
+               for f in (10, 100, 1000) if r[f"upper_{f}"]}
+        if not fit:
+            continue
+        r["factor"] = min(fit, key=fit.get)
+        r["cut"] = round(TAIL_X * r["med_base"], 2)
+        out.append(r)
+    return out, ms, sql
 
 
 # 2. duplicate rows ---------------------------------------------------------------
