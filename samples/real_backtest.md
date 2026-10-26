@@ -9,7 +9,7 @@ Dataset: **NYC TLC Trip Record Data, yellow taxi trip records**, published by th
 
 Trips from 2024-01-01 to 2024-03-31: 9,554,757. The metric is the daily total of `total_amount` by pickup date. The first 35 days (2024-01-01 to 2024-02-04) are published as trusted history by assumption; the gate then judges 56 days, 2024-02-05 to 2024-03-31, one night at a time, on the DuckDB stand-in. No threshold was changed for this data. How trips map onto the pipeline tables is described in `receipts/backtest.py`.
 
-Reproduce: `receipts backtest` (downloads about 150 MB once into `data/real/`, then runs in about 4 minutes).
+Reproduce: `receipts backtest` (downloads about 150 MB once into `data/real/`, then runs in about 7 minutes).
 
 ## Real days, no faults planted
 
@@ -35,6 +35,16 @@ Published as a verified real change: 2024-02-13 (-33.9%), 2024-02-27 (+26.0%).
 | 2024-03-30 Sat | Payment file F05 loaded twice | +8.2% | no | PROVEN_FAULT | duplicate_key | yes |
 
 Caught with the right cause: **6 of 6**.
+
+## Timings
+
+Measured on the DuckDB stand-in, from the client. Building the database (adapter, load, pipeline, UDF, warm-up history) took 13 s.
+
+| Measure | Median | Max |
+|---|---|---|
+| Gate run, end to end (62 runs) | 3,728 ms | 9,179 ms |
+| Of which inside the database (sum over statements) | 3,594 ms | 8,901 ms |
+| SQL statements per gate run | 14 | |
 
 ## All judged days
 

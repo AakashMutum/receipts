@@ -68,10 +68,25 @@ def test_no_em_dashes_anywhere():
     bad = []
     for p in ROOT.rglob("*"):
         if p.is_file() and p.suffix in {".py", ".md", ".html", ".css", ".js", ".sql", ".json", ".toml", ".txt", ""} \
-                and not any(x in p.parts for x in (".git", "data", "__pycache__", ".pytest_cache", ".venv", "venv", "site-packages", "node_modules")):
+                and not any(x in p.parts for x in (".git", "data", ".tmp", ".pipcache", "__pycache__", ".pytest_cache", ".venv", "venv", "site-packages", "node_modules")):
             try:
                 if chr(0x2014) in p.read_text(encoding="utf-8"):
                     bad.append(str(p.relative_to(ROOT)))
             except UnicodeDecodeError:
                 pass
     assert not bad, f"em dashes found in {bad}"
+
+
+def test_cli_output_is_utf8_when_redirected(tmp_path):
+    """On Windows a redirected stdout is cp1252; the CLI forces UTF-8 so receipts with symbols do not crash."""
+    import os
+    import subprocess
+    import sys
+    env = {k: v for k, v in os.environ.items() if k not in ("PYTHONIOENCODING", "PYTHONUTF8")}
+    env["PYTHONIOENCODING"] = "cp1252"
+    code = "from receipts.cli import _utf8_output; _utf8_output(); print('\u2192 \u20b9 \u2713')"
+    out = tmp_path / "out.txt"
+    with out.open("wb") as f:
+        r = subprocess.run([sys.executable, "-c", code], cwd=ROOT, env=env, stdout=f, stderr=subprocess.PIPE)
+    assert r.returncode == 0, r.stderr.decode("utf-8", "replace")
+    assert out.read_bytes().decode("utf-8").strip() == "\u2192 \u20b9 \u2713"

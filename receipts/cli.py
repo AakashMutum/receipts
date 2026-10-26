@@ -454,7 +454,15 @@ def cmd_demo(a):
     _serve(a, browser=not (a.no_browser or os.environ.get("RECEIPTS_NO_BROWSER") == "1"), rebuild=True)
 
 
+def _utf8_output() -> None:
+    """Force UTF-8 on stdout and stderr; on Windows a redirected stream defaults to cp1252 and crashes on symbols."""
+    for s in (sys.stdout, sys.stderr):
+        if hasattr(s, "reconfigure"):
+            s.reconfigure(encoding="utf-8", errors="replace")
+
+
 def main(argv=None):
+    _utf8_output()
     p = argparse.ArgumentParser(prog="receipts", description=__doc__)
     sub = p.add_subparsers(dest="cmd", required=True)
     g = sub.add_parser("generate", help="write synthetic CSVs")

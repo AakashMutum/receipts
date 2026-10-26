@@ -53,6 +53,7 @@ Every number on this page is copied from a committed report in [`samples/`](samp
 | Timings, IST case, one session on an idle laptop | median 5.6 s end to end over 4 repeats, 4.6 s measured by Exasol; 6.6 s on the first run after a fresh load | [`samples/exasol/timings.md`](samples/exasol/timings.md) |
 | Click Break the pipeline to HELD | median 8.4 s over 5 runs (6.8 to 20.5 s) | [`samples/exasol/timings.md`](samples/exasol/timings.md) |
 | Real-data backtest, NYC taxi Jan to Mar 2024, **run before the unit tail check** | 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE; 6 of 6 planted faults caught; 62 of 62 gate runs agree with the DuckDB run; gate median 14,804 ms | [`samples/exasol/real_backtest.md`](samples/exasol/real_backtest.md) |
+| Real-data backtest, re-run after the unit tail check on the DuckDB stand-in; the Exasol re-run is pending free disk space | 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check; gate median 3,728 ms on the stand-in | [`samples/real_backtest.md`](samples/real_backtest.md) |
 
 ## Verify in 3 minutes
 
@@ -62,7 +63,7 @@ No Exasol needed for the first three.
 |---|---|---|
 | Demo | Windows: double-click `run.bat`. macOS: double-click `run.command`. Linux: `./run.sh` | Sets up `.venv` on the first run (a few minutes on a slow connection), builds the stand-in data, opens the command center in lab mode. The header says **Local stand-in**. Click **Break the pipeline**: the steps appear one by one, then **HELD** and the receipt |
 | Headline claims | `receipts judge-check` | 20 runs on fresh data, 8 checks, ending in `ALL CHECKS PASSED (20/20 runs, ...)`; about 51 s on the laptop above |
-| Tests | `pytest -q` | all pass; 2 tests are skipped unless a live Exasol is set up |
+| Tests | `pytest -q` | 127 tests, all pass; 2 tests are skipped unless a live Exasol is set up |
 | Setup check | `receipts doctor` | on the stand-in: SQL parse and UDF checks `ok`, then `data loaded` once the demo has run |
 | On Exasol (needs Exasol Personal running) | `run-exasol.bat`, `run-exasol.command` or `./run-exasol.sh`; or `RECEIPTS_BACKEND=exasol receipts init` then `receipts doctor` | the header says **Exasol** and **Python UDF in the database**; `doctor` ends with `All good.` after the reserved-word, UDF and 9 `AGENT_READER` checks |
 
@@ -70,7 +71,7 @@ No Exasol needed for the first three.
 
 * All data is synthetic except the NYC taxi backtest.
 * A x10 unit change on 2% to 10% of one gateway is held without a proven cause (12 of the 24 held-out cases). It is not published, but a person has to look.
-* The real-data backtest has not been re-run since the unit tail check was added (not enough free disk on the laptop).
+* The real-data backtest was re-run after the unit tail check on the DuckDB stand-in; the Exasol re-run is pending free disk space.
 * The Exasol MCP server, Claude Desktop and Claude Code were not tested end to end; only the read-only database user was verified. The Dockerfile was not built.
 * Six fault classes have detectors; anything else is held as UNEXPLAINED if it leaves the normal range, and published if it does not.
 * One metric and one pipeline; the backtest connects real data through an adapter, not configuration.

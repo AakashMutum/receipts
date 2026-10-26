@@ -24,7 +24,7 @@ Every number below was measured on Exasol Personal 2026.2.0-nano.3 on one laptop
 | What | Result on Exasol | Report |
 |---|---|---|
 | Scored evaluation, 10 scenarios x 5 seeds, 20,000 orders a day | **50 of 50** right verdict and exactly the right causes; cause precision and recall 100%, 0 wrong causes. Without the undo test: 5 wrong causes. A threshold alert: 0% of causes found | [`eval_report.md`](samples/exasol/eval_report.md) |
-| Real data: NYC taxi trips, Jan to Mar 2024, 9,554,757 trips (run before the unit tail check, not re-run since) | 56 real days judged, **0 held**, 2 verified real changes; **6 of 6** planted faults caught with the right cause; 62 of 62 gate runs agree with the DuckDB run | [`real_backtest.md`](samples/exasol/real_backtest.md) |
+| Real data: NYC taxi trips, Jan to Mar 2024, 9,554,757 trips (Exasol run before the unit tail check; re-run after the unit tail check on the DuckDB stand-in; the Exasol re-run is pending free disk space) | Exasol, before: 56 real days judged, **0 held**, 2 verified real changes; **6 of 6** planted faults caught with the right cause; 62 of 62 gate runs agree with the DuckDB run. DuckDB stand-in, after: 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check | [`real_backtest.md`](samples/exasol/real_backtest.md), [stand-in](samples/real_backtest.md) |
 | Red team: shrink each fault until the gate stops proving it | Floors: unit change 2%, duplicates 2%, fan-out 2%, new codes 5%, clock faults 100%, stale FX caught. **0 holes** (1 before the unit tail check: a x100 unit change on 2% of one gateway was published, 6.5% off) | [`redteam_report.md`](samples/exasol/redteam_report.md) |
 | Held-out partial unit changes (24, frozen before the tail check was written) | Before: caught 0, held 24. After: **caught 12** (every x1000 case), held 12 (every x10 case). Published 0 in both | [`heldout_unit_after.md`](samples/exasol/heldout_unit_after.md) |
 | Scaling: the IST case after a fresh load | Right verdict at every size up to **400,000 orders a day, 17,346,085 payment rows**: gate 27.5 s, CUBE over 5.95 million rows 5.9 s. Nothing larger was measured | [`scaling.md`](samples/exasol/scaling.md) |
@@ -135,6 +135,7 @@ More commands, alerts with `--watch`, an optional LLM explanation, and troublesh
 * **Real days, no faults planted: 56 judged, 0 held, 0 called PROVEN_FAULT.** 54 published as `NO_INCIDENT`, 2 as a verified `REAL_CHANGE`: Tue 13 Feb (-33.9%, a snowstorm day when New York City schools went remote) and Tue 27 Feb (+26.0%, the busiest Tuesday so far).
 * **Planted faults on real days: 6 of 6 caught with the right cause.** Three unit changes (one vendor in cents, +2,111% to +2,371%) and three duplicated payment files (+8.2% to +8.3%, inside the normal range, so a threshold alert would have missed them).
 * **The same on both databases:** all 62 gate runs reach the same verdict and causes on Exasol and on the DuckDB stand-in; the daily values differ by at most 6.5e-05 relative.
+* **After the unit tail check (re-run after the unit tail check on the DuckDB stand-in; the Exasol re-run is pending free disk space):** 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check ([`samples/real_backtest.md`](samples/real_backtest.md)).
 * **Timing on Exasol (24 Oct, before the unit tail check):** median 14.8 s per gate run (max 47.5 s) as RAW grows to 9.5 million rows; loading and building took 150 s.
 * **What it also shows:** real revenue is noisy, with a normal range of plus or minus 21.7% at the median, so a fault without a detector that moves the total less than that is published. The clock check fired on five Saturdays and the undo test ruled it out every time.
 
@@ -160,7 +161,7 @@ More commands, alerts with `--watch`, an optional LLM explanation, and troublesh
 | Held-out partial unit changes, 24 cases (x10 and x1000; GW_A, GW_B; 2, 5, 10%; seeds 21, 22) | caught 0, held 24, published 0 | caught 12, held 12, published 0 |
 | Fault variants, 17 | caught 13, held 3, small 1, wrong 0 | caught 15, held 1, small 1, wrong 0 |
 | Scored evaluation, 50 runs | 50 of 50 | 50 of 50, same precision, recall and ablation numbers, festival control published as REAL_CHANGE on all 5 seeds |
-| Real-data backtest | 0 held, 2 REAL_CHANGE (13 Feb, 27 Feb), 6 of 6 | **not re-run** (not enough free disk on the laptop) |
+| Real-data backtest (re-run after the unit tail check on the DuckDB stand-in; the Exasol re-run is pending free disk space) | 0 held, 2 REAL_CHANGE (13 Feb, 27 Feb), 6 of 6 | 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check |
 
 * **Not closed:** a x10 change on 2% to 10% of a gateway is still held without a proven cause (12 of the 24 held-out cases). A x10 amount is mostly below the 20x cut, so the tail check does not see it. It is held, not published, but a person has to look. The cut was not lowered after seeing these cases, because they were written to test the fix, not to tune it. The DuckDB stand-in gives the same before and after counts ([`samples/heldout_unit_after.md`](samples/heldout_unit_after.md)).
 * Of 9 opposite-direction pairs at the floors, 8 were caught with both causes, and 1 was held with one of the two causes proven.
@@ -196,7 +197,7 @@ The command center shows the same contrast with two deterministic agents, so the
 
 * It only proves fault classes it has a detector for. Six today. Anything else becomes `UNEXPLAINED`: held, no cause guessed, a person decides.
 * A x10 unit change on a small share of one gateway (2% to 10%) is held without a proven cause, and partial clock shifts (25% to 50%) too: safe, but a person has to look.
-* The real-data backtest has not been re-run since the unit tail check was added (not enough free disk); its numbers are from before the fix.
+* The real-data backtest was re-run after the unit tail check on the DuckDB stand-in; the Exasol re-run is pending free disk space. The Exasol report is from before the fix.
 * The baseline learns a weekly pattern from five weeks of trusted history but has no holiday calendar, and a verified real change enters that history.
 * On real taxi data the normal range is wide (plus or minus 22% at the median), so a fault without a detector that moves the total less than that is published.
 * One metric, one pipeline. A generic configuration layer for other metrics is not built; the real-data backtest uses an adapter. What a company would provide is listed in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#connecting-your-own-metric).
@@ -368,7 +369,7 @@ receipts/
 │   ├── backtest.py      the real-data backtest on NYC taxi trips
 │   └── api.py           FastAPI endpoints for the command center
 ├── web/                 command center: index.html, app.css, app.js
-├── tests/               126 tests (2 of them run only against a live Exasol)
+├── tests/               127 tests (2 of them run only against a live Exasol)
 ├── samples/             committed, unedited reports and case files (samples/exasol from Exasol)
 ├── sql/exasol/          all rendered Exasol SQL, for reading
 ├── mcp/                 MCP client config and agent instructions
