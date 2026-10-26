@@ -7,6 +7,8 @@ starts clean. DAY defaults to the server's incoming day (yesterday in India), so
 a current date. Run with the same RECEIPTS_* / EXA_* variables as the server:
 
     python scripts/capture_screenshots.py --url http://127.0.0.1:8000
+
+`--only redteam` retakes just 09_redteam.png (no rebuild; the tab reads the committed red team report).
 """
 
 from __future__ import annotations
@@ -49,11 +51,20 @@ def shot(target, name: str) -> None:
     print(f"{name}: {path.stat().st_size // 1024} KB")
 
 
+def redteam(page: Page) -> None:
+    page.click("#tab-redteam")
+    page.wait_for_selector("#rt-chart svg")
+    page.evaluate("document.querySelector('#lab').scrollIntoView({block: 'start'})")
+    page.wait_for_timeout(500)
+    shot(page.locator("#lab"), "09_redteam.png")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     global DAY
     ap.add_argument("--url", default="http://127.0.0.1:8000")
     ap.add_argument("--day", help="incoming day, YYYY-MM-DD (default: the one the server holds)")
+    ap.add_argument("--only", choices=["redteam"], help="retake one screenshot only")
     a = ap.parse_args()
     url = a.url
     import json
@@ -65,6 +76,12 @@ def main() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page(viewport={"width": 1440, "height": 900}, reduced_motion="reduce")
+
+        if a.only == "redteam":
+            open_page(page, url)
+            redteam(page)
+            browser.close()
+            return
 
         rebuild()
         open_page(page, url)
@@ -108,10 +125,7 @@ def main() -> None:
         page.evaluate("document.querySelector('#lab').scrollIntoView({block: 'start'})")
         page.wait_for_timeout(800)
         shot(page.locator("#lab"), "08_break_it.png")
-        page.click("#tab-redteam")
-        page.wait_for_selector("#rt-chart svg")
-        page.wait_for_timeout(500)
-        shot(page.locator("#lab"), "09_redteam.png")
+        redteam(page)
         browser.close()
 
 
