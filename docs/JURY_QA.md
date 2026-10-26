@@ -9,7 +9,7 @@ The method is "test every slice, then rebuild the pipeline and re-run it for eac
 It is not in the loop. Detectors nominate, the undo test proves, and deterministic rules decide. The LLM only rewrites a finished verdict, sees only aggregates, and its text is discarded if it mentions a check that never fired. With no API key the whole system still works.
 
 **What if a detector is wrong?**
-That is expected. On the festival day the duplicate check fires on payment retries. Undoing it moves revenue by 0.00%, so it is ruled out. The ablation in the eval shows a detectors-only system names a wrong cause in 5 of 50 runs; Receipts names none.
+That is expected. On the festival day the duplicate check fires on payment retries. Undoing it moves revenue by 0.00%, so it is ruled out. The ablation in the eval shows a detectors-only system names 5 wrong causes over 50 runs; Receipts names none.
 
 **What if lineage is incomplete?**
 Rule 2 fails and the suspect cannot be confirmed, so the batch is held as unexplained rather than blamed on the wrong thing. Failing safe means more human review, never a wrong answer.
@@ -30,19 +30,19 @@ Ground truth: we know what the clean value should be because we generated the da
 She opens the case instead of a Slack thread. It already says which upstream feed broke, which rows, by how much, the corrected number, and the one-line fix to send the gateway team.
 
 **What did you not solve?**
-Seasonality in the baseline, fault classes beyond six, metrics beyond one, and the upstream fix itself. All listed in the README.
+A holiday calendar for the baseline, fault classes beyond six, metrics beyond one, and the upstream fix itself. All listed in the README.
 
 **Is any of this real data?**
-No. All data is synthetic and generated from a seed. The queries, timings, UDF and evaluation are real.
+The scenarios, the eval, the variants and the red team use synthetic data generated from a seed, so we know the true clean value. The backtest uses real public data: 9,554,757 NYC yellow taxi trips, January to March 2024. On Exasol (before the unit tail check) 56 real days were judged, 0 held, and 6 of 6 planted faults were caught; the DuckDB re-run after the tail check matched every verdict and cause.
 
 **Isn't the undo test circular? The same detector nominates the cause and writes the fix.**
 Partly, and we say so. For fixes limited to today's batch, rule 4 (history unchanged) holds by construction, so the rule that really discriminates is rule 3: undoing the cause must bring the number back into its normal range. That is a real test, because a wrong suspect's fix does not move the number (the festival retry burst is the example). Rule 4 matters for fixes that touch shared tables, like the merchant fan-out, where it passes only if history returns to exactly what was published.
 
 **You wrote the faults and the detectors. Is 100% meaningful?**
-On the ten scripted scenarios it shows consistency, not generality, and we say that. So there is a second test, `receipts variants`: 17 held-out variants (other gateways, other factors, partial row coverage, two faults at once) across two seeds. Result: 26 caught, 6 held for a person with no cause named, 2 published because the real error was under 2%, and 0 published wrong. Writing it found a real bug: the unit check only recognised a factor of 100.
+On the ten scripted scenarios it shows consistency, not generality, and we say that. So there is a second test, `receipts variants`: 17 held-out variants (other gateways, other factors, partial row coverage, two faults at once). On Exasol, after the unit tail check: 15 caught, 1 held for a person with no cause named, 1 published because the real error was under 4%, and 0 published wrong. Writing it found a real bug: the unit check only recognised a factor of 100.
 
 **Real revenue has weekly cycles. Does the baseline break?**
-A flat 14-day baseline would. The gate now learns each weekday's index from five weeks of trusted history, but only when a statistical test says the weekly pattern is real. On data with a weekday pattern it gave 63 of 63 correct verdicts across all seven weekdays. With the flat baseline the same data hid an undetected 9% fault on every weekday.
+A flat 14-day baseline would. The gate now learns each weekday's index from five weeks of trusted history, but only when a statistical test says the weekly pattern is real. On the real taxi data the weekday baseline was used on 56 of 56 judged days, and no real day was held.
 
 **Is it fast on big data? Your demo is small.**
-At 100,000 orders a day (4.2 million payment rows) on Exasol Personal on a laptop, the IST case takes 6.8 seconds (5.9 in the database, the CUBE over 1.48 million rows in 1.9) and the two-fault case 9.7 seconds, both with the right verdict. The DuckDB stand-in at the same size takes 7 to 10 seconds per case. That is the largest size we have measured, and we have not claimed anything about billion-row scale.
+On Exasol Personal on a laptop, the IST case gave the right verdict at every size up to 400,000 orders a day (17,346,085 payment rows): 27.5 seconds end to end, 26.3 measured by Exasol, the CUBE over 5.95 million rows in 5.9. Each run was the first after a fresh load, measured before the unit tail check. That is the largest size we have measured, and we claim nothing beyond it.
