@@ -36,7 +36,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 439.41,
-              "ms": 680.9,
+              "ms": 782.8,
               "faults": [
                 {
                   "fault": "unit_scale",
@@ -56,7 +56,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 231.56,
-              "ms": 878.0,
+              "ms": 1000.5,
               "faults": [
                 {
                   "fault": "unit_scale",
@@ -76,7 +76,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 126.32,
-              "ms": 1025.9,
+              "ms": 894.7,
               "faults": [
                 {
                   "fault": "unit_scale",
@@ -96,7 +96,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 43.87,
-              "ms": 732.7,
+              "ms": 751.0,
               "faults": [
                 {
                   "fault": "unit_scale",
@@ -116,7 +116,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 18.96,
-              "ms": 653.4,
+              "ms": 783.0,
               "faults": [
                 {
                   "fault": "unit_scale",
@@ -136,7 +136,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 5.72,
-              "ms": 594.9,
+              "ms": 1080.0,
               "faults": [
                 {
                   "fault": "unit_scale",
@@ -165,7 +165,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 100.0,
-              "ms": 629.2,
+              "ms": 1552.0,
               "faults": [
                 {
                   "fault": "duplicate_key",
@@ -185,7 +185,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 50.73,
-              "ms": 645.5,
+              "ms": 814.8,
               "faults": [
                 {
                   "fault": "duplicate_key",
@@ -205,7 +205,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 24.84,
-              "ms": 648.4,
+              "ms": 859.0,
               "faults": [
                 {
                   "fault": "duplicate_key",
@@ -225,7 +225,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 9.52,
-              "ms": 612.4,
+              "ms": 838.8,
               "faults": [
                 {
                   "fault": "duplicate_key",
@@ -245,7 +245,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 4.97,
-              "ms": 662.8,
+              "ms": 1072.6,
               "faults": [
                 {
                   "fault": "duplicate_key",
@@ -265,7 +265,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 1.87,
-              "ms": 709.1,
+              "ms": 1236.1,
               "faults": [
                 {
                   "fault": "duplicate_key",
@@ -294,7 +294,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 100.0,
-              "ms": 722.3,
+              "ms": 1177.6,
               "faults": [
                 {
                   "fault": "key_fanout",
@@ -314,7 +314,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 67.3,
-              "ms": 1176.0,
+              "ms": 1512.8,
               "faults": [
                 {
                   "fault": "key_fanout",
@@ -334,7 +334,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 31.97,
-              "ms": 1057.7,
+              "ms": 1583.3,
               "faults": [
                 {
                   "fault": "key_fanout",
@@ -354,7 +354,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 12.66,
-              "ms": 686.8,
+              "ms": 1197.0,
               "faults": [
                 {
                   "fault": "key_fanout",
@@ -374,7 +374,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 5.85,
-              "ms": 733.9,
+              "ms": 1128.1,
               "faults": [
                 {
                   "fault": "key_fanout",
@@ -394,7 +394,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": 1.7,
-              "ms": 773.9,
+              "ms": 1190.2,
               "faults": [
                 {
                   "fault": "key_fanout",
@@ -423,7 +423,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -8.08,
-              "ms": 657.0,
+              "ms": 1090.0,
               "faults": [
                 {
                   "fault": "stale_feed",
@@ -452,7 +452,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -15.36,
-              "ms": 621.1,
+              "ms": 837.9,
               "faults": [
                 {
                   "fault": "clock_shift",
@@ -470,7 +470,7 @@
               "wrong_published": false,
               "held_no_cause": true,
               "error_pct": -7.76,
-              "ms": 511.0,
+              "ms": 678.7,
               "faults": [
                 {
                   "fault": "clock_shift",
@@ -488,7 +488,7 @@
               "wrong_published": false,
               "held_no_cause": true,
               "error_pct": -3.8,
-              "ms": 525.2,
+              "ms": 582.4,
               "faults": [
                 {
                   "fault": "clock_shift",
@@ -517,7 +517,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -32.4,
-              "ms": 582.5,
+              "ms": 655.4,
               "faults": [
                 {
                   "fault": "orphan_code",
@@ -537,7 +537,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -16.41,
-              "ms": 937.4,
+              "ms": 845.7,
               "faults": [
                 {
                   "fault": "orphan_code",
@@ -557,7 +557,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -7.46,
-              "ms": 811.1,
+              "ms": 975.7,
               "faults": [
                 {
                   "fault": "orphan_code",
@@ -577,7 +577,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -2.92,
-              "ms": 665.2,
+              "ms": 817.2,
               "faults": [
                 {
                   "fault": "orphan_code",
@@ -597,7 +597,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -1.74,
-              "ms": 730.1,
+              "ms": 669.9,
               "faults": [
                 {
                   "fault": "orphan_code",
@@ -615,7 +615,7 @@
               "wrong_published": false,
               "held_no_cause": false,
               "error_pct": -0.6,
-              "ms": 679.1,
+              "ms": 607.5,
               "faults": [
                 {
                   "fault": "orphan_code",
@@ -642,7 +642,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": 4967.89,
-          "ms": 616.3,
+          "ms": 731.5,
           "faults": [
             {
               "fault": "unit_scale",
@@ -663,7 +663,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": 3683.36,
-          "ms": 598.9,
+          "ms": 739.1,
           "faults": [
             {
               "fault": "unit_scale",
@@ -684,7 +684,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": 439.41,
-          "ms": 573.5,
+          "ms": 1085.2,
           "faults": [
             {
               "fault": "unit_scale",
@@ -708,7 +708,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": -9.65,
-          "ms": 691.0,
+          "ms": 1072.2,
           "faults": [
             {
               "fault": "unit_scale",
@@ -734,7 +734,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": 3.97,
-          "ms": 686.1,
+          "ms": 929.0,
           "faults": [
             {
               "fault": "unit_scale",
@@ -760,7 +760,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": -2.36,
-          "ms": 660.6,
+          "ms": 843.8,
           "faults": [
             {
               "fault": "unit_scale",
@@ -786,7 +786,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": -13.97,
-          "ms": 700.7,
+          "ms": 903.2,
           "faults": [
             {
               "fault": "duplicate_key",
@@ -811,7 +811,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": -0.48,
-          "ms": 637.0,
+          "ms": 713.0,
           "faults": [
             {
               "fault": "duplicate_key",
@@ -837,7 +837,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": -6.34,
-          "ms": 716.1,
+          "ms": 833.4,
           "faults": [
             {
               "fault": "duplicate_key",
@@ -863,7 +863,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": -13.96,
-          "ms": 764.0,
+          "ms": 942.7,
           "faults": [
             {
               "fault": "key_fanout",
@@ -889,7 +889,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": -0.06,
-          "ms": 730.0,
+          "ms": 810.8,
           "faults": [
             {
               "fault": "key_fanout",
@@ -915,7 +915,7 @@
           "wrong_published": false,
           "held_no_cause": false,
           "error_pct": -6.47,
-          "ms": 802.5,
+          "ms": 777.7,
           "faults": [
             {
               "fault": "key_fanout",
@@ -926,6 +926,590 @@
               "fault": "stale_feed",
               "share": 1.0,
               "gateway": null
+            }
+          ]
+        }
+      ],
+      "wrong_fix_control": [
+        {
+          "fault": "unit_scale",
+          "verdict": "PROVEN_FAULT",
+          "wrong_fixes": [
+            {
+              "kind": "wrong_factor",
+              "fix": "divide GW_C by 10 instead of 100",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "unit_scale"
+              ],
+              "move_pct": -74.06,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "wrong_factor",
+              "fix": "divide GW_C by 1000 instead of 100",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "unit_scale"
+              ],
+              "move_pct": -82.2,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "every_day",
+              "fix": "divide GW_C by 100 on every day, not only tonight",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "unit_scale"
+              ],
+              "move_pct": -81.46,
+              "history": "ALTERED",
+              "in_range": true,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "wrong_gateway",
+              "fix": "unit fix (divide by 100) on GW_A",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "unit_scale"
+              ],
+              "move_pct": -9.21,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_A",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "unit_scale"
+              ],
+              "move_pct": -0.49,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "wrong_gateway",
+              "fix": "unit fix (divide by 100) on GW_B",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "unit_scale"
+              ],
+              "move_pct": -6.83,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_B",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "unit_scale"
+              ],
+              "move_pct": -0.41,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_C",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "unit_scale"
+              ],
+              "move_pct": -5.24,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "remove duplicate payments in tonight's batch",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "unit_scale"
+              ],
+              "move_pct": 0.0,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "moves today's number only +0.00%"
+            }
+          ]
+        },
+        {
+          "fault": "duplicate_key",
+          "verdict": "PROVEN_FAULT",
+          "wrong_fixes": [
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_A",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "duplicate_key"
+              ],
+              "move_pct": -49.68,
+              "history": "UNCHANGED",
+              "in_range": true,
+              "accepted": true,
+              "why": "would be confirmed: moves the number, keeps history and lands in range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_A",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "duplicate_key"
+              ],
+              "move_pct": -2.67,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_B",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "duplicate_key"
+              ],
+              "move_pct": -36.83,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_B",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "duplicate_key"
+              ],
+              "move_pct": -2.21,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_C",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "duplicate_key"
+              ],
+              "move_pct": -4.39,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_C",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "duplicate_key"
+              ],
+              "move_pct": -0.28,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            }
+          ]
+        },
+        {
+          "fault": "key_fanout",
+          "verdict": "PROVEN_FAULT",
+          "wrong_fixes": [
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_A",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "key_fanout"
+              ],
+              "move_pct": -49.68,
+              "history": "UNCHANGED",
+              "in_range": true,
+              "accepted": true,
+              "why": "would be confirmed: moves the number, keeps history and lands in range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_A",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "key_fanout"
+              ],
+              "move_pct": -2.67,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_B",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "key_fanout"
+              ],
+              "move_pct": -36.83,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_B",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "key_fanout"
+              ],
+              "move_pct": -2.21,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_C",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "key_fanout"
+              ],
+              "move_pct": -4.39,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_C",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "key_fanout"
+              ],
+              "move_pct": -0.28,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "remove duplicate payments in tonight's batch",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "key_fanout"
+              ],
+              "move_pct": -0.0,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "moves today's number only -0.00%"
+            }
+          ]
+        },
+        {
+          "fault": "stale_feed",
+          "verdict": "PROVEN_FAULT",
+          "wrong_fixes": [
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_A",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "stale_feed"
+              ],
+              "move_pct": -54.04,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_A",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "stale_feed"
+              ],
+              "move_pct": -2.9,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_B",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "stale_feed"
+              ],
+              "move_pct": -40.07,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_B",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "stale_feed"
+              ],
+              "move_pct": -2.4,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_C",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "stale_feed"
+              ],
+              "move_pct": -4.78,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_C",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "stale_feed"
+              ],
+              "move_pct": -0.31,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "remove duplicate payments in tonight's batch",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "stale_feed"
+              ],
+              "move_pct": -0.0,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "moves today's number only -0.00%"
+            }
+          ]
+        },
+        {
+          "fault": "clock_shift",
+          "verdict": "PROVEN_FAULT",
+          "wrong_fixes": [
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_A",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "clock_shift"
+              ],
+              "move_pct": -58.7,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "wrong_gateway",
+              "fix": "clock fix (shift back 5.5 hours) on GW_A",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "clock_shift"
+              ],
+              "move_pct": -3.15,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_B",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "clock_shift"
+              ],
+              "move_pct": -25.55,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_C",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "clock_shift"
+              ],
+              "move_pct": -5.19,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "wrong_gateway",
+              "fix": "clock fix (shift back 5.5 hours) on GW_C",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "clock_shift"
+              ],
+              "move_pct": -0.33,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "remove duplicate payments in tonight's batch",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "clock_shift"
+              ],
+              "move_pct": -0.0,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "moves today's number only -0.00%"
+            }
+          ]
+        },
+        {
+          "fault": "orphan_code",
+          "verdict": "PROVEN_FAULT",
+          "wrong_fixes": [
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_A",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "orphan_code"
+              ],
+              "move_pct": -49.94,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_A",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "orphan_code"
+              ],
+              "move_pct": -2.6,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_B",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "orphan_code"
+              ],
+              "move_pct": -36.43,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_B",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "orphan_code"
+              ],
+              "move_pct": -2.5,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "unit fix (divide by 100) on GW_C",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "orphan_code"
+              ],
+              "move_pct": -4.61,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "the corrected number is still outside the normal range"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "clock fix (shift back 5.5 hours) on GW_C",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "orphan_code"
+              ],
+              "move_pct": -0.27,
+              "history": "ALTERED",
+              "in_range": false,
+              "accepted": false,
+              "why": "history would change"
+            },
+            {
+              "kind": "different_cause",
+              "fix": "remove duplicate payments in tonight's batch",
+              "verdict": "PROVEN_FAULT",
+              "confirmed": [
+                "orphan_code"
+              ],
+              "move_pct": 0.0,
+              "history": "UNCHANGED",
+              "in_range": false,
+              "accepted": false,
+              "why": "moves today's number only +0.00%"
             }
           ]
         }
@@ -1008,8 +1592,63 @@
       "WRONG": 0
     },
     "combo_runs": 9,
-    "holes": []
+    "holes": [],
+    "wrong_fix": {
+      "tried": 42,
+      "rejected": 40,
+      "accepted": 2,
+      "by_kind": {
+        "wrong_factor": {
+          "tried": 2,
+          "rejected": 2,
+          "accepted": 0
+        },
+        "every_day": {
+          "tried": 1,
+          "rejected": 1,
+          "accepted": 0
+        },
+        "wrong_gateway": {
+          "tried": 4,
+          "rejected": 4,
+          "accepted": 0
+        },
+        "different_cause": {
+          "tried": 35,
+          "rejected": 33,
+          "accepted": 2
+        }
+      },
+      "accepted_list": [
+        {
+          "kind": "different_cause",
+          "fix": "unit fix (divide by 100) on GW_A",
+          "verdict": "PROVEN_FAULT",
+          "confirmed": [
+            "duplicate_key"
+          ],
+          "move_pct": -49.68,
+          "history": "UNCHANGED",
+          "in_range": true,
+          "accepted": true,
+          "why": "would be confirmed: moves the number, keeps history and lands in range"
+        },
+        {
+          "kind": "different_cause",
+          "fix": "unit fix (divide by 100) on GW_A",
+          "verdict": "PROVEN_FAULT",
+          "confirmed": [
+            "key_fanout"
+          ],
+          "move_pct": -49.68,
+          "history": "UNCHANGED",
+          "in_range": true,
+          "accepted": true,
+          "why": "would be confirmed: moves the number, keeps history and lands in range"
+        }
+      ]
+    }
   },
-  "seconds": 36,
-  "generated_at": "2026-10-26 01:25:55"
+  "seconds": 51,
+  "generated_at": "2026-10-27 02:30:34"
 }
