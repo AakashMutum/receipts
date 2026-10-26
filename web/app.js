@@ -357,6 +357,23 @@
     $("#lineage").after(extra);
   }
 
+  // blast radius ---------------------------------------------------------------------------------------------
+  function renderBlast(c) {
+    const b = c.blast_radius;
+    if (!b) { $("#blast-sub").textContent = "Not computed for this case."; $("#blast").innerHTML = ""; return; }
+    const held = c.trust_status === "HELD";
+    $("#blast-sub").textContent = `Read forward from ${b.start.join(", ")} over ${b.views_read} view definitions.`;
+    const list = (xs) => xs.length ? xs.map((x) => `<code>${esc(x)}</code>`).join(" ") : "none";
+    const r = b.reads || {};
+    const reads = r.available
+      ? (r.readers && r.readers.length ? r.readers.map((x) => `${esc(x.user_name)} (${esc(x.reads)} reads)`).join(", ") : "nobody, according to the audit log")
+      : esc(r.note || "not available on this backend");
+    $("#blast").innerHTML = `
+      <p><b>${b.count}</b> view${b.count === 1 ? "" : "s"} read the pipeline directly and showed ${held ? "the held" : "this"} value: ${list(b.exposed)}</p>
+      <p>Protected by the gate, they read only published values: ${list(b.protected)}</p>
+      <p class="sub">Read during the bad window: ${reads}</p>`;
+  }
+
   // fix diff + approval -------------------------------------------------------------------------------------------
   function renderFix(c) {
     const card = $("#fix-card");
@@ -599,6 +616,7 @@
       renderWhere(c);
       renderUndo(c);
       renderLineage(c);
+      renderBlast(c);
       renderFix(c);
       renderTimings(c);
       if (animate) $("#case").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });

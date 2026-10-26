@@ -59,6 +59,7 @@ def cmd_init(a):
 
 
 def _print_case(c):
+    from .explain import blast_text
     v = c["values"]
     print(f"\n{c['case_id']}  {c['day_label']}  verdict {c['verdict']}  status {c['trust_status']}")
     print(f"  candidate {v['candidate']:,.0f}  baseline {v['baseline']:,.0f}  change {v['change_pct']:+.1%}"
@@ -69,6 +70,7 @@ def _print_case(c):
             if s["reason"]:
                 print(f"              {s['reason']}")
     print(f"  {c['explanation']['text']}")
+    print(f"  {blast_text(c)}")
     print(f"  {c['decomposition']['hypotheses']:,} slices tested over {c['decomposition']['rows_in_scope']:,} rows; "
           f"total {c['total_ms']:.0f} ms, {c['statements']} SQL statements")
 
@@ -94,7 +96,7 @@ def cmd_run(a):
     c = gate.run(be, day, {"id": sc.id, "title": sc.title, "story": sc.story, "kind": sc.kind})
     _print_case(c)
     if a.json:
-        Path(a.json).write_text(json.dumps(c, indent=2, default=str))
+        Path(a.json).write_text(json.dumps(c, indent=2, default=str), encoding="utf-8")
     ok = c["verdict"] == SCENARIOS[a.scenario].expected_verdict
     return 0 if ok else 1
 
@@ -177,7 +179,7 @@ def cmd_export_sql(a):
     out.mkdir(parents=True, exist_ok=True)
     (out / "01_schema.sql").write_text(d.render("schema.sql", tables=SOURCE_TABLES, festival=FESTIVAL_TABLES))
     (out / "02_pipeline.sql").write_text(d.render("pipeline.sql", schema="PIPE", src=PROD_SRC))
-    (out / "03_pub.sql").write_text(d.render("pub.sql"))
+    (out / "03_pub.sql").write_text(d.render("pub.sql") + "\n" + d.render("mart.sql"))
     (out / "04_udf_clock_drift.sql").write_text(clock_drift_ddl() + "\n/\n")
 
     class _B:  # minimal stand-in so the decomposition renderer can be reused

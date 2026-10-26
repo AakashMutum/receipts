@@ -15,8 +15,12 @@ SELECT
     WHEN p.TRUST_STATUS = 'CORRECTED' THEN 'Safe to use. A proven fault was corrected and approved by a person.'
     ELSE 'Do not use. This value is held by Receipts case ' || p.CASE_ID || '. Quote the last trusted day instead and say the latest value is under investigation.'
   END AS AGENT_GUIDANCE,
-  p.PUBLISHED_AT
+  p.PUBLISHED_AT,
+  -- blast radius: views that read the pipeline directly, so they showed the candidate value
+  COALESCE(c.DOWNSTREAM_COUNT, 0) AS DOWNSTREAM_COUNT,
+  c.DOWNSTREAM_OBJECTS
 FROM PUB.DAILY_REVENUE_PUBLISHED p
+LEFT JOIN RECEIPTS.CASES c ON c.CASE_ID = p.CASE_ID
 JOIN (
   -- Exasol rejects a correlated subquery with "<", so the latest trusted earlier day comes from a join.
   SELECT a.TXN_DAY, MAX(b.TXN_DAY) AS LAST_TRUSTED_DAY

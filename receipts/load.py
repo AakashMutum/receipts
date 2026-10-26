@@ -59,6 +59,7 @@ def init_database(be: Backend, data_dir: Path, log=print) -> dict:
         log(f"loaded LANDING.{t} from {f.name} in {time.perf_counter() - t1:.1f}s")
     create_pipeline(be)
     be.run_script(be.render("pub.sql"))
+    be.run_script(be.render("mart.sql"))
     udf = install_udf(be)
     log(f"udf: {udf['udf']}")
     reset_raw(be, incoming, full=True)

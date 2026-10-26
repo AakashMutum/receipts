@@ -61,6 +61,30 @@ def template(case: dict) -> str:
             f"{case.get('where_text') or 'see the breakdown'}.")
 
 
+def blast_text(case: dict) -> str:
+    """Who saw this number: views that read the pipeline directly, and views the gate protected."""
+    b = case.get("blast_radius")
+    if not b:
+        return "Who saw this number: not computed for this case."
+    held = case["trust_status"] == "HELD"
+    if b["exposed"]:
+        saw = (f"{len(b['exposed'])} view{'s' if len(b['exposed']) != 1 else ''} read the pipeline directly and "
+               f"showed {'this held' if held else 'this'} value: " + ", ".join(b["exposed"]) + ".")
+    else:
+        saw = "No view reads the pipeline directly, so nothing showed the value before the gate decided."
+    prot = (" Protected by the gate (they read only published values): " + ", ".join(b["protected"]) + "."
+            if b["protected"] else "")
+    reads = b.get("reads") or {}
+    if reads.get("available") and reads.get("readers"):
+        who = "; ".join(f"{r.get('user_name')} ({r.get('reads')} reads)" for r in reads["readers"])
+        log = f" Read during the bad window: {who}."
+    elif reads.get("available"):
+        log = " Nobody read them during the bad window, according to the audit log."
+    else:
+        log = f" Read during the bad window: {reads.get('note', 'not available on this backend')}."
+    return f"Who saw this number: {saw}{prot}{log}"
+
+
 def llm(case: dict) -> dict:
     cfg = settings()
     if not cfg.llm_key:

@@ -4,7 +4,8 @@
 --   PIPE      the revenue pipeline, a chain of views
 --   PUB       what dashboards and AI agents are allowed to read
 --   RECEIPTS  cases, evidence and timings written back by the gate
-{% for s in ['LANDING', 'RAW', 'PIPE', 'PUB', 'RECEIPTS'] %}
+--   MART      reports others built on the pipeline (readers for the blast radius)
+{% for s in ['LANDING', 'RAW', 'PIPE', 'PUB', 'RECEIPTS', 'MART'] %}
 DROP SCHEMA IF EXISTS {{ s }} CASCADE;
 CREATE SCHEMA {{ s }};
 {% endfor %}
@@ -51,7 +52,9 @@ CREATE TABLE RECEIPTS.CASES (
   SCENARIO VARCHAR(40),
   ELAPSED_MS DOUBLE,
   SUMMARY VARCHAR(2000),
-  CASE_JSON VARCHAR(2000000)
+  CASE_JSON VARCHAR(2000000),
+  DOWNSTREAM_COUNT DECIMAL(9,0),
+  DOWNSTREAM_OBJECTS VARCHAR(2000)
 );
 
 CREATE TABLE RECEIPTS.EVIDENCE (

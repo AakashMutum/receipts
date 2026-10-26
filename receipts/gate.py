@@ -21,7 +21,7 @@ from itertools import combinations
 
 from . import decompose as decomp
 from . import detectors as det
-from . import explain, lineage
+from . import blast, explain, lineage
 from .db import Backend, to_date
 from .dialect import lit
 from .load import PROD_SRC, udf_status
@@ -196,7 +196,8 @@ def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool =
     # 2. lineage from the catalog -----------------------------------------------------------
     t = time.perf_counter()
     lin = lineage.build(be)
-    tm.step("Read lineage from view definitions", t, rows=len(lin.views))
+    all_views = blast.read_views(be)
+    tm.step("Read lineage from view definitions", t, rows=len(all_views))
 
     # 3. decomposition: every slice in one CUBE pass ----------------------------------------------
     t = time.perf_counter()
@@ -310,6 +311,13 @@ def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool =
     corrected = combined["value"] if combined else None
     last_trusted_day = max(published) if published else None
 
+    # who could have read tonight's number before the gate decided
+    blamed = {(s["blamed"]["table"], s["blamed"]["column"]) for s in suspects
+              if s["outcome"] == "CONFIRMED" and s["blamed"]["table"] and s["blamed"]["column"]}
+    radius = blast.radius(all_views, lin.metric, blamed, lin.tables)
+    since = f"(SELECT MAX(PUBLISHED_AT) FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY < {be.dialect.day(day)})"
+    radius["reads"] = blast.reads_in_window(be, radius["exposed"], since)
+
     # where to look when unexplained: the most concentrated single slice
     where = None
     if dec["top_single"]:
@@ -341,6 +349,7 @@ def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool =
         "decomposition": dec,
         "where_text": where,
         "lineage": lin.to_json(),
+        "blast_radius": radius,
         "series": {
             "published": {d.isoformat(): v for d, v in published.items()},
             "candidate": {d.isoformat(): v for d, v in cand_series.items()},
@@ -408,7 +417,8 @@ def write(be: Backend, case: dict) -> None:
     be.execute(f"""INSERT INTO RECEIPTS.CASES VALUES ({lit(case['case_id'])}, {lit(case['metric'])}, {lit(D)},
         CURRENT_TIMESTAMP, {lit(case['verdict'])}, {lit(v['candidate'])}, {lit(v['baseline'])},
         {lit(v['corrected'])}, {lit(sc)}, {lit(case['total_ms'])}, {lit(case['explanation']['text'][:2000])},
-        {lit(json.dumps(case, default=str))})""")
+        {lit(json.dumps(case, default=str))}, {lit(case['blast_radius']['count'])},
+        {lit(', '.join(case['blast_radius']['exposed'])[:2000])})""")
     for s in case["suspects"]:
         u = s["undo"] or {}
         be.execute(f"""INSERT INTO RECEIPTS.EVIDENCE VALUES ({lit(case['case_id'])}, {lit(s['id'])}, {lit(s['fired'])},

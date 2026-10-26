@@ -22,7 +22,8 @@ IDENTIFIERS = sorted({c for cols in SOURCE_TABLES.values() for c, _ in cols} | s
     "STG_PAYMENTS", "STG_ORDERS", "DIM_MERCHANT", "DIM_CATEGORY", "FX_DAILY", "FCT_REVENUE", "DAILY_REVENUE",
     "METRIC_TRUST", "DASHBOARD_REVENUE", "CLOCK_DRIFT", "DUP_KEYS", "EXTRA_ROWS", "MED_TODAY", "MED_BASE", "N_TODAY",
     "TABLE_NAME", "KEY_COLUMN", "DIM_ROWS", "PAYMENTS_TODAY", "ORDERS_TODAY", "ORDERS_ON_DUP_KEYS", "DUP_ROWS",
-    "RAW_PAYMENTS", "N", "CONFIRMED_CAUSES", "AGENT_READER"})
+    "RAW_PAYMENTS", "N", "CONFIRMED_CAUSES", "AGENT_READER", "MART", "FINANCE_DAILY", "AVG_TICKET", "AVG_TICKET_INR",
+    "CITY_REVENUE", "EXEC_SUMMARY", "CATEGORY_LIST", "DOWNSTREAM_COUNT", "DOWNSTREAM_OBJECTS", "FIRST_READ", "READS"})
 
 
 def exasol_statements() -> list[str]:
@@ -30,6 +31,7 @@ def exasol_statements() -> list[str]:
     out = split_statements(d.render("schema.sql", tables=SOURCE_TABLES, festival=FESTIVAL_TABLES))
     out += split_statements(d.render("pipeline.sql", schema="PIPE", src=PROD_SRC))
     out += split_statements(d.render("pub.sql"))
+    out += split_statements(d.render("mart.sql"))
     for s in SCENARIOS.values():
         out += [d.render_string(x, incoming=INCOMING_DAY) for x in s.inject]
     return out
