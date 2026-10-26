@@ -46,3 +46,18 @@ A flat 14-day baseline would. The gate now learns each weekday's index from five
 
 **Is it fast on big data? Your demo is small.**
 On Exasol Personal on a laptop, the IST case gave the right verdict at every size up to 400,000 orders a day (17,346,085 payment rows): 27.5 seconds end to end, 26.3 measured by Exasol, the CUBE over 5.95 million rows in 5.9. Each run was the first after a fresh load, measured before the unit tail check. That is the largest size we have measured, and we claim nothing beyond it.
+
+**Your red team found a hole. What was it, and is it closed?**
+A x100 unit change on 2% of one small gateway's payments moved revenue up 6.5% and was published as a verified real change, because the unit check compared medians and 2% of rows do not move a median. We added a tail check: per gateway, count today's amounts above 20 times the baseline median and compare with the baseline share. Re-run on the same seed, the unit floor went from 100% to 2% and the holes from 1 to 0. Held-out cases written before the fix were not used to tune it.
+
+**Why is the normal range on the taxi data about plus or minus 22%?**
+Because real daily revenue is noisy. Weather, holidays and events move taxi revenue a lot from one day to the next, so the band learned from five weeks of history is wide (21.7% at the median, from 12.9% to 31.9%). A fault without a detector that moves the total less than that would be published. The detectors do not depend on the band: three duplicated files at +8% were still caught.
+
+**What happens today with a x10 unit error on 2% to 10% of one gateway?**
+It is held, not proven. Those amounts mostly stay below the 20x cut, so the tail check does not see them, but the total leaves the normal range, so the number is held as UNEXPLAINED and a person looks. In the 24 held-out cases all 12 x10 cases ended like this, and none was published.
+
+**Why is there a DuckDB stand-in if Exasol is the platform?**
+So CI and anyone without Exasol can run the tests and the demo. It runs the same SQL templates. The results we quote come from Exasol unless a line says the stand-in, and the stand-in gives the same verdicts where both were run.
+
+**What have you not tested?**
+The Mac and Linux run scripts on a real Mac or Linux machine (only under Git Bash on Windows), the Exasol MCP server with a real AI agent (only the read-only database user was verified), posting to a real Slack workspace (only that a failing webhook does not stop the watcher), and building the Docker image.
