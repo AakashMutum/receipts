@@ -121,7 +121,7 @@ def cmd_judge_check(a):
     """No API key, no Exasol needed. Builds, evaluates and asserts the headline claims."""
     from .evaluate import evaluate
     print("Receipts judge check: fresh synthetic data, every scenario, scored against ground truth.\n")
-    rep = evaluate(seeds=(11, 22), orders_per_day=12000, backend="duckdb")
+    rep = evaluate(seeds=(11, 22), orders_per_day=12000, backend="duckdb", wrong_fix=False)
     s = rep["systems"]
     checks = [
         ("Every faulty batch held, every good batch published", s["receipts"]["hold_decision_accuracy"] == 1.0),
@@ -264,6 +264,23 @@ def cmd_backtest(a):
     caught = sum(r["caught"] for r in rep["planted"])
     print(f"\n{len(rep['clean'])} real days judged, {held} held. Planted faults caught: {caught} of "
           f"{len(rep['planted'])}. Report: {out}")
+
+
+def cmd_wrongfix(a):
+    """Show the gate deliberately wrong corrections for every planted fault; write the wrong-fix report."""
+    from .wrongfix import run, to_markdown
+    rep = run(seeds=tuple(a.seeds), orders_per_day=a.orders_per_day, backend=a.backend,
+              log=lambda m: print(m, flush=True))
+    out = Path(a.out) if a.out else ROOT / "samples" / ("exasol" if a.backend == "exasol" else "")
+    out.mkdir(parents=True, exist_ok=True)
+    cmd = (f"receipts wrongfix --backend {a.backend} --seeds {' '.join(map(str, a.seeds))} "
+           f"--orders-per-day {a.orders_per_day}")
+    (out / "wrongfix_report.json").write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
+    (out / "wrongfix_report.md").write_text(to_markdown(rep, cmd), encoding="utf-8")
+    s = rep["summary"]
+    print(f"\nwrong fixes tried {s['tried']}, rejected {s['rejected']}, accepted {s['accepted']}. "
+          f"Report: {out / 'wrongfix_report.md'}")
+    return 0
 
 
 def cmd_scale(a):
@@ -546,6 +563,14 @@ def main(argv=None):
     rt.add_argument("--out", help="folder for redteam_report.md and .json (default samples/, or samples/exasol/)")
     rt.add_argument("--no-restore", action="store_true", help="do not run init --fresh afterwards (Exasol)")
     rt.set_defaults(fn=cmd_redteam)
+    wf = sub.add_parser("wrongfix", help="show the gate deliberately wrong corrections (synthetic data only)",
+                        description="For every scenario with a planted fault, apply wrong corrections (wrong gateway, "
+                                    "wrong factor, every day, another cause) and report which the gate's rules reject.")
+    wf.add_argument("--backend", choices=["duckdb", "exasol"], default="duckdb")
+    wf.add_argument("--seeds", type=int, nargs="+", default=[11, 22, 33, 44, 55])
+    wf.add_argument("--orders-per-day", type=int, default=20000)
+    wf.add_argument("--out", help="folder for wrongfix_report.md and .json (default samples/, or samples/exasol/)")
+    wf.set_defaults(fn=cmd_wrongfix)
     ho = sub.add_parser("heldout", help="frozen held-out partial unit errors (synthetic data only)")
     ho.add_argument("--backend", choices=["duckdb", "exasol"], default="duckdb")
     ho.add_argument("--seeds", type=int, nargs="+", default=[21, 22])

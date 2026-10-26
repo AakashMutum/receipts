@@ -58,6 +58,30 @@ the fix was written and were not used to tune it.
 Reports: `samples/exasol/*_before.md` and the files without the suffix. The DuckDB stand-in gives the same
 held-out counts and the same red team floors.
 
+## Wrong-fix control: is the undo test circular?
+
+For every scenario with a planted fault, the gate's own rules (moves today by at least 1.5%, keeps history as
+published, lands in the normal range) were shown deliberately wrong corrections: the right fix on the wrong
+gateway, the wrong factor, the right fix on every day instead of tonight, or the fix for a cause that was not
+planted. Run on the DuckDB stand-in, 5 seeds, 20,000 orders a day
+([`samples/wrongfix_report.md`](../samples/wrongfix_report.md), `receipts wrongfix`).
+
+| Wrong fixes | Tried | Rejected | Accepted |
+|---|---|---|---|
+| Wrong gateway | 30 | 30 | 0 |
+| Applied to every day, not tonight | 5 | 5 | 0 |
+| Wrong factor | 10 | 6 | 4 |
+| Fix for a cause that was not planted | 190 | 184 | 6 |
+| **All** | **235** | **225** | **10** |
+
+The 10 accepted are listed in the report. Four are a x1000 correction where x100 was planted on the smallest
+gateway, and six are a x100 correction on the smallest gateway while the total was already inside the range
+(the masked pair on all 5 seeds, one duplicate load). In each case the gate's own verdict was unaffected: the
+detectors did not nominate those corrections, and the confirmed causes were the planted ones. What it shows:
+the history rule rejects every fix applied to past days, and the move-and-range rules reject most wrong fixes;
+on a small slice, or when the total is already in range, a wrong correction can pass the rules, so the
+detector's nomination carries part of the proof there.
+
 ## Known limits and holes
 
 * **Not closed:** a x10 unit change on 2% to 10% of a gateway is held without a proven cause (12 of 24 held-out

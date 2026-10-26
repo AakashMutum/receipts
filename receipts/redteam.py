@@ -30,7 +30,7 @@ from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
-from . import gate
+from . import gate, wrongfix
 from .config import settings
 from .datagen import GenConfig, generate
 from .db import Backend, DuckDBBackend, connect
@@ -71,24 +71,30 @@ def classify(case: dict, expected: set[str], truth: float) -> dict:
             "error_pct": round(err, 2), "ms": case["total_ms"]}
 
 
-def attack(be: Backend, day: date, kinds: list[tuple[str, float, str | None]], truth: float) -> dict:
+def attack(be: Backend, day: date, kinds: list[tuple[str, float, str | None]], truth: float,
+           control: bool = False) -> dict:
     """Plant one or more faults into tonight's RAW batch, run the gate without write-back, restore RAW."""
     sql = [s for k, sh, gw in kinds for s in fault_sql(k, sh, gw)]
     sc = Scenario("redteam", " + ".join(k for k, _, _ in kinds), "", "PROVEN_FAULT",
                   frozenset(k for k, _, _ in kinds), sql, kind="redteam")
-    r = attack_sql(be, day, sc, truth)
+    planted = {k: (gw or FAULT_CLASSES[k][3]) for k, _, gw in kinds} if control else None
+    r = attack_sql(be, day, sc, truth, planted)
     r["faults"] = [{"fault": k, "share": sh, "gateway": gw or FAULT_CLASSES[k][3]} for k, sh, gw in kinds]
     return r
 
 
-def attack_sql(be: Backend, day: date, sc: Scenario, truth: float) -> dict:
+def attack_sql(be: Backend, day: date, sc: Scenario, truth: float, planted: dict | None = None) -> dict:
     """Land tonight's batch with a scenario's fault SQL, run the gate without write-back, restore RAW."""
     ingest(be, day, sc)
     try:
         c = gate.run(be, day, {"id": sc.id, "title": sc.title}, write_back=False)
+        wrong = wrongfix.control(be, day, c, planted) if planted else None
     finally:
         reset_raw(be, day)  # leave tonight unlanded, as the attack found it
-    return classify(c, set(sc.expected_causes), truth)
+    out = classify(c, set(sc.expected_causes), truth)
+    if wrong is not None:
+        out["wrong_fixes"] = wrong
+    return out
 
 
 def clean_value(be: Backend, day: date) -> float:
@@ -140,6 +146,13 @@ def run(backend: str = "duckdb", seeds=(11,), orders_per_day: int = 8000, log=pr
             r["gateway"] = gw
             scope.append(r)
             log(f"  unit_scale     {gw:5s}  100%  {r['outcome']:12s} {r['verdict']:13s} error {r['error_pct']:+7.2f}%")
+        # wrong-fix control: each class at 100%, every deliberately wrong correction through the gate's rules
+        controls = []
+        for k in FAULT_CLASSES:
+            r = attack(be, day, [(k, 1.0, None)], truth, control=True)
+            controls.append({"fault": k, "verdict": r["verdict"], "wrong_fixes": r["wrong_fixes"]})
+            log(f"  wrong fixes for {k:14s} tried {len(r['wrong_fixes'])}, "
+                f"accepted {sum(w['accepted'] for w in r['wrong_fixes'])}")
         floors = {l["fault"]: l["floor"] for l in ladders}
         combos = []
         for up in UP:
@@ -152,7 +165,7 @@ def run(backend: str = "duckdb", seeds=(11,), orders_per_day: int = 8000, log=pr
                     f"{','.join(r['confirmed']) or '-'} error {r['error_pct']:+.2f}%")
         be.close()
         per_seed.append({"seed": seed, "clean_value": truth, "ladders": ladders, "unit_gateways": scope,
-                         "combos": combos})
+                         "combos": combos, "wrong_fix_control": controls})
     return {"backend": desc, "seeds": list(seeds), "orders_per_day": orders_per_day, "shares": SHARES,
             "wrong_pct": WRONG_PCT, "runs": per_seed, "summary": summarise(per_seed),
             "seconds": round(time.perf_counter() - t0), "generated_at": time.strftime("%Y-%m-%d %H:%M:%S")}
@@ -178,7 +191,9 @@ def summarise(per_seed: list[dict]) -> dict:
              [{"where": " + ".join(f"{f['fault']} at {f['share']:.0%}" for f in c["faults"]), **c}
               for c in combos if c["outcome"] in HOLES])
     return {"classes": out, "combos": {o: sum(c["outcome"] == o for c in combos) for o in OUTCOMES},
-            "combo_runs": len(combos), "holes": holes}
+            "combo_runs": len(combos), "holes": holes,
+            "wrong_fix": wrongfix.summary([w for s in per_seed for c in s.get("wrong_fix_control", [])
+                                           for w in c["wrong_fixes"]])}
 
 
 def _pct(x) -> str:
@@ -239,6 +254,15 @@ def to_markdown(rep: dict, command: str) -> str:
         out.append("No attack got a wrong number published or a wrong cause named. Below each floor the gate either held "
                    "the number with nothing proven (safe, a person looks) or published a number that was less than "
                    f"{rep['wrong_pct']:.0f}% off (inside the normal noise).")
+    w = s.get("wrong_fix")
+    if w:
+        out += ["", "## Wrong-fix control", "",
+                "Each fault class at 100%, then deliberately wrong corrections (wrong gateway, wrong factor, every day "
+                "instead of tonight, or the fix for another cause) judged by the gate's own rules. Accepted means it "
+                "moves today by at least 1.5%, keeps history and lands in range.", "",
+                f"Tried {w['tried']}, rejected {w['rejected']}, accepted {w['accepted']}."]
+        out += [f"* Accepted: {r['fix']} ({r['move_pct']:+.2f}%), gate verdict {r['verdict']}, confirmed "
+                f"{', '.join(r['confirmed']) or 'none'}." for r in w["accepted_list"]]
     out += ["", "## What the outcomes mean", ""] + [f"* `{k}`: {v}" for k, v in OUTCOMES.items()]
     out.append("* Holes are `wrong_cause` and `WRONG`. Held is safe: the number is not shown and a person decides.")
     return "\n".join(out) + "\n"

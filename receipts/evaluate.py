@@ -20,6 +20,7 @@ from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
+from . import wrongfix
 from .config import settings
 from .datagen import GenConfig, generate
 from .db import DuckDBBackend, connect
@@ -49,7 +50,8 @@ def _score(runs: list[dict], system: str) -> dict:
             "false_causes": fp, "missed_causes": fn}
 
 
-def evaluate(seeds=(11, 22, 33), orders_per_day=3000, history_days=42, backend: str = "duckdb", log=print) -> dict:
+def evaluate(seeds=(11, 22, 33), orders_per_day=3000, history_days=42, backend: str = "duckdb", log=print,
+             wrong_fix: bool = True) -> dict:
     t_all = time.perf_counter()
     runs = []
     for seed in seeds:
@@ -85,6 +87,8 @@ def evaluate(seeds=(11, 22, 33), orders_per_day=3000, history_days=42, backend: 
             ok = (run["receipts"]["verdict"] == sc.expected_verdict and
                   set(run["receipts"]["causes"]) == set(sc.expected_causes))
             run["pass"] = ok
+            if wrong_fix and sc.expected_verdict == "PROVEN_FAULT":  # the wrong-fix control, see wrongfix.py
+                run["wrong_fixes"] = wrongfix.control(be, day, c, wrongfix.planted_of(sc.expected_causes, c))
             runs.append(run)
             log(f"seed {seed} {sc.id:17s} {'PASS' if ok else 'FAIL'}  verdict {c['verdict']:13s} "
                 f"causes {','.join(c['confirmed']) or '-':28s} {c['total_ms']:.0f} ms")
@@ -107,6 +111,8 @@ def evaluate(seeds=(11, 22, 33), orders_per_day=3000, history_days=42, backend: 
         "seconds": round(time.perf_counter() - t_all, 1),
         "runs_detail": runs,
     }
+    if wrong_fix:
+        report["wrong_fix"] = wrongfix.summary([w for r in runs for w in r.get("wrong_fixes", [])])
     return report
 
 
@@ -142,6 +148,15 @@ def to_markdown(rep: dict) -> str:
             "because the total looks normal.",
             "* The unknown fault has no detector by design. The right answer is UNEXPLAINED (held, no cause named), "
             "and that is what is scored.", ""]
+    w = rep.get("wrong_fix")
+    if w:
+        out += ["## Wrong-fix control", "",
+                "Deliberately wrong corrections for every planted fault (wrong gateway, wrong factor, every day instead "
+                f"of tonight, or the fix for another cause), judged by the gate's own rules: tried {w['tried']}, "
+                f"rejected {w['rejected']}, accepted {w['accepted']}.", ""]
+        out += [f"* Accepted: {r['fix']} ({r['move_pct']:+.2f}%, history {r['history'].lower()}, in range); gate "
+                f"verdict {r['verdict']}, confirmed {', '.join(r['confirmed']) or 'none'}." for r in w["accepted_list"]]
+        out.append("")
     return "\n".join(out)
 
 
