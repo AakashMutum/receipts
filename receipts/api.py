@@ -11,7 +11,7 @@ from datetime import date
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -204,6 +204,32 @@ def trust():
         rows = b.query("SELECT METRIC_NAME, TXN_DAY, TRUST_STATUS, TRUSTED_VALUE, CASE_ID, AGENT_GUIDANCE "
                        "FROM PUB.METRIC_TRUST ORDER BY TXN_DAY DESC LIMIT 3")
     return rows
+
+
+def _badge(metric: str | None) -> Response:
+    from . import badge
+    try:
+        b = be()
+        with _lock:
+            got = badge.latest(b, metric)
+    except HTTPException:
+        got = None
+    headers = {"Cache-Control": "no-cache, max-age=0"}
+    if not got:
+        return Response(badge.unknown(metric or "receipts"), media_type="image/svg+xml", status_code=404, headers=headers)
+    return Response(badge.svg(got["metric"], got["status"], got["last_trusted"]), media_type="image/svg+xml",
+                    headers=headers)
+
+
+@app.get("/badge.svg")
+def badge_default():
+    """Trust badge for the latest day of the first metric. Read-only; works in normal mode."""
+    return _badge(None)
+
+
+@app.get("/badge/{metric}.svg")
+def badge_metric(metric: str):
+    return _badge(metric)
 
 
 @app.get("/api/alerts")

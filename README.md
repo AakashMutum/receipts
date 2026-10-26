@@ -193,6 +193,14 @@ The command center shows the same contrast with two deterministic agents, so the
 
 ![Two agents, one question](docs/screenshots/04_agents_held.png)
 
+## Trust badge
+
+`GET /badge.svg` returns a small SVG with the metric name, today's trust status (TRUSTED, REAL_CHANGE, HELD or CORRECTED) and the last trusted day, read from `PUB.METRIC_TRUST`. It carries no values and works in normal mode. `/badge/<metric>.svg` picks a metric by name. Embed it in a wiki, a README or a dashboard header:
+
+```markdown
+![Revenue trust](http://127.0.0.1:8000/badge.svg)
+```
+
 ## Limits
 
 * It only proves fault classes it has a detector for. Six today. Anything else becomes `UNEXPLAINED`: held, no cause guessed, a person decides.

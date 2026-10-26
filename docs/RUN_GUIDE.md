@@ -191,6 +191,20 @@ The **Red team** tab next to it shows the detection floor per fault class from t
 runs one attack live (`receipts redteam` writes the report; see the README). Run it on the built-in synthetic
 data or a sandbox copy, never on live production tables.
 
+## 9. Trust badge
+
+With `receipts serve` running (normal or lab mode), `http://127.0.0.1:8000/badge.svg` is a small SVG: the metric
+name, today's trust status and the last trusted day, read from `PUB.METRIC_TRUST`. No values, no raw data, and it
+is never cached. `/badge/<metric>.svg` selects a metric by name; an unknown name returns 404 with a grey badge.
+
+```markdown
+![Revenue trust](http://127.0.0.1:8000/badge.svg)
+```
+
+```html
+<img src="http://127.0.0.1:8000/badge/daily_revenue_inr.svg" alt="Revenue trust">
+```
+
 ## Troubleshooting
 
 | Symptom | Fix |
