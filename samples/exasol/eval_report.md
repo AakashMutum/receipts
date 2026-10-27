@@ -1,6 +1,6 @@
 # Receipts evaluation
 
-50 runs: 10 scenarios x 5 seeds (20,000 orders a day, 42 days of history, backend exasol). Generated 2026-10-26 01:50:51.
+50 runs: 10 scenarios x 5 seeds (20,000 orders a day, 42 days of history, backend exasol). Generated 2026-10-27 22:48:03.
 
 **Receipts passed 50 of 50 runs** (right verdict and exactly the right causes).
 
@@ -11,7 +11,7 @@
 | Threshold alert (typical monitor) | 88% | 100% | 0% | 0 | 40 |
 
 Corrected value after the proven fix, against the true clean value: mean error 0.001%, max 0.017%.
-Gate latency per run: median 3410 ms, max 11667 ms.
+Gate latency per run: median 4535 ms, max 13204 ms.
 
 ## Per scenario
 
@@ -74,3 +74,18 @@ Gate latency per run: median 3410 ms, max 11667 ms.
 * **Detectors only** is the ablation. It names every check that fired. On the festival day the retry burst trips the duplicate check, so it blames a fault that is not there. The undo test removes it.
 * **Threshold alert** never names a cause, holds the real festival surge, and misses the masked pair because the total looks normal.
 * The unknown fault has no detector by design. The right answer is UNEXPLAINED (held, no cause named), and that is what is scored.
+
+## Wrong-fix control
+
+Deliberately wrong corrections for every planted fault (wrong gateway, wrong factor, every day instead of tonight, or the fix for another cause), judged by the gate's own rules: tried 235, rejected 225, accepted 10.
+
+* Accepted: unit fix (divide by 100) on GW_C (-5.41%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed clock_shift, duplicate_key.
+* Accepted: divide GW_C by 1000 instead of 100 (-83.06%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed unit_scale.
+* Accepted: unit fix (divide by 100) on GW_C (-5.46%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed clock_shift, duplicate_key.
+* Accepted: divide GW_C by 1000 instead of 100 (-82.88%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed unit_scale.
+* Accepted: unit fix (divide by 100) on GW_C (-5.55%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed clock_shift, duplicate_key.
+* Accepted: divide GW_C by 1000 instead of 100 (-83.76%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed unit_scale.
+* Accepted: unit fix (divide by 100) on GW_C (-4.92%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed duplicate_key.
+* Accepted: unit fix (divide by 100) on GW_C (-5.90%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed clock_shift, duplicate_key.
+* Accepted: divide GW_C by 1000 instead of 100 (-82.98%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed unit_scale.
+* Accepted: unit fix (divide by 100) on GW_C (-5.47%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed clock_shift, duplicate_key.
