@@ -72,18 +72,18 @@ def test_held_case_lists_readers_and_publishes_count(duck):
     ingest(duck, DAY, "ist_utc")
     c = gate.run(duck, DAY)
     b = c["blast_radius"]
-    assert b["exposed"] == ["MART.AVG_TICKET", "MART.CITY_REVENUE", "MART.FINANCE_DAILY"]
+    assert b["exposed"] == ["MART.AVG_TICKET", "MART.CITY_REVENUE", "MART.FINANCE_DAILY", "PIPE.DAILY_ORDERS"]
     assert "MART.CATEGORY_LIST" not in b["exposed"] + b["protected"]
     assert {"PUB.METRIC_TRUST", "PUB.DASHBOARD_REVENUE", "MART.EXEC_SUMMARY"} <= set(b["protected"])
     assert b["reads"] == {"available": False, "note": "not available on this backend (the stand-in keeps no query log)"}
     r = duck.query(f"SELECT DOWNSTREAM_COUNT, DOWNSTREAM_OBJECTS FROM PUB.METRIC_TRUST WHERE TXN_DAY = DATE '{DAY}'")[0]
-    assert r["downstream_count"] == 3 and "MART.FINANCE_DAILY" in r["downstream_objects"]
+    assert r["downstream_count"] == 4 and "MART.FINANCE_DAILY" in r["downstream_objects"]
 
 
 def test_exasol_sql_path_gives_the_same_readers(shadow):
     ingest(shadow, DAY, "ist_utc")
     c = gate.run(shadow, DAY)
-    assert c["blast_radius"]["exposed"] == ["MART.AVG_TICKET", "MART.CITY_REVENUE", "MART.FINANCE_DAILY"]
+    assert c["blast_radius"]["exposed"] == ["MART.AVG_TICKET", "MART.CITY_REVENUE", "MART.FINANCE_DAILY", "PIPE.DAILY_ORDERS"]
 
 
 def test_audit_query_parses_as_exasol():
