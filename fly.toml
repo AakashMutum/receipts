@@ -1,0 +1,18 @@
+# Public lab demo on the DuckDB stand-in, synthetic data only. Not deployed; see docs/DEPLOY_DEMO.md.
+# `fly launch --no-deploy --copy-config` then `fly deploy` with your own app name.
+app = "receipts-demo"
+
+[build]
+  dockerfile = "Dockerfile"
+  build-target = "public"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"

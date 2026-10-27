@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import threading
 import time
@@ -10,12 +11,12 @@ import uuid
 from datetime import date
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import agent, explain, gate, lab
+from . import agent, explain, gate, hosted, lab
 from .config import ROOT, settings
 from .db import Backend, connect, to_date
 from .dialect import lit
@@ -72,6 +73,36 @@ def _eval_summary():
     rep = json.loads(f.read_text())
     rep.pop("runs_detail", None)
     return rep
+
+
+_limits = hosted.limiter()
+_auto: dict = {"reset": None}
+
+
+def _demo_reset() -> None:
+    """Auto reset for a public demo: remove tonight's batch and the finished jobs, unless a run is in progress."""
+    b = be()
+    with _lock:
+        if any(j["status"] == "running" for j in _jobs.values()):
+            _auto["reset"].touched()
+            return
+        reset_raw(b, _day(b))
+        _jobs.clear()
+
+
+def _guard(request: Request) -> None:
+    """Public demo only: rate-limit actions that write, and schedule the automatic reset."""
+    if not hosted.enabled():
+        return
+    ok, wait = _limits.allow(hosted.client_of(request))
+    if not ok:
+        raise HTTPException(429, f"This public demo allows a few actions a minute. Try again in {wait:.0f} s.",
+                            headers={"Retry-After": str(int(wait) + 1)})
+    with _lock:
+        if _auto["reset"] is None:
+            _auto["reset"] = hosted.AutoReset(_demo_reset, float(os.environ.get("RECEIPTS_DEMO_RESET_MIN", "10")))
+            _auto["reset"].start()
+    _auto["reset"].touched()
 
 
 def _require_lab() -> None:
@@ -139,9 +170,10 @@ def overview():
 
 
 @app.post("/api/run")
-def run(req: RunReq):
+def run(req: RunReq, request: Request):
     """Land a scenario's batch, planted fault included, and run the gate. Lab only."""
     _require_lab()
+    _guard(request)
     if req.scenario not in SCENARIOS:
         raise HTTPException(404, f"Unknown scenario {req.scenario}")
     b = be()
@@ -172,7 +204,8 @@ def cases():
 
 
 @app.post("/api/case/{case_id}/approve")
-def approve(case_id: str, req: ApproveReq):
+def approve(case_id: str, req: ApproveReq, request: Request):
+    _guard(request)
     b = be()
     with _lock:
         try:
@@ -272,9 +305,10 @@ def _break_job(job: dict, sc, t_click: float) -> None:
 
 
 @app.post("/api/lab/break")
-def lab_break(req: BreakReq):
+def lab_break(req: BreakReq, request: Request):
     """Plant one fault class into tonight's RAW batch and run the gate in the background. Lab only."""
     _require_lab()
+    _guard(request)
     t_click = time.perf_counter()
     if req.fault not in FAULT_CLASSES:
         raise HTTPException(404, f"Unknown fault {req.fault}")
@@ -306,9 +340,10 @@ def lab_job(job_id: str):
 
 
 @app.post("/api/lab/reset")
-def lab_reset():
+def lab_reset(request: Request):
     """Remove tonight's landed batch and its published row, so the demo can run again. Lab only."""
     _require_lab()
+    _guard(request)
     b = be()
     with _lock:
         _require_synthetic(b)
@@ -338,10 +373,11 @@ def lab_redteam():
 
 
 @app.post("/api/lab/redteam/attack")
-def lab_attack(req: BreakReq):
+def lab_attack(req: BreakReq, request: Request):
     """Run one attack live: plant the fault, run the gate without write-back, restore RAW. Lab only."""
     from .redteam import OUTCOMES, attack, clean_value
     _require_lab()
+    _guard(request)
     if req.fault not in FAULT_CLASSES:
         raise HTTPException(404, f"Unknown fault {req.fault}")
     if not 0 < req.share <= 1:
