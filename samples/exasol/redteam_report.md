@@ -2,7 +2,7 @@
 
 **Run this on the built-in synthetic data or a sandbox copy, never on live production tables.** Every attack writes a planted fault into RAW.
 
-On Exasol 2026.2.0-nano.3, 20,000 orders a day, seeds 11. Generated 2026-10-26 01:25:06 in 6 minutes. Reproduce: `receipts redteam --backend exasol --seeds 11 --orders-per-day 20000`.
+On Exasol 2026.2.0-nano.3, 20,000 orders a day, seeds 11. Generated 2026-10-27 22:56:31 in 8 minutes. Reproduce: `receipts redteam --backend exasol --seeds 11 --orders-per-day 20000`.
 
 For each fault class an attacker shrinks the share of rows affected (100, 50, 25, 10, 5, 2 percent). After the first step the gate no longer proves, it keeps shrinking while the fault still moves the number by 4% or more (a smaller one cannot be published as a wrong number), then stops. The detection floor is the smallest share proven with the right cause at every step down to it; with several seeds the worst seed counts. Nothing was tuned for this run.
 
@@ -77,6 +77,14 @@ For each fault class an attacker shrinks the share of rows affected (100, 50, 25
 ## Holes
 
 No attack got a wrong number published or a wrong cause named. Below each floor the gate either held the number with nothing proven (safe, a person looks) or published a number that was less than 4% off (inside the normal noise).
+
+## Wrong-fix control
+
+Each fault class at 100%, then deliberately wrong corrections (wrong gateway, wrong factor, every day instead of tonight, or the fix for another cause) judged by the gate's own rules. Accepted means it moves today by at least 1.5%, keeps history and lands in range.
+
+Tried 42, rejected 40, accepted 2.
+* Accepted: unit fix (divide by 100) on GW_A (-49.80%), gate verdict PROVEN_FAULT, confirmed duplicate_key.
+* Accepted: unit fix (divide by 100) on GW_A (-49.80%), gate verdict PROVEN_FAULT, confirmed key_fanout.
 
 ## What the outcomes mean
 
