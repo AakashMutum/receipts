@@ -9,7 +9,7 @@ Dataset: **NYC TLC Trip Record Data, yellow taxi trip records**, published by th
 
 Trips from 2024-01-01 to 2024-03-31: 9,554,757. The metric is the daily total of `total_amount` by pickup date. The first 35 days (2024-01-01 to 2024-02-04) are published as trusted history by assumption; the gate then judges 56 days, 2024-02-05 to 2024-03-31, one night at a time, on Exasol 2026.2.0-nano.3 (Python UDF: in-database). No threshold was changed for this data. How trips map onto the pipeline tables is described in `receipts/backtest.py`.
 
-Reproduce: `receipts backtest --backend exasol` (downloads about 150 MB once into `data/real/`, then runs in about 33 minutes).
+Reproduce: `receipts backtest --backend exasol` (downloads about 150 MB once into `data/real/`, then runs in about 10 minutes).
 
 ## Real days, no faults planted
 
@@ -38,20 +38,20 @@ Caught with the right cause: **6 of 6**.
 
 ## Timings
 
-Measured on Exasol 2026.2.0-nano.3 (Python UDF: in-database), from the client. Building the database (adapter, load, pipeline, UDF, warm-up history) took 450 s.
+Measured on Exasol 2026.2.0-nano.3 (Python UDF: in-database), from the client. Building the database (adapter, load, pipeline, UDF, warm-up history) took 85 s.
 
 | Measure | Median | Max |
 |---|---|---|
-| Gate run, end to end (62 runs) | 14,804 ms | 47,483 ms |
-| Of which inside the database (sum over statements) | 12,871 ms | 47,251 ms |
-| SQL statements per gate run | 15 | |
+| Gate run, end to end (62 runs) | 6,469 ms | 12,896 ms |
+| Of which inside the database (sum over statements) | 5,337 ms | 11,507 ms |
+| SQL statements per gate run | 19 | |
 
 ## Compared with the run on the DuckDB stand-in
 
 * Gate runs compared: 62 (same days, same planted faults)
 * Same verdict and same causes: **62 of 62**
 * Same detectors fired: 62 of 62
-* Largest relative difference in the metric value between the two databases: 6.45e-05
+* Largest relative difference in the metric value between the two databases: 9.94e-09
 
 ## All judged days
 

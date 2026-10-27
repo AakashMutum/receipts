@@ -25,9 +25,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 38898.1,
-      "db_ms": 33062.4,
-      "statements": 15
+      "ms": 5232.4,
+      "db_ms": 4139.7,
+      "statements": 19
     },
     {
       "day": "2024-02-06",
@@ -42,9 +42,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 35427.5,
-      "db_ms": 28186.3,
-      "statements": 15
+      "ms": 5082.6,
+      "db_ms": 3969.6,
+      "statements": 19
     },
     {
       "day": "2024-02-07",
@@ -59,9 +59,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 44585.0,
-      "db_ms": 35162.1,
-      "statements": 15
+      "ms": 4851.4,
+      "db_ms": 3886.7,
+      "statements": 19
     },
     {
       "day": "2024-02-08",
@@ -76,9 +76,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 41157.1,
-      "db_ms": 34083.0,
-      "statements": 15
+      "ms": 5413.5,
+      "db_ms": 4372.2,
+      "statements": 19
     },
     {
       "day": "2024-02-09",
@@ -93,9 +93,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 33769.0,
-      "db_ms": 27745.6,
-      "statements": 15
+      "ms": 5127.7,
+      "db_ms": 4027.2,
+      "statements": 19
     },
     {
       "day": "2024-02-10",
@@ -110,9 +110,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 40170.6,
-      "db_ms": 30624.3,
-      "statements": 15
+      "ms": 5961.5,
+      "db_ms": 4858.1,
+      "statements": 19
     },
     {
       "day": "2024-02-11",
@@ -127,9 +127,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 25213.8,
-      "db_ms": 20096.2,
-      "statements": 15
+      "ms": 4810.4,
+      "db_ms": 3837.3,
+      "statements": 19
     },
     {
       "day": "2024-02-12",
@@ -144,9 +144,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 35342.9,
-      "db_ms": 27341.5,
-      "statements": 15
+      "ms": 5050.7,
+      "db_ms": 4014.6,
+      "statements": 19
     },
     {
       "day": "2024-02-13",
@@ -161,9 +161,9 @@
       "trust": "REAL_CHANGE",
       "confirmed": [],
       "fired": [],
-      "ms": 30196.7,
-      "db_ms": 25383.1,
-      "statements": 15
+      "ms": 4952.2,
+      "db_ms": 3973.3,
+      "statements": 19
     },
     {
       "day": "2024-02-14",
@@ -178,9 +178,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 32813.6,
-      "db_ms": 23297.2,
-      "statements": 15
+      "ms": 4906.8,
+      "db_ms": 3886.5,
+      "statements": 19
     },
     {
       "day": "2024-02-15",
@@ -195,9 +195,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 26413.6,
-      "db_ms": 23136.4,
-      "statements": 15
+      "ms": 5110.7,
+      "db_ms": 4093.3,
+      "statements": 19
     },
     {
       "day": "2024-02-16",
@@ -212,9 +212,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 29517.9,
-      "db_ms": 23982.8,
-      "statements": 15
+      "ms": 4965.5,
+      "db_ms": 3926.1,
+      "statements": 19
     },
     {
       "day": "2024-02-17",
@@ -231,9 +231,9 @@
       "fired": [
         "clock_shift:REJECTED"
       ],
-      "ms": 32343.5,
-      "db_ms": 26631.9,
-      "statements": 26
+      "ms": 6696.3,
+      "db_ms": 5705.1,
+      "statements": 31
     },
     {
       "day": "2024-02-18",
@@ -248,9 +248,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 33680.6,
-      "db_ms": 26091.9,
-      "statements": 15
+      "ms": 5174.2,
+      "db_ms": 4116.4,
+      "statements": 19
     },
     {
       "day": "2024-02-19",
@@ -265,9 +265,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 29531.5,
-      "db_ms": 21280.5,
-      "statements": 15
+      "ms": 5053.6,
+      "db_ms": 3999.1,
+      "statements": 19
     },
     {
       "day": "2024-02-20",
@@ -282,9 +282,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 29346.7,
-      "db_ms": 25060.7,
-      "statements": 15
+      "ms": 5192.3,
+      "db_ms": 4118.8,
+      "statements": 19
     },
     {
       "day": "2024-02-21",
@@ -299,9 +299,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 37059.9,
-      "db_ms": 30295.5,
-      "statements": 15
+      "ms": 5061.7,
+      "db_ms": 3997.0,
+      "statements": 19
     },
     {
       "day": "2024-02-22",
@@ -316,9 +316,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 42683.3,
-      "db_ms": 33910.5,
-      "statements": 15
+      "ms": 5204.8,
+      "db_ms": 4145.5,
+      "statements": 19
     },
     {
       "day": "2024-02-23",
@@ -333,9 +333,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 39023.2,
-      "db_ms": 31580.9,
-      "statements": 15
+      "ms": 6047.5,
+      "db_ms": 4733.1,
+      "statements": 19
     },
     {
       "day": "2024-02-24",
@@ -352,9 +352,9 @@
       "fired": [
         "clock_shift:REJECTED"
       ],
-      "ms": 46881.6,
-      "db_ms": 39365.8,
-      "statements": 26
+      "ms": 6570.1,
+      "db_ms": 5516.5,
+      "statements": 31
     },
     {
       "day": "2024-02-25",
@@ -369,9 +369,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 34624.2,
-      "db_ms": 30725.6,
-      "statements": 15
+      "ms": 6070.7,
+      "db_ms": 4878.8,
+      "statements": 19
     },
     {
       "day": "2024-02-26",
@@ -386,9 +386,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 38244.3,
-      "db_ms": 30974.4,
-      "statements": 15
+      "ms": 7794.5,
+      "db_ms": 6782.6,
+      "statements": 19
     },
     {
       "day": "2024-02-27",
@@ -403,9 +403,9 @@
       "trust": "REAL_CHANGE",
       "confirmed": [],
       "fired": [],
-      "ms": 29266.2,
-      "db_ms": 25868.1,
-      "statements": 15
+      "ms": 5310.2,
+      "db_ms": 4324.2,
+      "statements": 19
     },
     {
       "day": "2024-02-28",
@@ -420,9 +420,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 16802.4,
-      "db_ms": 13347.5,
-      "statements": 15
+      "ms": 5215.0,
+      "db_ms": 4195.9,
+      "statements": 19
     },
     {
       "day": "2024-02-29",
@@ -437,9 +437,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 12411.9,
-      "db_ms": 10128.0,
-      "statements": 15
+      "ms": 5456.7,
+      "db_ms": 4371.4,
+      "statements": 19
     },
     {
       "day": "2024-03-01",
@@ -454,9 +454,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 13136.1,
-      "db_ms": 10826.8,
-      "statements": 15
+      "ms": 5251.1,
+      "db_ms": 4224.2,
+      "statements": 19
     },
     {
       "day": "2024-03-02",
@@ -471,9 +471,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 12249.0,
-      "db_ms": 10712.0,
-      "statements": 15
+      "ms": 5723.4,
+      "db_ms": 4657.7,
+      "statements": 19
     },
     {
       "day": "2024-03-03",
@@ -488,9 +488,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 10481.9,
-      "db_ms": 8679.5,
-      "statements": 15
+      "ms": 5992.1,
+      "db_ms": 4487.0,
+      "statements": 19
     },
     {
       "day": "2024-03-04",
@@ -505,9 +505,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 12450.8,
-      "db_ms": 10223.0,
-      "statements": 15
+      "ms": 5450.6,
+      "db_ms": 4344.6,
+      "statements": 19
     },
     {
       "day": "2024-03-05",
@@ -522,9 +522,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 12888.5,
-      "db_ms": 11212.8,
-      "statements": 15
+      "ms": 8587.5,
+      "db_ms": 7150.5,
+      "statements": 19
     },
     {
       "day": "2024-03-06",
@@ -539,9 +539,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 17597.4,
-      "db_ms": 15204.2,
-      "statements": 15
+      "ms": 6357.5,
+      "db_ms": 5189.4,
+      "statements": 19
     },
     {
       "day": "2024-03-07",
@@ -556,9 +556,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 11015.8,
-      "db_ms": 9176.7,
-      "statements": 15
+      "ms": 5482.7,
+      "db_ms": 4499.6,
+      "statements": 19
     },
     {
       "day": "2024-03-08",
@@ -573,9 +573,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 15532.9,
-      "db_ms": 13138.1,
-      "statements": 15
+      "ms": 6933.3,
+      "db_ms": 5729.0,
+      "statements": 19
     },
     {
       "day": "2024-03-09",
@@ -592,9 +592,9 @@
       "fired": [
         "clock_shift:REJECTED"
       ],
-      "ms": 17674.7,
-      "db_ms": 16146.6,
-      "statements": 26
+      "ms": 9347.7,
+      "db_ms": 8212.9,
+      "statements": 31
     },
     {
       "day": "2024-03-10",
@@ -609,9 +609,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 13608.3,
-      "db_ms": 11919.7,
-      "statements": 15
+      "ms": 6909.1,
+      "db_ms": 5669.4,
+      "statements": 19
     },
     {
       "day": "2024-03-11",
@@ -626,9 +626,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 14074.9,
-      "db_ms": 12113.8,
-      "statements": 15
+      "ms": 6593.1,
+      "db_ms": 5599.6,
+      "statements": 19
     },
     {
       "day": "2024-03-12",
@@ -643,9 +643,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 11033.1,
-      "db_ms": 9602.8,
-      "statements": 15
+      "ms": 6708.5,
+      "db_ms": 5664.5,
+      "statements": 19
     },
     {
       "day": "2024-03-13",
@@ -660,9 +660,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 15538.4,
-      "db_ms": 13865.1,
-      "statements": 15
+      "ms": 9106.2,
+      "db_ms": 7873.8,
+      "statements": 19
     },
     {
       "day": "2024-03-14",
@@ -677,9 +677,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 8672.4,
-      "db_ms": 7219.6,
-      "statements": 15
+      "ms": 6549.1,
+      "db_ms": 5531.4,
+      "statements": 19
     },
     {
       "day": "2024-03-15",
@@ -694,9 +694,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 11320.6,
-      "db_ms": 9683.3,
-      "statements": 15
+      "ms": 7267.9,
+      "db_ms": 6099.7,
+      "statements": 19
     },
     {
       "day": "2024-03-16",
@@ -713,9 +713,9 @@
       "fired": [
         "clock_shift:REJECTED"
       ],
-      "ms": 13444.4,
-      "db_ms": 12033.0,
-      "statements": 26
+      "ms": 12895.8,
+      "db_ms": 11506.8,
+      "statements": 31
     },
     {
       "day": "2024-03-17",
@@ -730,9 +730,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 11480.7,
-      "db_ms": 9724.8,
-      "statements": 15
+      "ms": 6779.9,
+      "db_ms": 5733.5,
+      "statements": 19
     },
     {
       "day": "2024-03-18",
@@ -747,9 +747,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 9887.6,
-      "db_ms": 8418.7,
-      "statements": 15
+      "ms": 7214.4,
+      "db_ms": 6050.9,
+      "statements": 19
     },
     {
       "day": "2024-03-19",
@@ -764,9 +764,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 9812.8,
-      "db_ms": 8586.7,
-      "statements": 15
+      "ms": 7169.1,
+      "db_ms": 6093.0,
+      "statements": 19
     },
     {
       "day": "2024-03-20",
@@ -781,9 +781,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 10871.8,
-      "db_ms": 9507.8,
-      "statements": 15
+      "ms": 7476.8,
+      "db_ms": 6406.9,
+      "statements": 19
     },
     {
       "day": "2024-03-21",
@@ -798,9 +798,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 13390.7,
-      "db_ms": 11927.0,
-      "statements": 15
+      "ms": 8379.4,
+      "db_ms": 7321.9,
+      "statements": 19
     },
     {
       "day": "2024-03-22",
@@ -815,9 +815,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 11738.9,
-      "db_ms": 9819.9,
-      "statements": 15
+      "ms": 7517.5,
+      "db_ms": 6485.4,
+      "statements": 19
     },
     {
       "day": "2024-03-23",
@@ -832,9 +832,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 10961.9,
-      "db_ms": 9623.5,
-      "statements": 15
+      "ms": 7396.2,
+      "db_ms": 6359.3,
+      "statements": 19
     },
     {
       "day": "2024-03-24",
@@ -849,9 +849,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 12954.7,
-      "db_ms": 11457.2,
-      "statements": 15
+      "ms": 7737.1,
+      "db_ms": 6624.5,
+      "statements": 19
     },
     {
       "day": "2024-03-25",
@@ -866,9 +866,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 13215.7,
-      "db_ms": 11680.3,
-      "statements": 15
+      "ms": 8046.3,
+      "db_ms": 6999.5,
+      "statements": 19
     },
     {
       "day": "2024-03-26",
@@ -883,9 +883,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 9477.1,
-      "db_ms": 7872.6,
-      "statements": 15
+      "ms": 6095.7,
+      "db_ms": 5048.6,
+      "statements": 19
     },
     {
       "day": "2024-03-27",
@@ -900,9 +900,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 8949.5,
-      "db_ms": 7418.2,
-      "statements": 15
+      "ms": 6388.0,
+      "db_ms": 5337.5,
+      "statements": 19
     },
     {
       "day": "2024-03-28",
@@ -917,9 +917,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 9486.1,
-      "db_ms": 8050.8,
-      "statements": 15
+      "ms": 7172.6,
+      "db_ms": 6097.5,
+      "statements": 19
     },
     {
       "day": "2024-03-29",
@@ -934,9 +934,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 9127.6,
-      "db_ms": 7662.9,
-      "statements": 15
+      "ms": 6036.9,
+      "db_ms": 5015.1,
+      "statements": 19
     },
     {
       "day": "2024-03-30",
@@ -953,9 +953,9 @@
       "fired": [
         "clock_shift:REJECTED"
       ],
-      "ms": 11497.9,
-      "db_ms": 10291.9,
-      "statements": 26
+      "ms": 7712.5,
+      "db_ms": 6756.2,
+      "statements": 31
     },
     {
       "day": "2024-03-31",
@@ -970,9 +970,9 @@
       "trust": "TRUSTED",
       "confirmed": [],
       "fired": [],
-      "ms": 9811.9,
-      "db_ms": 8366.1,
-      "statements": 15
+      "ms": 6661.1,
+      "db_ms": 5336.9,
+      "statements": 19
     }
   ],
   "planted": [
@@ -993,9 +993,9 @@
       "fired": [
         "unit_scale:CONFIRMED"
       ],
-      "ms": 30534.4,
-      "db_ms": 30322.1,
-      "statements": 26,
+      "ms": 6645.4,
+      "db_ms": 6397.3,
+      "statements": 33,
       "fault": "CMT sends cents (x100)",
       "expected_cause": "unit_scale",
       "real_error_pct": 2341.1790553612445,
@@ -1019,9 +1019,9 @@
       "fired": [
         "duplicate_key:CONFIRMED"
       ],
-      "ms": 47482.7,
-      "db_ms": 47250.8,
-      "statements": 27,
+      "ms": 7752.9,
+      "db_ms": 7543.1,
+      "statements": 32,
       "fault": "Payment file F05 loaded twice",
       "expected_cause": "duplicate_key",
       "real_error_pct": 8.319784603313941,
@@ -1045,9 +1045,9 @@
       "fired": [
         "unit_scale:CONFIRMED"
       ],
-      "ms": 17205.5,
-      "db_ms": 17045.0,
-      "statements": 26,
+      "ms": 6851.6,
+      "db_ms": 6639.8,
+      "statements": 33,
       "fault": "CMT sends cents (x100)",
       "expected_cause": "unit_scale",
       "real_error_pct": 2370.6145589987004,
@@ -1071,9 +1071,9 @@
       "fired": [
         "duplicate_key:CONFIRMED"
       ],
-      "ms": 10801.5,
-      "db_ms": 10680.5,
-      "statements": 27,
+      "ms": 7417.2,
+      "db_ms": 7204.8,
+      "statements": 32,
       "fault": "Payment file F05 loaded twice",
       "expected_cause": "duplicate_key",
       "real_error_pct": 8.274624158651516,
@@ -1097,9 +1097,9 @@
       "fired": [
         "unit_scale:CONFIRMED"
       ],
-      "ms": 10852.9,
-      "db_ms": 10757.4,
-      "statements": 26,
+      "ms": 8352.7,
+      "db_ms": 8140.6,
+      "statements": 33,
       "fault": "CMT sends cents (x100)",
       "expected_cause": "unit_scale",
       "real_error_pct": 2110.811948294162,
@@ -1109,9 +1109,9 @@
     {
       "day": "2024-03-30",
       "weekday": "Sat",
-      "value": 3100727.33,
+      "value": 3100527.41,
       "expected": 3194591.6340000005,
-      "change_pct": -0.0293822543704816,
+      "change_pct": -0.02944483513913828,
       "band_pct": 0.13474061943612112,
       "seasonal": true,
       "anomaly": false,
@@ -1124,30 +1124,30 @@
         "duplicate_key:CONFIRMED",
         "clock_shift:REJECTED"
       ],
-      "ms": 12746.3,
-      "db_ms": 12603.4,
-      "statements": 38,
+      "ms": 8279.3,
+      "db_ms": 8030.4,
+      "statements": 44,
       "fault": "Payment file F05 loaded twice",
       "expected_cause": "duplicate_key",
-      "real_error_pct": 8.187056902376847,
+      "real_error_pct": 8.1800815207602,
       "caught": true,
       "held": true
     }
   ],
-  "seconds": 1992,
+  "seconds": 577,
   "backend": {
     "backend": "exasol",
     "standin": false,
     "version": "2026.2.0-nano.3",
     "udf": "in-database"
   },
-  "load_seconds": 450.3,
+  "load_seconds": 85.1,
   "timings": {
     "gate_runs": 62,
-    "median_ms": 14804,
-    "max_ms": 47483,
-    "median_db_ms": 12871,
-    "max_db_ms": 47251,
-    "median_statements": 15
+    "median_ms": 6469,
+    "max_ms": 12896,
+    "median_db_ms": 5337,
+    "max_db_ms": 11507,
+    "median_statements": 19
   }
 }
