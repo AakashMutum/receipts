@@ -410,7 +410,7 @@ receipts/
 │   ├── hosted.py        rate limits and automatic reset for a public demo
 │   └── api.py           FastAPI endpoints for the command center
 ├── web/                 command center: index.html, app.css, app.js
-├── tests/               170 tests (2 of them run only against a live Exasol)
+├── tests/               171 tests (2 of them run only against a live Exasol)
 ├── samples/             committed, unedited reports and case files (samples/exasol from Exasol)
 ├── sql/exasol/          all rendered Exasol SQL, for reading
 ├── mcp/                 MCP client config and agent instructions
@@ -439,7 +439,7 @@ On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.
 * For a configured metric the band, weekday baseline, lineage, undo test and blast radius follow the config; the detectors and the slice breakdown are bound to the payments layout, and only `daily_revenue_inr` is written to `PUB`.
 * No holiday calendar; a verified real change becomes part of the baseline. Corrections are hotfixes; the real fix is upstream.
 
-**SQL path written and grammar-checked; live run to follow.** These were added after the last Exasol session and run on the stand-in and through the Exasol grammar test, not on a live Exasol: the `MART` reader views and the `DOWNSTREAM_COUNT` and `DOWNSTREAM_OBJECTS` columns of `PUB.METRIC_TRUST`; the audit-log query for reads during the bad window; `PIPE.DAILY_ORDERS` and `receipts connect --check` (which reads `SYS.EXA_ALL_COLUMNS` on Exasol); the wrong-fix control; the trust badge.
+**SQL path written and grammar-checked; live run to follow.** These were added after the last Exasol session and run on the stand-in and through the Exasol grammar test, not on a live Exasol: the `MART` reader views and the `DOWNSTREAM_COUNT` and `DOWNSTREAM_OBJECTS` columns of `PUB.METRIC_TRUST`; the audit-log query for reads during the bad window; `PIPE.DAILY_ORDERS`, the `RECEIPTS.METRIC_HISTORY` snapshot and `receipts connect --check` (which reads `SYS.EXA_ALL_COLUMNS` on Exasol); the wrong-fix control; the trust badge.
 
 **Measured once, on Exasol, before the unit tail check.** The real-data backtest (the stand-in re-run after it matched every verdict and cause) and the scaling run up to 400,000 orders a day; nothing larger is claimed.
 

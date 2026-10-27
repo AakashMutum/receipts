@@ -65,7 +65,7 @@ No Exasol needed for the first three.
 |---|---|---|
 | Demo | Windows: double-click `run.bat`. macOS: double-click `run.command`. Linux: `./run.sh` | Sets up `.venv` on the first run (a few minutes on a slow connection), builds the stand-in data, opens the command center in lab mode. The header says **Local stand-in**. Click **Break the pipeline**: the steps appear one by one, then **HELD** and the receipt |
 | Headline claims | `receipts judge-check` | 20 runs on fresh data, 8 checks, ending in `ALL CHECKS PASSED (20/20 runs, ...)`; about 51 s on the laptop above |
-| Tests | `pytest -q` | 170 tests, all pass; 2 tests are skipped unless a live Exasol is set up |
+| Tests | `pytest -q` | 171 tests, all pass; 2 tests are skipped unless a live Exasol is set up |
 | Setup check | `receipts doctor` | on the stand-in: SQL parse and UDF checks `ok`, then `data loaded` once the demo has run |
 | On Exasol (needs Exasol Personal running) | `run-exasol.bat`, `run-exasol.command` or `./run-exasol.sh`; or `RECEIPTS_BACKEND=exasol receipts init` then `receipts doctor` | the header says **Exasol** and **Python UDF in the database**; `doctor` ends with `All good.` after the reserved-word, UDF and 9 `AGENT_READER` checks |
 
