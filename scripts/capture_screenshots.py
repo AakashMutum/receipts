@@ -9,6 +9,10 @@ a current date. Run with the same RECEIPTS_* / EXA_* variables as the server:
     python scripts/capture_screenshots.py --url http://127.0.0.1:8000
 
 `--only redteam` retakes just 09_redteam.png (no rebuild; the tab reads the committed red team report).
+`--only blast` lands the IST case and takes 11_who_saw.png; `--only badges` takes 12_badges.png from /badge.svg
+after a healthy night, the IST case, its approval and the festival (lab mode, no rebuild). `--only connect` needs
+no server (stop it first: the stand-in allows one process): it lands the IST case with `receipts run` and takes
+13_connect.png of `receipts connect`.
 """
 
 from __future__ import annotations
@@ -59,16 +63,77 @@ def redteam(page: Page) -> None:
     shot(page.locator("#lab"), "09_redteam.png")
 
 
+def blast(page: Page, url: str) -> None:
+    open_page(page, url)
+    run(page, "ist_utc")
+    card = page.locator("section.card:has(#blast-title)")
+    card.scroll_into_view_if_needed()
+    page.wait_for_timeout(300)
+    shot(card, "11_who_saw.png")
+
+
+def badges(page: Page, url: str) -> None:
+    import html as _html
+    base = url.rstrip("/")
+    got = []
+
+    def land(scenario):
+        r = page.request.post(base + "/api/run", data={"scenario": scenario}, timeout=120_000)
+        assert r.ok, f"{scenario}: {r.status}"
+        return r.json()["case"]
+
+    def badge(label):
+        r = page.request.get(base + "/badge.svg")
+        assert r.ok
+        got.append((label, r.text()))
+
+    land("healthy")
+    badge("A clean night")
+    c = land("ist_utc")
+    badge("IST written as UTC, held")
+    r = page.request.post(base + f"/api/case/{c['case_id']}/approve", data={"note": "screenshot"})
+    assert r.ok, r.status
+    badge("The proven correction approved by a person")
+    land("festival")
+    badge("A real festival surge")
+    rows = "".join(f"<tr><td>{_html.escape(l)}</td><td>{svg}</td></tr>" for l, svg in got)
+    page.set_content("<html><body style='margin:0'><div id='w' style='display:inline-block;padding:24px;background:#fff;font:15px system-ui,sans-serif;color:#222'>"
+                     "<h3 style='margin:0 0 12px'>GET /badge.svg after each night</h3><table id='b' "
+                     "style='border-collapse:collapse'>" + rows.replace("<td>", "<td style='padding:8px 16px 8px 0'>")
+                     + "</table></div></body></html>")
+    shot(page.locator("#w"), "12_badges.png")
+
+
+def connect_shot(page: Page) -> None:
+    import html as _html
+    env = {**__import__("os").environ, "PYTHONIOENCODING": "utf-8"}
+    subprocess.run([sys.executable, "-m", "receipts.cli", "run", "ist_utc"], cwd=ROOT, env=env, check=False,
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    out = subprocess.run([sys.executable, "-m", "receipts.cli", "connect"], cwd=ROOT, env=env, capture_output=True,
+                         text=True, encoding="utf-8").stdout
+    lines = [l for l in out.splitlines() if not l.lstrip().startswith("ok ")]
+    page.set_content("<html><body style='margin:0;background:#0f1720'><pre id='t' style='margin:0;padding:20px 24px;"
+                     "color:#e6edf3;font:13px Consolas,monospace;white-space:pre'>$ receipts connect\n"
+                     + _html.escape("\n".join(lines)) + "</pre></body></html>")
+    shot(page.locator("#t"), "13_connect.png")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     global DAY
     ap.add_argument("--url", default="http://127.0.0.1:8000")
     ap.add_argument("--day", help="incoming day, YYYY-MM-DD (default: the one the server holds)")
-    ap.add_argument("--only", choices=["redteam"], help="retake one screenshot only")
+    ap.add_argument("--only", choices=["redteam", "blast", "badges", "connect"], help="take one screenshot only")
     a = ap.parse_args()
     url = a.url
     import json
     import urllib.request
+    if a.only == "connect":
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            connect_shot(browser.new_page(viewport={"width": 1500, "height": 400}))
+            browser.close()
+        return
     with urllib.request.urlopen(url.rstrip("/") + "/api/overview", timeout=60) as r:
         DAY = a.day or json.load(r)["incoming_day"]
     print(f"incoming day {DAY}")
@@ -80,6 +145,10 @@ def main() -> None:
         if a.only == "redteam":
             open_page(page, url)
             redteam(page)
+            browser.close()
+            return
+        if a.only in ("blast", "badges"):
+            (blast if a.only == "blast" else badges)(page, url)
             browser.close()
             return
 

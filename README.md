@@ -197,6 +197,8 @@ The command center shows the same contrast with two deterministic agents, so the
 
 Every receipt lists the views that read the affected metric or column, found by walking the view definitions in `SYS.EXA_ALL_VIEWS` forward from the metric and from the blamed raw columns. Views that read the pipeline directly showed tonight's number before the gate decided; views that read `PUB` showed only the last trusted value. With the IST case on the stand-in: 4 views read the bad number (`MART.FINANCE_DAILY`, `MART.AVG_TICKET`, `MART.CITY_REVENUE`, `PIPE.DAILY_ORDERS`) and 3 were protected (`PUB.METRIC_TRUST`, `PUB.DASHBOARD_REVENUE`, `MART.EXEC_SUMMARY`). `PUB.METRIC_TRUST` carries the count and the list (`DOWNSTREAM_COUNT`, `DOWNSTREAM_OBJECTS`), so an agent sees them too. On Exasol, Receipts also asks the audit log (`EXA_DBA_AUDIT_SQL`) which sessions read those views since the previous publish; the stand-in has no query log and the receipt says so.
 
+![Who saw this number, IST case on the stand-in](docs/screenshots/11_who_saw.png)
+
 ## Is the undo test circular? The wrong-fix control
 
 `receipts wrongfix` shows the gate's own rules deliberately wrong corrections for every planted fault: the right fix on the wrong gateway, the wrong factor, the right fix on every day instead of tonight, or the fix for a cause that was not planted. On the DuckDB stand-in, 5 seeds, 20,000 orders a day: **235 tried, 225 rejected, 10 accepted** ([`samples/wrongfix_report.md`](samples/wrongfix_report.md)). Every fix applied to past days and every wrong-gateway fix was rejected. The 10 accepted are all on the smallest gateway: a x1000 correction where x100 was planted (4), or a x100 correction while the total was already inside the range (6). In each, the gate's real verdict named only the planted causes, because no detector nominated the wrong fix. The same control runs inside `receipts eval` and `receipts redteam`.
@@ -204,6 +206,8 @@ Every receipt lists the views that read the affected metric or column, found by 
 ## Your own metric
 
 Metrics live in [`receipts.yaml`](receipts.yaml): the daily view, its value and day columns, the raw tables, the amount, ID and time columns, and a weekday baseline option. `receipts connect --check` validates the file against the database in plain English; `receipts connect` judges tonight for every metric. The sample config adds paid orders per day and the average basket over a new `PIPE.DAILY_ORDERS` view. A metric that is not published keeps its trusted history in `RECEIPTS.METRIC_HISTORY`, snapshotted when the database is built, so a fault that rewrites past days in the views (a merchant table that fans out) cannot move the baseline with it. Without the snapshot the average basket was published wrong in 6 of 16 held-out fault runs written before the fix; with it, 0 of 16 ([`before`](samples/metrics_heldout_before.md), [`after`](samples/metrics_heldout_after.md)). Every scenario through the same gate on the stand-in, 2 seeds, after the fix: 0 published wrong for revenue, order count and average basket ([`samples/metrics_report.md`](samples/metrics_report.md)). Steps: [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md#9-point-it-at-your-own-metric).
+
+![receipts connect for the three metrics, IST case on the stand-in](docs/screenshots/13_connect.png)
 
 ## Blind test kit
 
@@ -216,6 +220,8 @@ Metrics live in [`receipts.yaml`](receipts.yaml): the daily view, its value and 
 ```markdown
 ![Revenue trust](http://127.0.0.1:8000/badge.svg)
 ```
+
+![The badge after a clean night, a held night, an approved correction and a real change](docs/screenshots/12_badges.png)
 
 ## Architecture
 
