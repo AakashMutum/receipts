@@ -70,3 +70,6 @@ We tried. `receipts wrongfix` feeds the gate's rules deliberately wrong correcti
 
 **How would a company connect its own metric?**
 Edit `receipts.yaml`: the daily view, its value and day columns, the raw tables, and the amount, ID and time columns. `receipts connect --check` says in plain English what is missing or the wrong type. The band, weekday baseline, lineage, undo test and blast radius then follow that metric. The six detectors are written for the payments layout, so a different raw layout gets the band and lineage but needs its own detectors for causes.
+
+**The wrong-fix control accepted 10 of 235: what were they?**
+All 10 touch the smallest gateway, about 5% of revenue. Five divide it by 100 on the masked pair, whose total is already inside the normal range; four divide it by 1000 where x100 was planted, so the right cause with the wrong size; one divides it by 100 on a duplicate load, which happens to land in range. Each moves today by more than 1.5%, keeps history and lands in range, so the rules alone would confirm it. That is a real limit: on a slice smaller than the normal range, the undo test cannot separate right from wrong. The gate's verdict was right in all 10 because no detector nominated those corrections. The list is in `samples/exasol/wrongfix_report.md`.

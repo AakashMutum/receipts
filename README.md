@@ -435,7 +435,7 @@ On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.
 
 * Six fault classes have detectors. Anything else that leaves the normal range is held as `UNEXPLAINED`; anything that stays inside it is published. On the taxi data the normal range is plus or minus 21.7% at the median.
 * A x10 unit change on 2% to 10% of one gateway, and a clock shift on 25% to 50% of one, are held without a proven cause.
-* In the wrong-fix control, 10 of 235 wrong corrections pass the rules on their own; the detector's nomination carries the proof there.
+* On a slice smaller than the normal range the undo test alone cannot tell a right correction from a wrong one: in the wrong-fix control 10 of 235 wrong corrections pass the rules, all on the smallest gateway (about 5% of revenue), for example dividing it by 1000 where x100 was planted, or by 100 when the total was already in range. The gate's verdicts stayed right because no detector nominated them; the detector carries the proof there.
 * For a configured metric the band, weekday baseline, lineage, undo test and blast radius follow the config; the detectors and the slice breakdown are bound to the payments layout, and only `daily_revenue_inr` is written to `PUB`.
 * No holiday calendar; a verified real change becomes part of the baseline. Corrections are hotfixes; the real fix is upstream.
 

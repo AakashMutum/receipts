@@ -75,13 +75,21 @@ stand-in gives the same table ([`samples/wrongfix_report.md`](../samples/wrongfi
 | Fix for a cause that was not planted | 190 | 184 | 6 |
 | **All** | **235** | **225** | **10** |
 
-The 10 accepted are listed in the report. Four are a x1000 correction where x100 was planted on the smallest
-gateway, and six are a x100 correction on the smallest gateway while the total was already inside the range
-(the masked pair on all 5 seeds, one duplicate load). In each case the gate's own verdict was unaffected: the
-detectors did not nominate those corrections, and the confirmed causes were the planted ones. What it shows:
-the history rule rejects every fix applied to past days, and the move-and-range rules reject most wrong fixes;
-on a small slice, or when the total is already in range, a wrong correction can pass the rules, so the
-detector's nomination carries part of the proof there.
+The 10 accepted, on Exasol and on the stand-in alike, all act on GW_C, the smallest gateway, which carries about
+5% of revenue:
+
+| Runs | Wrong fix | Why the rules accepted it |
+|---|---|---|
+| masked pair, all 5 seeds | divide GW_C by 100, although GW_C was not touched | The masked pair's total already sits inside the normal range (+4.0% to +7.0%). Removing about 5.5% moves today by more than 1.5%, keeps history and still lands in range. |
+| unit change, seeds 22, 33, 44, 55 | divide GW_C by 1000 where x100 was planted | The right cause with the wrong size. Over-correcting a 5% slice leaves revenue about 4% under the clean value, inside the range. |
+| file loaded twice, seed 44 | divide GW_C by 100 | The planted duplicates moved revenue +11.2%; taking 4.9% off happens to land inside the range. |
+
+None of these is the same cause under another name, and none is below the 1.5% line: each passes because the
+normal range is wider than the smallest gateway's share. That is a real limit of the undo test on its own: for a
+slice smaller than the band, "lands in range" cannot tell a right correction from a wrong one. In all 10 runs the
+gate's verdict was still right, because no detector nominated these corrections (the unit check fits the factor
+from the data, and it did not fire on GW_C in the masked pair). The history rule rejected every fix applied to
+past days, and every wrong-gateway fix was rejected.
 
 ## Known limits and holes
 
@@ -90,7 +98,8 @@ detector's nomination carries part of the proof there.
 * Partial clock shifts (25% to 50%) are held without a proven cause. Safe, but a person has to investigate.
 * A fault without a detector is held as UNEXPLAINED when it leaves the normal range, and published when it
   does not. On real taxi data the normal range is about plus or minus 22%.
-* In the wrong-fix control 10 of 235 wrong corrections pass the rules on their own (above).
+* The undo test alone cannot tell a right from a wrong correction on a slice smaller than the normal range:
+  10 of 235 wrong corrections, all on the smallest gateway, pass the rules (above). Detector nomination covers it.
 * Configured metrics: the detectors are bound to the payments layout. On the stand-in's 16 held-out faults, two orphan-code faults of -3.7% and -4.0% on order count were held although they sit just
   under the 4% line ([`samples/metrics_heldout_after.md`](../samples/metrics_heldout_after.md)).
 * No holiday calendar; a verified real change becomes part of the baseline.
