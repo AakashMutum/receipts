@@ -2,6 +2,26 @@
   <img src="docs/banner.svg" alt="Receipts: hold the number, prove why, tell people and agents whether to trust it" width="100%">
 </p>
 
+# RECEIPTS: Proof for Every Number That Moves
+
+**When a daily business number moves, Receipts holds it back, proves inside Exasol which upstream fault caused it by undoing that fault in a sandbox, and tells dashboards and AI agents whether to trust it.**
+
+**Start in 30 seconds** (Python 3.10 or newer; the first run installs the packages, then the command center opens in your browser):
+
+| Windows | macOS | Linux |
+|---|---|---|
+| double-click `run.bat` | double-click `run.command` | `./run.sh` |
+
+**Judging?** Read [`JUDGES.md`](JUDGES.md): every criterion, its evidence and the command that reproduces it, in three minutes.
+
+| Strongest evidence | Result | Report |
+|---|---|---|
+| Scored evaluation, 10 scenarios x 5 seeds, Exasol | **50 of 50** right verdict and right causes; without the undo test, 5 wrong causes | [`eval_report.md`](samples/exasol/eval_report.md) |
+| Held-out partial unit changes, frozen before the fix, Exasol | 24 cases: 12 caught, 12 held, **0 published** | [`heldout_unit_after.md`](samples/exasol/heldout_unit_after.md) |
+| Red team, every fault shrunk until it is no longer proven, Exasol | **0 holes** after the unit tail check (1 found and closed) | [`redteam_report.md`](samples/exasol/redteam_report.md) |
+| Real data, 9,554,757 NYC taxi trips, Exasol | 56 real days, **0 held**, 2 verified real changes; 6 of 6 planted faults caught; the same on the stand-in after the tail check | [`real_backtest.md`](samples/exasol/real_backtest.md) |
+| Wrong-fix control, DuckDB stand-in | 235 deliberately wrong corrections: 225 rejected, 10 accepted and listed | [`wrongfix_report.md`](samples/wrongfix_report.md) |
+
 <p align="center">
   <a href="https://github.com/AakashMutum/receipts/actions"><img src="https://img.shields.io/github/actions/workflow/status/AakashMutum/receipts/ci.yml?branch=main&label=CI" alt="CI status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT license"></a>
@@ -9,11 +29,7 @@
   <a href="https://downloads.exasol.com/exasol-personal"><img src="https://img.shields.io/badge/data%20platform-Exasol%20Personal-0c3d51.svg" alt="Exasol Personal"></a>
 </p>
 
-# RECEIPTS: Proof for Every Number That Moves
-
-**When a daily business number moves, Receipts holds it back, proves inside Exasol which upstream fault caused it by undoing that fault in a sandbox, and tells dashboards and AI agents whether to trust it.**
-
-> **Start here:** [`JUDGES.md`](JUDGES.md) (a three-minute brief with the evidence per judging criterion), [`NOVELTY.md`](NOVELTY.md) (what is new and what is not), [`docs/EVAL_CARD.md`](docs/EVAL_CARD.md) (what was tested and what is not claimed) and [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md) (how to run it).
+> More: [`NOVELTY.md`](NOVELTY.md) (what is new and what is not), [`docs/EVAL_CARD.md`](docs/EVAL_CARD.md) (what was tested), [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md) (how to run it), [Verified and not covered](#verified-and-not-covered).
 
 Built for ExaThon India 2026, Track 4: The Work Behind the Work. Exasol Personal is the platform: every check, the slice decomposition, the Python UDF, lineage, the undo test and the write-back run inside Exasol, and agents read the result from Exasol through the Exasol MCP server. A DuckDB stand-in exists only for CI and for people without Exasol.
 
