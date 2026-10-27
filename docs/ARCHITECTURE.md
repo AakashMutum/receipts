@@ -63,7 +63,7 @@ agent can say why a value is held without reading `RECEIPTS`.
 
 ## Connecting your own metric
 
-Receipts is built around one metric and one schema today: daily revenue of the synthetic marketplace, read through the views in [`receipts/sql/pipeline.sql`](../receipts/sql/pipeline.sql). **The generic configuration layer that would let a company point it at its own metric is not built yet.** The detectors, the CUBE dimensions, the undo corrections and the fault scenarios name the marketplace tables and columns directly.
+Metrics are listed in [`receipts.yaml`](../receipts.yaml): the daily view, its value and day columns, the raw tables, the amount, ID and time columns, and the weekday baseline option. `receipts connect --check` validates the file against the database, and the gate's band, baseline, lineage, undo test and blast radius follow it (see [`docs/RUN_GUIDE.md`](RUN_GUIDE.md#9-point-it-at-your-own-metric)). The detectors, the CUBE dimensions, the undo corrections and the fault scenarios still name the marketplace tables and columns directly, so a metric over a different raw layout gets the band and lineage but no cause from the detectors.
 
 What a company would need to provide, and what each part maps to in the code:
 

@@ -24,7 +24,7 @@ Every number below was measured on Exasol Personal 2026.2.0-nano.3 on one laptop
 | What | Result on Exasol | Report |
 |---|---|---|
 | Scored evaluation, 10 scenarios x 5 seeds, 20,000 orders a day | **50 of 50** right verdict and exactly the right causes; cause precision and recall 100%, 0 wrong causes. Without the undo test: 5 wrong causes. A threshold alert: 0% of causes found | [`eval_report.md`](samples/exasol/eval_report.md) |
-| Real data: NYC taxi trips, Jan to Mar 2024, 9,554,757 trips (Exasol run before the unit tail check; re-run after the unit tail check on the DuckDB stand-in; the Exasol re-run is pending free disk space) | Exasol, before: 56 real days judged, **0 held**, 2 verified real changes; **6 of 6** planted faults caught with the right cause; 62 of 62 gate runs agree with the DuckDB run. DuckDB stand-in, after: 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check | [`real_backtest.md`](samples/exasol/real_backtest.md), [stand-in](samples/real_backtest.md) |
+| Real data: NYC taxi trips, Jan to Mar 2024, 9,554,757 trips (Exasol, before the unit tail check) | 56 real days judged, **0 held**, 2 verified real changes (13 Feb -33.9%, 27 Feb +26.0%); **6 of 6** planted faults caught with the right cause; 62 of 62 gate runs agree with the DuckDB run. The DuckDB re-run after the tail check matched every verdict and cause | [`real_backtest.md`](samples/exasol/real_backtest.md), [stand-in](samples/real_backtest.md) |
 | Red team: shrink each fault until the gate stops proving it | Floors: unit change 2%, duplicates 2%, fan-out 2%, new codes 5%, clock faults 100%, stale FX caught. **0 holes** (1 before the unit tail check: a x100 unit change on 2% of one gateway was published, 6.5% off) | [`redteam_report.md`](samples/exasol/redteam_report.md) |
 | Held-out partial unit changes (24, frozen before the tail check was written) | Before: caught 0, held 24. After: **caught 12** (every x1000 case), held 12 (every x10 case). Published 0 in both | [`heldout_unit_after.md`](samples/exasol/heldout_unit_after.md) |
 | Scaling: the IST case after a fresh load | Right verdict at every size up to **400,000 orders a day, 17,346,085 payment rows**: gate 27.5 s, CUBE over 5.95 million rows 5.9 s. Nothing larger was measured | [`scaling.md`](samples/exasol/scaling.md) |
@@ -51,7 +51,7 @@ Receipts runs in two modes:
 |---|---|
 | `GROUP BY CUBE` with `GROUPING_ID` | Tests every combination of six dimensions for today and the baseline in one scan: 11,074 slices |
 | `PYTHON3 SET SCRIPT` UDF | `RECEIPTS.CLOCK_DRIFT` compares each gateway's half-hour profile with its baseline and finds the shift that lines it up, per group, inside the database |
-| `SYS.EXA_ALL_VIEWS` | Lineage from the view text Exasol already stores |
+| `SYS.EXA_ALL_VIEWS` | Lineage from the view text Exasol already stores: backwards to the raw columns, and forwards to every view that read the number |
 | Views and schemas | The undo test rebuilds the full pipeline in a sandbox schema with one source swapped |
 | `EXA_STATISTICS.EXA_SQL_LAST_DAY` | After each gate run, `FLUSH STATISTICS` and Exasol's own per-statement duration and peak memory, bracketed with `CURRENT_STATEMENT`; shown in the receipt as "Measured by Exasol" |
 | Users and grants | `AGENT_READER` can `SELECT` from `PUB` and nothing else; the MCP server logs in as it |
@@ -87,7 +87,7 @@ The screenshot below is from an earlier run (24 Oct, before the unit tail check)
 
 Each script sets up a private `.venv`, builds the demo data, starts the command center in lab mode and opens your browser. The `run-exasol` scripts use your running Exasol Personal and never install anything for it.
 
-**With Docker** (stand-in only, nothing else on the host): `docker build -t receipts .` then `docker run --rm -p 8000:8000 receipts`, and open http://127.0.0.1:8000. Not tested on the machine this was built on (Docker was not running there).
+**With Docker** (stand-in only, nothing else on the host): `docker build -t receipts .` then `docker run --rm -p 8000:8000 receipts`, and open http://127.0.0.1:8000. A public lab demo with rate limits and automatic reset builds from the same file: [`docs/DEPLOY_DEMO.md`](docs/DEPLOY_DEMO.md).
 
 **Step by step on Exasol Personal:**
 
@@ -135,7 +135,7 @@ More commands, alerts with `--watch`, an optional LLM explanation, and troublesh
 * **Real days, no faults planted: 56 judged, 0 held, 0 called PROVEN_FAULT.** 54 published as `NO_INCIDENT`, 2 as a verified `REAL_CHANGE`: Tue 13 Feb (-33.9%, a snowstorm day when New York City schools went remote) and Tue 27 Feb (+26.0%, the busiest Tuesday so far).
 * **Planted faults on real days: 6 of 6 caught with the right cause.** Three unit changes (one vendor in cents, +2,111% to +2,371%) and three duplicated payment files (+8.2% to +8.3%, inside the normal range, so a threshold alert would have missed them).
 * **The same on both databases:** all 62 gate runs reach the same verdict and causes on Exasol and on the DuckDB stand-in; the daily values differ by at most 6.5e-05 relative.
-* **After the unit tail check (re-run after the unit tail check on the DuckDB stand-in; the Exasol re-run is pending free disk space):** 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check ([`samples/real_backtest.md`](samples/real_backtest.md)).
+* **After the unit tail check, on the DuckDB stand-in:** 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check ([`samples/real_backtest.md`](samples/real_backtest.md)).
 * **Timing on Exasol (24 Oct, before the unit tail check):** median 14.8 s per gate run (max 47.5 s) as RAW grows to 9.5 million rows; loading and building took 450 s in the reported run.
 * **What it also shows:** real revenue is noisy, with a normal range of plus or minus 21.7% at the median, so a fault without a detector that moves the total less than that is published. The clock check fired on five Saturdays and the undo test ruled it out every time.
 
@@ -161,7 +161,7 @@ More commands, alerts with `--watch`, an optional LLM explanation, and troublesh
 | Held-out partial unit changes, 24 cases (x10 and x1000; GW_A, GW_B; 2, 5, 10%; seeds 21, 22) | caught 0, held 24, published 0 | caught 12, held 12, published 0 |
 | Fault variants, 17 | caught 13, held 3, small 1, wrong 0 | caught 15, held 1, small 1, wrong 0 |
 | Scored evaluation, 50 runs | 50 of 50 | 50 of 50, same precision, recall and ablation numbers, festival control published as REAL_CHANGE on all 5 seeds |
-| Real-data backtest (re-run after the unit tail check on the DuckDB stand-in; the Exasol re-run is pending free disk space) | 0 held, 2 REAL_CHANGE (13 Feb, 27 Feb), 6 of 6 | 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check |
+| Real-data backtest (before on Exasol, after on the DuckDB stand-in) | 0 held, 2 REAL_CHANGE (13 Feb, 27 Feb), 6 of 6 | the same: 0 held, 2 REAL_CHANGE, 6 of 6, all 62 verdicts and causes unchanged |
 
 * **Not closed:** a x10 change on 2% to 10% of a gateway is still held without a proven cause (12 of the 24 held-out cases). A x10 amount is mostly below the 20x cut, so the tail check does not see it. It is held, not published, but a person has to look. The cut was not lowered after seeing these cases, because they were written to test the fix, not to tune it. The DuckDB stand-in gives the same before and after counts ([`samples/heldout_unit_after.md`](samples/heldout_unit_after.md)).
 * Of 9 opposite-direction pairs at the floors, 8 were caught with both causes, and 1 was held with one of the two causes proven.
@@ -172,7 +172,7 @@ The **Red team** tab in lab mode charts these floors and runs one attack live.
 
 ## Scaling
 
-Measured on 24 Oct, before the unit tail check; not re-measured since (not enough free disk). `receipts scale --backend exasol` runs the IST case after `receipts init --fresh --orders-per-day N`, one gate run per size. Full report: [`samples/exasol/scaling.md`](samples/exasol/scaling.md).
+Measured on 24 Oct, before the unit tail check. `receipts scale --backend exasol` runs the IST case after `receipts init --fresh --orders-per-day N`, one gate run per size. Full report: [`samples/exasol/scaling.md`](samples/exasol/scaling.md).
 
 | Orders a day | Payment rows | Load and build | Gate end to end | Measured by Exasol | CUBE | Peak temp memory | Verdict |
 |---|---|---|---|---|---|---|---|
@@ -187,11 +187,27 @@ Each run is the first after a fresh load, which is slower than a repeat. The run
 
 `PUB.METRIC_TRUST` tells an AI agent not to quote a held number and gives the last trusted value. On Exasol, `receipts init` creates `AGENT_READER`, which can read `PUB` and nothing else, and the Exasol MCP server logs in as it. With the IST case held, that user sees `HELD`, no trusted value, the guidance to quote the last trusted day, and the proven cause from `PUB.CONFIRMED_CAUSES`; Exasol refuses it on `RAW`, `PIPE`, `RECEIPTS` and every write (`python scripts/mcp_smoke.py`).
 
-Connecting Claude Desktop or Claude Code, the prompts to ask and the expected answers: [`docs/MCP_DEMO.md`](docs/MCP_DEMO.md). The MCP server and a live model were not tested end to end here (no `uv` on the build machine); the page says exactly what was.
+Connecting Claude Desktop or Claude Code, the prompts to ask and the expected answers: [`docs/MCP_DEMO.md`](docs/MCP_DEMO.md).
 
 The command center shows the same contrast with two deterministic agents, so the demo never depends on a live model:
 
 ![Two agents, one question](docs/screenshots/04_agents_held.png)
+
+## Who saw this number
+
+Every receipt lists the views that read the affected metric or column, found by walking the view definitions in `SYS.EXA_ALL_VIEWS` forward from the metric and from the blamed raw columns. Views that read the pipeline directly showed tonight's number before the gate decided; views that read `PUB` showed only the last trusted value. With the IST case on the stand-in: 4 views read the bad number (`MART.FINANCE_DAILY`, `MART.AVG_TICKET`, `MART.CITY_REVENUE`, `PIPE.DAILY_ORDERS`) and 3 were protected (`PUB.METRIC_TRUST`, `PUB.DASHBOARD_REVENUE`, `MART.EXEC_SUMMARY`). `PUB.METRIC_TRUST` carries the count and the list (`DOWNSTREAM_COUNT`, `DOWNSTREAM_OBJECTS`), so an agent sees them too. On Exasol, Receipts also asks the audit log (`EXA_DBA_AUDIT_SQL`) which sessions read those views since the previous publish; the stand-in has no query log and the receipt says so.
+
+## Is the undo test circular? The wrong-fix control
+
+`receipts wrongfix` shows the gate's own rules deliberately wrong corrections for every planted fault: the right fix on the wrong gateway, the wrong factor, the right fix on every day instead of tonight, or the fix for a cause that was not planted. On the DuckDB stand-in, 5 seeds, 20,000 orders a day: **235 tried, 225 rejected, 10 accepted** ([`samples/wrongfix_report.md`](samples/wrongfix_report.md)). Every fix applied to past days and every wrong-gateway fix was rejected. The 10 accepted are all on the smallest gateway: a x1000 correction where x100 was planted (4), or a x100 correction while the total was already inside the range (6). In each, the gate's real verdict named only the planted causes, because no detector nominated the wrong fix. The same control runs inside `receipts eval` and `receipts redteam`.
+
+## Your own metric
+
+Metrics live in [`receipts.yaml`](receipts.yaml): the daily view, its value and day columns, the raw tables, the amount, ID and time columns, and a weekday baseline option. `receipts connect --check` validates the file against the database in plain English; `receipts connect` judges tonight for every metric. The sample config adds paid orders per day and the average basket over a new `PIPE.DAILY_ORDERS` view. Every scenario through the same gate on the stand-in, 2 seeds ([`samples/metrics_report.md`](samples/metrics_report.md)): order count 6 held right, 14 published right, 0 wrong; average basket 12 held right, 6 published right, **2 published wrong** (the merchant fan-out moved it +17% and +21% and it stayed inside its band). Steps: [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md#9-point-it-at-your-own-metric).
+
+## Blind test kit
+
+`receipts blindtest --lab` lets someone other than the author plant a fault of their choice (class, share, gateway, or a clean night), runs the gate and appends one line to a local results file, misses included. [`docs/BLIND_TEST.md`](docs/BLIND_TEST.md) is the one-page kit for 10 blind faults and a report template.
 
 ## Trust badge
 
@@ -200,18 +216,6 @@ The command center shows the same contrast with two deterministic agents, so the
 ```markdown
 ![Revenue trust](http://127.0.0.1:8000/badge.svg)
 ```
-
-## Limits
-
-* It only proves fault classes it has a detector for. Six today. Anything else becomes `UNEXPLAINED`: held, no cause guessed, a person decides.
-* A x10 unit change on a small share of one gateway (2% to 10%) is held without a proven cause, and partial clock shifts (25% to 50%) too: safe, but a person has to look.
-* The real-data backtest was re-run after the unit tail check on the DuckDB stand-in; the Exasol re-run is pending free disk space. The Exasol report is from before the fix.
-* The baseline learns a weekly pattern from five weeks of trusted history but has no holiday calendar, and a verified real change enters that history.
-* On real taxi data the normal range is wide (plus or minus 22% at the median), so a fault without a detector that moves the total less than that is published.
-* One metric, one pipeline. A generic configuration layer for other metrics is not built; the real-data backtest uses an adapter. What a company would provide is listed in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#connecting-your-own-metric).
-* Corrections are hotfixes. The real fix is upstream, and Receipts records the evidence for that conversation.
-* Exasol is not started in CI. The Exasol path is verified by hand on Exasol Personal 2026.2.0-nano.3 (including `tests/test_exasol_live.py`) and in CI through the Exasol SQL path on the stand-in.
-* What is claimed and what is not, in one page: [`docs/EVAL_CARD.md`](docs/EVAL_CARD.md).
 
 ## Architecture
 
@@ -375,9 +379,16 @@ receipts/
 │   ├── datagen.py       seeded synthetic marketplace data
 │   ├── watch.py         the batch watcher behind serve --watch, and its alerts
 │   ├── backtest.py      the real-data backtest on NYC taxi trips
+│   ├── blast.py         who saw the number: readers of the metric from the view catalog
+│   ├── wrongfix.py      the wrong-fix control
+│   ├── metrics.py       receipts.yaml and connect --check
+│   ├── connect.py       every scenario for every configured metric
+│   ├── blindtest.py     the blind test kit
+│   ├── badge.py         the trust badge
+│   ├── hosted.py        rate limits and automatic reset for a public demo
 │   └── api.py           FastAPI endpoints for the command center
 ├── web/                 command center: index.html, app.css, app.js
-├── tests/               127 tests (2 of them run only against a live Exasol)
+├── tests/               170 tests (2 of them run only against a live Exasol)
 ├── samples/             committed, unedited reports and case files (samples/exasol from Exasol)
 ├── sql/exasol/          all rendered Exasol SQL, for reading
 ├── mcp/                 MCP client config and agent instructions
@@ -393,6 +404,24 @@ receipts judge-check
 ```
 
 On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.py`.
+
+## Verified and not covered
+
+**Verified.** Every number in this README comes from a committed report in [`samples/`](samples/). Numbers from Exasol Personal 2026.2.0-nano.3 are in `samples/exasol/`; numbers from the DuckDB stand-in say so where they are quoted. CI runs the tests on the stand-in and renders every Exasol statement through sqlglot's Exasol grammar.
+
+**What the gate does not prove.**
+
+* Six fault classes have detectors. Anything else that leaves the normal range is held as `UNEXPLAINED`; anything that stays inside it is published. On the taxi data the normal range is plus or minus 21.7% at the median.
+* A x10 unit change on 2% to 10% of one gateway, and a clock shift on 25% to 50% of one, are held without a proven cause.
+* In the wrong-fix control, 10 of 235 wrong corrections pass the rules on their own; the detector's nomination carries the proof there.
+* For a configured metric the band, weekday baseline, lineage, undo test and blast radius follow the config; the detectors and the slice breakdown are bound to the payments layout, and only `daily_revenue_inr` is written to `PUB`. The average basket was published wrong twice on a merchant fan-out.
+* No holiday calendar; a verified real change becomes part of the baseline. Corrections are hotfixes; the real fix is upstream.
+
+**SQL path written and grammar-checked; live run to follow.** These were added after the last Exasol session and run on the stand-in and through the Exasol grammar test, not on a live Exasol: the `MART` reader views and the `DOWNSTREAM_COUNT` and `DOWNSTREAM_OBJECTS` columns of `PUB.METRIC_TRUST`; the audit-log query for reads during the bad window; `PIPE.DAILY_ORDERS` and `receipts connect --check` (which reads `SYS.EXA_ALL_COLUMNS` on Exasol); the wrong-fix control; the trust badge.
+
+**Measured once, on Exasol, before the unit tail check.** The real-data backtest (the stand-in re-run after it matched every verdict and cause) and the scaling run up to 400,000 orders a day; nothing larger is claimed.
+
+**Not run here.** The Exasol MCP server with a live client (only the read-only `AGENT_READER` user was verified); `run.command` and `run.sh` on a real Mac or Linux machine (run under Git Bash on Windows); posting to a real Slack workspace (only that a failing webhook does not stop the watcher); building either Docker image and deploying the public demo; a blind test by someone other than the author.
 
 ## Author
 

@@ -14,7 +14,7 @@ Core 5, Podman on WSL2, about 7.7 GiB visible to the VM), unless a line says the
   PROVEN_FAULT, UNEXPLAINED (held).
 * No thresholds were changed for any test on this page. One detector was extended after the red team found a
   hole (the unit tail check, below); every test was re-run after it on Exasol except the real-data
-  backtest, which was re-run after the unit tail check on the DuckDB stand-in; the Exasol re-run is pending free disk space.
+  backtest, which was re-run after it on the DuckDB stand-in and matched every verdict and cause.
 
 ## Data
 
@@ -30,7 +30,7 @@ Core 5, Podman on WSL2, about 7.7 GiB visible to the VM), unless a line says the
 | Scored evaluation, 10 scenarios x 5 seeds, 20,000 orders a day | 50 of 50; cause precision and recall 100%, 0 wrong causes. Ablation without the undo test: 5 wrong causes. Threshold alert: 0% of causes, misses the masked pair. Corrected values within 0.017% of the clean value | [`samples/exasol/eval_report.md`](../samples/exasol/eval_report.md) |
 | Held-out variants, 17, written after the detectors were fixed | caught 15, held 1, published under 4% off 1, published wrong 0 (before the tail check: caught 13, held 3) | [`samples/exasol/variants_report.md`](../samples/exasol/variants_report.md) |
 | Real data, 56 days judged (Exasol, before the tail check) | 0 held, 54 NO_INCIDENT, 2 verified REAL_CHANGE; 6 of 6 planted faults caught; 62 of 62 runs agree with the DuckDB run; the DuckDB re-run after the tail check matched every verdict and cause | [`samples/exasol/real_backtest.md`](../samples/exasol/real_backtest.md) |
-| Real data, re-run after the unit tail check on the DuckDB stand-in; the Exasol re-run is pending free disk space | 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check | [`samples/real_backtest.md`](../samples/real_backtest.md) |
+| Real data, DuckDB stand-in, after the tail check | 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check | [`samples/real_backtest.md`](../samples/real_backtest.md) |
 | Red team, seed 11, 20,000 orders a day | Floors: unit 2%, duplicates 2%, fan-out 2%, new codes 5%, clock faults 100%, stale FX caught. 0 holes (1 before the tail check). 8 of 9 opposite-direction pairs caught, 1 held with one cause |
 | Held-out partial unit changes, 24, frozen before the tail check | before: caught 0, held 24; after: caught 12 (all x1000), held 12 (all x10); published 0 both times | [`samples/exasol/heldout_unit_after.md`](../samples/exasol/heldout_unit_after.md) | [`samples/exasol/redteam_report.md`](../samples/exasol/redteam_report.md) |
 | Scaling, IST case (24 Oct, before the unit tail check) | Right verdict at 20k, 100k, 200k and 400k orders a day; at 400k (17,346,085 payment rows) the gate takes 27.5 s, 26.3 s measured by Exasol, peak temporary memory 353 MiB | [`samples/exasol/scaling.md`](../samples/exasol/scaling.md) |
@@ -53,7 +53,7 @@ the fix was written and were not used to tune it.
 | Held-out partial unit changes, 24 | caught 0, held 24, published 0 | caught 12, held 12, published 0 |
 | Variants, 17 | caught 13, held 3, small 1, wrong 0 | caught 15, held 1, small 1, wrong 0 |
 | Scored evaluation, 50 runs | 50 of 50 | 50 of 50, same precision, recall and ablation numbers, festival control published as REAL_CHANGE on all 5 seeds |
-| Real-data backtest (re-run after the unit tail check on the DuckDB stand-in; the Exasol re-run is pending free disk space) | 0 held, REAL_CHANGE on 13 Feb and 27 Feb, 6 of 6 | 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check |
+| Real-data backtest (before on Exasol, after on the DuckDB stand-in) | 0 held, REAL_CHANGE on 13 Feb and 27 Feb, 6 of 6 | 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check |
 
 Reports: `samples/exasol/*_before.md` and the files without the suffix. The DuckDB stand-in gives the same
 held-out counts and the same red team floors.
@@ -86,23 +86,14 @@ detector's nomination carries part of the proof there.
 
 * **Not closed:** a x10 unit change on 2% to 10% of a gateway is held without a proven cause (12 of 24 held-out
   cases): those amounts mostly stay below the 20x cut. Held, not published, but a person has to look.
-* The real-data backtest was re-run after the unit tail check on the DuckDB stand-in; the Exasol re-run is pending free disk space. There, 13 Feb and 27 Feb
-  still publish as REAL_CHANGE with the tail check; on Exasol this is not yet verified.
 * Partial clock shifts (25% to 50%) are held without a proven cause. Safe, but a person has to investigate.
 * A fault without a detector is held as UNEXPLAINED when it leaves the normal range, and published when it
   does not. On real taxi data the normal range is about plus or minus 22%.
+* In the wrong-fix control 10 of 235 wrong corrections pass the rules on their own (above).
+* Configured metrics: on the stand-in the average basket was published wrong twice on a merchant fan-out
+  ([`samples/metrics_report.md`](../samples/metrics_report.md)); the detectors are bound to the payments layout.
 * No holiday calendar; a verified real change becomes part of the baseline.
-* One metric and one pipeline; the backtest connects real data through an adapter, not configuration.
 * Red team and scaling ran on one seed and one laptop. The eval ran on 5 seeds.
-* `run.command` and `run.sh` were tested only under Git Bash on Windows, not on a real Mac or Linux machine.
-* The Slack alert was tested only for failing safely (an unreachable webhook does not stop the watcher); no
-  message was posted to a real Slack workspace.
 
-## What is not claimed
-
-* Anything beyond 400,000 orders a day or 17.3 million payment rows.
-* That the six detectors cover the faults of a real company's pipeline.
-* That the Exasol MCP server, Claude Desktop or Claude Code were tested end to end: `uv` was not installed on
-  the build machine, so only the read-only database user was verified.
-* Timings on any other machine. Each scaling run is the first after a fresh load, which is slower than a repeat.
-* That the Dockerfile builds: Docker was not running on the build machine.
+Where each result was verified, and what was not run here, is in one place:
+[README, Verified and not covered](../README.md#verified-and-not-covered).

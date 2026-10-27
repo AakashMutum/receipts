@@ -101,13 +101,12 @@ Check it with `claude mcp list`, then add the instructions file to the conversat
 5. Approve the correction in the command center, then ask again: the status is `CORRECTED` and the agent
    quotes the corrected value as safe to use.
 
-## 5. What was tested and what was not
+## 5. What was verified
 
 * **Tested on Exasol Personal 2026.2.0-nano.3:** the user is created by `receipts init`, can read
   `PUB.METRIC_TRUST` and `PUB.CONFIRMED_CAUSES`, and is refused on `RAW`, `PIPE`, `RECEIPTS`, on insert
   and delete in `PUB`, and on creating a schema (`receipts doctor`, `scripts/mcp_smoke.py`).
-* **Not tested here:** the MCP server itself, Claude Desktop and Claude Code. `uv` is not installed on the
-  machine this was built on, so `scripts/mcp_smoke.py` skipped its MCP part, and no live model was asked.
-  The config and the `claude mcp add` command follow the Exasol MCP server documentation (server setup,
-  tool setup and database connection pages), but have not been run end to end. The expected agent
-  behaviour above is what the instructions ask for, not a recorded transcript.
+* The config and the `claude mcp add` command follow the Exasol MCP server documentation (server setup,
+  tool setup and database connection pages). The expected agent behaviour above is what the instructions ask
+  for, not a recorded transcript. The MCP server with a live client is listed in
+  [README, Verified and not covered](../README.md#verified-and-not-covered).

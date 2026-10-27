@@ -30,7 +30,7 @@ Ground truth: we know what the clean value should be because we generated the da
 She opens the case instead of a Slack thread. It already says which upstream feed broke, which rows, by how much, the corrected number, and the one-line fix to send the gateway team.
 
 **What did you not solve?**
-A holiday calendar for the baseline, fault classes beyond six, metrics beyond one, and the upstream fix itself. All listed in the README.
+A holiday calendar for the baseline, fault classes beyond six, detectors for raw layouts other than the sample payments, and the upstream fix itself. All listed in the README under Verified and not covered.
 
 **Is any of this real data?**
 The scenarios, the eval, the variants and the red team use synthetic data generated from a seed, so we know the true clean value. The backtest uses real public data: 9,554,757 NYC yellow taxi trips, January to March 2024. On Exasol (before the unit tail check) 56 real days were judged, 0 held, and 6 of 6 planted faults were caught; the DuckDB re-run after the tail check matched every verdict and cause.
@@ -60,4 +60,13 @@ It is held, not proven. Those amounts mostly stay below the 20x cut, so the tail
 So CI and anyone without Exasol can run the tests and the demo. It runs the same SQL templates. The results we quote come from Exasol unless a line says the stand-in, and the stand-in gives the same verdicts where both were run.
 
 **What have you not tested?**
-The Mac and Linux run scripts on a real Mac or Linux machine (only under Git Bash on Windows), the Exasol MCP server with a real AI agent (only the read-only database user was verified), posting to a real Slack workspace (only that a failing webhook does not stop the watcher), and building the Docker image.
+The newest parts (the blast radius views and audit-log query, the order-count metric, the wrong-fix control, the badge) are written for Exasol and pass the Exasol grammar test and the stand-in, but have not run on a live Exasol yet. Also: the Mac and Linux run scripts on a real Mac or Linux machine (only under Git Bash on Windows), the Exasol MCP server with a real AI agent (only the read-only database user was verified), posting to a real Slack workspace (only that a failing webhook does not stop the watcher), and building the Docker image.
+
+**How is this different from tools that estimate or replay the effect of a change?**
+They tell you how much a change probably contributed. Receipts proves a cause by undoing it: it rebuilds the pipeline in a sandbox schema inside Exasol with one source corrected, re-runs the metric, and accepts the cause only if the number comes back into range and published history is unchanged. Until then the number is held, and dashboards and agents see the last trusted value.
+
+**How do you know a wrong fix would not pass the undo test?**
+We tried. `receipts wrongfix` feeds the gate's rules deliberately wrong corrections for every planted fault: the wrong gateway, the wrong factor, the right fix on every day, or the fix for another cause. On the stand-in, 5 seeds: 235 tried, 225 rejected, 10 accepted. All 10 are on the smallest gateway, and in every one the gate's real verdict named only the planted cause, because no detector nominated the wrong fix. So the undo test does most of the work, and on a small slice the detector's nomination carries the rest. The list is in `samples/wrongfix_report.md`.
+
+**How would a company connect its own metric?**
+Edit `receipts.yaml`: the daily view, its value and day columns, the raw tables, and the amount, ID and time columns. `receipts connect --check` says in plain English what is missing or the wrong type. The band, weekday baseline, lineage, undo test and blast radius then follow that metric. The six detectors are written for the payments layout, so a different raw layout gets the band and lineage but needs its own detectors for causes.
