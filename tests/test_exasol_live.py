@@ -35,7 +35,9 @@ def test_gate_reports_exasol_measured_timings(exa):
     m = c["exasol_measured"]
     assert c["confirmed"] == ["clock_shift"]
     assert m["source"].startswith("EXA_STATISTICS."), m
-    assert m["statements"] >= c["statements"] - 2 and m["db_ms"] > 0 and m["temp_ram_peak_mib"] > 0
+    # the client also counts statements Exasol's statistics leave out: two commented SELECTs, and since the blast
+    # radius, FLUSH STATISTICS and the audit-log read
+    assert m["statements"] >= c["statements"] - 4 and m["db_ms"] > 0 and m["temp_ram_peak_mib"] > 0
     cube = next(s for s in m["steps"] if "GROUP BY CUBE" in s["step"])
     assert cube["statements"] == 1 and cube["db_ms"] > 0
 
