@@ -12,3 +12,12 @@ logs/
 
 # contributor notes, kept locally only
 docs/dev/
+
+# local caches, scratch and build output
+.tmp/
+.pipcache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+*.pyc
