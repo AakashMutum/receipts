@@ -501,6 +501,14 @@ def _serve(a, browser: bool, rebuild: bool = False) -> None:
     import uvicorn
 
     from .model import default_incoming_day, stale_message
+    import socket
+    with socket.socket() as s:  # a clear message instead of a server traceback when the port is taken
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 0)
+        if s.connect_ex(("127.0.0.1" if a.host in ("0.0.0.0", "") else a.host, a.port)) == 0:
+            print(f"Port {a.port} is already in use by another program, so the command center cannot start there.\n"
+                  f"Close that program, or start on another port: receipts {a.cmd}{' --lab' if a.lab else ''} "
+                  f"--port {a.port + 1}", file=sys.stderr)
+            sys.exit(2)
     if a.lab:
         os.environ["RECEIPTS_LAB"] = "1"  # read by the API and the watcher in this process
     lab_on = os.environ.get("RECEIPTS_LAB") == "1"

@@ -23,6 +23,11 @@ if not exist ".venv\Scripts\python.exe" (
   echo   Creating a private Python environment in .venv
   %PY% -m venv .venv || goto :fail_venv
 )
+if not exist ".venv\Scripts\python.exe" (
+  echo   The .venv folder is incomplete, it may come from another computer or Python version.
+  echo   Delete the .venv folder and double-click run.bat again.
+  goto :fail
+)
 if not exist ".venv\Scripts\receipts.exe" (
   echo   Installing Receipts and its packages. On a slow connection this takes a few minutes.
   ".venv\Scripts\python.exe" -m pip install --disable-pip-version-check -e . || goto :fail_install

@@ -37,6 +37,9 @@ if [ ! -d .venv ]; then
     "$PY" -m venv .venv || fail "Could not create .venv. On Debian or Ubuntu install it first: sudo apt install python3-venv"
 fi
 if [ -d .venv/bin ]; then VBIN=.venv/bin; else VBIN=.venv/Scripts; fi
+if [ ! -x "$VBIN/python" ] && [ ! -x "$VBIN/python.exe" ]; then
+    fail "The .venv folder is incomplete (it may come from another computer or Python version). Delete the .venv folder and run this again."
+fi
 if [ ! -x "$VBIN/receipts" ] && [ ! -x "$VBIN/receipts.exe" ]; then
     echo "  Installing Receipts and its packages. On a slow connection this takes a few minutes."
     "$VBIN/python" -m pip install --disable-pip-version-check -e . || fail "The install did not finish. Check your internet connection and run this again."
