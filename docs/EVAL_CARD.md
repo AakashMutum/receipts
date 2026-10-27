@@ -13,8 +13,8 @@ Core 5, Podman on WSL2, about 7.7 GiB visible to the VM), unless a line says the
   the number back in range with published history unchanged. Verdicts: NO_INCIDENT, REAL_CHANGE (published),
   PROVEN_FAULT, UNEXPLAINED (held).
 * No thresholds were changed for any test on this page. One detector was extended after the red team found a
-  hole (the unit tail check, below); every test was re-run after it on Exasol except the real-data
-  backtest, which was re-run after it on the DuckDB stand-in and matched every verdict and cause.
+  hole (the unit tail check, below); every test was re-run after it on Exasol, the real-data backtest
+  included.
 
 ## Data
 
@@ -29,8 +29,8 @@ Core 5, Podman on WSL2, about 7.7 GiB visible to the VM), unless a line says the
 |---|---|---|
 | Scored evaluation, 10 scenarios x 5 seeds, 20,000 orders a day | 50 of 50; cause precision and recall 100%, 0 wrong causes. Ablation without the undo test: 5 wrong causes. Threshold alert: 0% of causes, misses the masked pair. Corrected values within 0.017% of the clean value | [`samples/exasol/eval_report.md`](../samples/exasol/eval_report.md) |
 | Held-out variants, 17, written after the detectors were fixed | caught 15, held 1, published under 4% off 1, published wrong 0 (before the tail check: caught 13, held 3) | [`samples/exasol/variants_report.md`](../samples/exasol/variants_report.md) |
-| Real data, 56 days judged (Exasol, before the tail check) | 0 held, 54 NO_INCIDENT, 2 verified REAL_CHANGE; 6 of 6 planted faults caught; 62 of 62 runs agree with the DuckDB run; the DuckDB re-run after the tail check matched every verdict and cause | [`samples/exasol/real_backtest.md`](../samples/exasol/real_backtest.md) |
-| Real data, DuckDB stand-in, after the tail check | 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check | [`samples/real_backtest.md`](../samples/real_backtest.md) |
+| Real data, 56 days judged, after the tail check | 0 held, 54 NO_INCIDENT, 2 verified REAL_CHANGE; 6 of 6 planted faults caught; 62 of 62 runs agree with the DuckDB stand-in; the same verdicts as before the tail check | [`samples/exasol/real_backtest.md`](../samples/exasol/real_backtest.md) |
+| Newest checks on live Exasol | 10 of 10 pass: blast radius, audit-log reader, `DOWNSTREAM_*` columns, metric history, `connect --check`, both new metrics, badge | [`samples/exasol/live_checks.md`](../samples/exasol/live_checks.md) |
 | Red team, seed 11, 20,000 orders a day | Floors: unit 2%, duplicates 2%, fan-out 2%, new codes 5%, clock faults 100%, stale FX caught. 0 holes (1 before the tail check). 8 of 9 opposite-direction pairs caught, 1 held with one cause |
 | Held-out partial unit changes, 24, frozen before the tail check | before: caught 0, held 24; after: caught 12 (all x1000), held 12 (all x10); published 0 both times | [`samples/exasol/heldout_unit_after.md`](../samples/exasol/heldout_unit_after.md) | [`samples/exasol/redteam_report.md`](../samples/exasol/redteam_report.md) |
 | Scaling, IST case (24 Oct, before the unit tail check) | Right verdict at 20k, 100k, 200k and 400k orders a day; at 400k (17,346,085 payment rows) the gate takes 27.5 s, 26.3 s measured by Exasol, peak temporary memory 353 MiB | [`samples/exasol/scaling.md`](../samples/exasol/scaling.md) |
@@ -53,7 +53,7 @@ the fix was written and were not used to tune it.
 | Held-out partial unit changes, 24 | caught 0, held 24, published 0 | caught 12, held 12, published 0 |
 | Variants, 17 | caught 13, held 3, small 1, wrong 0 | caught 15, held 1, small 1, wrong 0 |
 | Scored evaluation, 50 runs | 50 of 50 | 50 of 50, same precision, recall and ablation numbers, festival control published as REAL_CHANGE on all 5 seeds |
-| Real-data backtest (before on Exasol, after on the DuckDB stand-in) | 0 held, REAL_CHANGE on 13 Feb and 27 Feb, 6 of 6 | 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check |
+| Real-data backtest | 0 held, REAL_CHANGE on 13 Feb and 27 Feb, 6 of 6 | the same: 0 held, REAL_CHANGE on 13 Feb and 27 Feb, 6 of 6, all 62 verdicts and causes unchanged |
 
 Reports: `samples/exasol/*_before.md` and the files without the suffix. The DuckDB stand-in gives the same
 held-out counts and the same red team floors.
@@ -63,8 +63,9 @@ held-out counts and the same red team floors.
 For every scenario with a planted fault, the gate's own rules (moves today by at least 1.5%, keeps history as
 published, lands in the normal range) were shown deliberately wrong corrections: the right fix on the wrong
 gateway, the wrong factor, the right fix on every day instead of tonight, or the fix for a cause that was not
-planted. Run on the DuckDB stand-in, 5 seeds, 20,000 orders a day
-([`samples/wrongfix_report.md`](../samples/wrongfix_report.md), `receipts wrongfix`).
+planted. Run on Exasol, 5 seeds, 20,000 orders a day
+([`samples/exasol/wrongfix_report.md`](../samples/exasol/wrongfix_report.md), `receipts wrongfix --backend exasol`); the
+stand-in gives the same table ([`samples/wrongfix_report.md`](../samples/wrongfix_report.md)).
 
 | Wrong fixes | Tried | Rejected | Accepted |
 |---|---|---|---|
