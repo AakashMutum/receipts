@@ -21,3 +21,6 @@ docs/dev/
 build/
 dist/
 *.pyc
+
+# local MCP client config (connects as AGENT_READER; password comes from EXA_AGENT_PASSWORD)
+.mcp.json
