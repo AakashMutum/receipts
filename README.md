@@ -201,7 +201,7 @@ Each run is the first after a fresh load, which is slower than a repeat. The run
 
 ## Agent demo
 
-`PUB.METRIC_TRUST` tells an AI agent not to quote a held number and gives the last trusted value. On Exasol, `receipts init` creates `AGENT_READER`, which can read `PUB` and nothing else, and the Exasol MCP server logs in as it. With the IST case held, that user sees `HELD`, no trusted value, the guidance to quote the last trusted day, and the proven cause from `PUB.CONFIRMED_CAUSES`; Exasol refuses it on `RAW`, `PIPE`, `RECEIPTS` and every write (`python scripts/mcp_smoke.py`).
+`PUB.METRIC_TRUST` tells an AI agent not to quote a held number and gives the last trusted value. On Exasol, `receipts init` creates `AGENT_READER`, which can read `PUB` and nothing else, and the Exasol MCP server logs in as it. With the IST case held, that user sees `HELD`, no trusted value, the guidance to quote the last trusted day, and the proven cause from `PUB.CONFIRMED_CAUSES`; Exasol refuses it on `RAW`, `PIPE`, `RECEIPTS` and every write (`python scripts/mcp_smoke.py`). Through the Exasol MCP server itself, at protocol level, the same user got the held row, the four downstream views, and Exasol's refusal of a delete sent through the server's write tool: [`docs/MCP_PROTOCOL_RUN.md`](docs/MCP_PROTOCOL_RUN.md).
 
 Connecting Claude Desktop or Claude Code, the prompts to ask and the expected answers: [`docs/MCP_DEMO.md`](docs/MCP_DEMO.md).
 
@@ -443,7 +443,7 @@ On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.
 
 **Measured once, on Exasol, before the unit tail check.** The scaling run up to 400,000 orders a day; nothing larger is claimed.
 
-**Not run here.** The Exasol MCP server with a live client (only the read-only `AGENT_READER` user was verified); `run.command` and `run.sh` on a real Mac or Linux machine (run under Git Bash on Windows); posting to a real Slack workspace (only that a failing webhook does not stop the watcher); building either Docker image and deploying the public demo; a blind test by someone other than the author.
+**Not run here.** An AI agent answering through the Exasol MCP server (the server itself ran as `AGENT_READER` and answered the three demo questions at protocol level, [`docs/MCP_PROTOCOL_RUN.md`](docs/MCP_PROTOCOL_RUN.md); the Claude Code CLI connected and listed its tools but was not signed in for headless use, so no model answered); `run.command` and `run.sh` on a real Mac or Linux machine (run under Git Bash on Windows); posting to a real Slack workspace (only that a failing webhook does not stop the watcher); building either Docker image and deploying the public demo; a blind test by someone other than the author.
 
 ## Author
 

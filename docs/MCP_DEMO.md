@@ -106,7 +106,12 @@ Check it with `claude mcp list`, then add the instructions file to the conversat
 * **Tested on Exasol Personal 2026.2.0-nano.3:** the user is created by `receipts init`, can read
   `PUB.METRIC_TRUST` and `PUB.CONFIRMED_CAUSES`, and is refused on `RAW`, `PIPE`, `RECEIPTS`, on insert
   and delete in `PUB`, and on creating a schema (`receipts doctor`, `scripts/mcp_smoke.py`).
-* The config and the `claude mcp add` command follow the Exasol MCP server documentation (server setup,
-  tool setup and database connection pages). The expected agent behaviour above is what the instructions ask
-  for, not a recorded transcript. The MCP server with a live client is listed in
-  [README, Verified and not covered](../README.md#verified-and-not-covered).
+* **The Exasol MCP server itself, at protocol level:** `exasol-mcp-server` 2.3.0, started with `uvx` and logged
+  in as `AGENT_READER`, answered the three demo questions as tool calls from a small MCP client
+  (`scripts/mcp_smoke.py --transcript`): the held trust row, the last trusted value and the proven cause, the
+  four downstream views, and Exasol's own "insufficient privileges" refusal of a delete and an update sent
+  through the server's write tool. The SQL is fixed in that script; no AI model chose it. Transcript:
+  [`MCP_PROTOCOL_RUN.md`](MCP_PROTOCOL_RUN.md).
+* **A live AI client:** the Claude Code CLI connected to the same server as `AGENT_READER` and listed its 24
+  tools, but it was not signed in for headless use on this machine, so no model answered. No agent transcript
+  is claimed. The expected agent behaviour above is what the instructions ask for.
