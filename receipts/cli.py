@@ -327,6 +327,38 @@ def cmd_connect(a):
     return 0
 
 
+def cmd_blindtest(a):
+    """A guided blind test: someone plants a fault, the gate judges it, one line is appended to the results file."""
+    from . import blindtest
+    from .config import settings
+    from .faults import FAULT_CLASSES
+    from .load import incoming_day
+    if not (a.lab or settings().lab):
+        print("Refused: blindtest plants faults, so it runs in lab mode only (add --lab or set RECEIPTS_LAB=1).",
+              file=sys.stderr)
+        return 3
+    be = _be()
+    _synthetic_or_exit(be)
+    day = incoming_day(be)
+    if be.scalar(f"SELECT COUNT(*) FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY = {be.dialect.day(day)}"):
+        print(f"Refused: tonight ({day}) is already judged and published. Run `receipts init --fresh` for a clean "
+              "night, then start the blind test.", file=sys.stderr)
+        return 3
+    if a.fault:
+        fault = None if a.fault == "none" else a.fault
+        gw = a.gateway or (FAULT_CLASSES[fault][3] if fault else None)
+        share, tester, note = a.share / 100, a.tester or "", a.note or ""
+    else:
+        fault, share, gw, tester, note = blindtest.ask()
+    print("Running the gate (no write-back; tonight's batch is removed again afterwards) ...", flush=True)
+    r = blindtest.judge(be, day, fault, share, gw)
+    out = Path(a.results)
+    blindtest.append(out, blindtest.row(tester, fault, share, gw, r, note))
+    print(f"Verdict {r['verdict']}, cause named: {', '.join(r['confirmed']) or 'none'}. Outcome: {r['outcome']}. "
+          f"Correct: {r['correct']}.\nAppended to {out}")
+    return 0
+
+
 def cmd_scale(a):
     """Run the IST case at increasing order volumes and write samples/exasol/scaling.md and .json."""
     from .scale import run, to_markdown
@@ -626,6 +658,20 @@ def main(argv=None):
     cn.add_argument("--orders-per-day", type=int, default=8000)
     cn.add_argument("--out", help="folder for metrics_report.md (default samples/)")
     cn.set_defaults(fn=cmd_connect)
+    bl = sub.add_parser("blindtest", help="plant a fault you choose, let the gate judge it, log the result (lab only)",
+                        description="Lab mode and synthetic data only. Without --fault a short prompt asks for the "
+                                    "fault, share and gateway. See docs/BLIND_TEST.md.")
+    bl.add_argument("--lab", action="store_true", help="turn on lab mode for this command (or RECEIPTS_LAB=1)")
+    bl.add_argument("--fault", choices=["unit_scale", "duplicate_key", "key_fanout", "stale_feed", "clock_shift",
+                                        "orphan_code", "none"],
+                    help="skip the prompt: the fault class to plant, or none for a clean night")
+    bl.add_argument("--share", type=float, default=100.0, help="percent of rows affected, 1 to 100 (default 100)")
+    bl.add_argument("--gateway", choices=["GW_A", "GW_B", "GW_C"], help="for unit_scale and clock_shift")
+    bl.add_argument("--tester", help="name or initials for the results file")
+    bl.add_argument("--note", help="free text for the results file")
+    bl.add_argument("--results", default=str(ROOT / "data" / "blindtest_results.md"),
+                    help="results file to append to (default data/blindtest_results.md, kept local)")
+    bl.set_defaults(fn=cmd_blindtest)
     ho = sub.add_parser("heldout", help="frozen held-out partial unit errors (synthetic data only)")
     ho.add_argument("--backend", choices=["duckdb", "exasol"], default="duckdb")
     ho.add_argument("--seeds", type=int, nargs="+", default=[21, 22])
