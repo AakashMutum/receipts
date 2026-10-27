@@ -75,8 +75,8 @@ def scenarios(metrics: list[Metric], seeds=(11,), orders_per_day: int = 8000, lo
             "generated_at": time.strftime("%Y-%m-%d %H:%M:%S")}
 
 
-def to_markdown(rep: dict, command: str) -> str:
-    out = ["# Configured metrics through the same gate", "",
+def to_markdown(rep: dict, command: str, title: str = "Configured metrics through the same gate") -> str:
+    out = [f"# {title}", "",
            f"Metrics from `receipts.yaml`: {', '.join(rep['metrics'])}. On the DuckDB stand-in, synthetic data, "
            f"{rep['orders_per_day']:,} orders a day, seeds {', '.join(map(str, rep['seeds']))}. Generated "
            f"{rep['generated_at']} in {rep['seconds']} s. Reproduce: `{command}`.", "",
@@ -95,3 +95,40 @@ def to_markdown(rep: dict, command: str) -> str:
         out.append(f"| {r['seed']} | {r['metric']} | {r['scenario']} | {r['error_pct']:+.2f}% | {r['verdict']} | "
                    f"{', '.join(r['confirmed']) or '-'} | {r['outcome']} |")
     return "\n".join(out) + "\n"
+
+
+def heldout(metrics: list[Metric], orders_per_day: int = 8000, log=print) -> dict:
+    """The frozen HELDOUT cases for every metric that is not published (the published one has its own tests)."""
+    from .faults import fault_scenario
+    t0 = time.perf_counter()
+    ms = [m for m in metrics if not m.publish]
+    rows = []
+    for seed in HELDOUT_SEEDS:
+        tmp = Path(tempfile.mkdtemp(prefix=f"receipts_mheld_{seed}_"))
+        cfg = GenConfig(seed=seed, orders_per_day=orders_per_day)
+        generate(tmp, cfg)
+        be = DuckDBBackend(":memory:")
+        init_database(be, tmp, log=lambda *a: None)
+        day = cfg.incoming_day
+        ingest(be, day, "healthy")
+        clean = {m.name: _value(be, m, day) for m in ms}
+        for kind, share, gw in HELDOUT:
+            sc = fault_scenario(kind, share, gw)
+            ingest(be, day, sc)
+            for m in ms:
+                c = run_gate(be, day, {"id": sc.id, "title": sc.title}, write_back=False, metric=m)
+                err = (c["values"]["candidate"] - clean[m.name]) / clean[m.name] * 100 if clean[m.name] else 0.0
+                held = c["trust_status"] == "HELD"
+                rows.append({"seed": seed, "metric": m.name, "scenario": sc.title, "verdict": c["verdict"],
+                             "confirmed": c["confirmed"], "error_pct": round(err, 2), "held": held,
+                             "outcome": outcome(held, err, False)})
+                log(f"seed {seed} {m.name:18s} {sc.title:55s} {c['verdict']:13s} error {err:+7.2f}%  "
+                    f"{rows[-1]['outcome']}")
+        be.close()
+    by = {}
+    for r in rows:
+        k = by.setdefault(r["metric"], {})
+        k[r["outcome"]] = k.get(r["outcome"], 0) + 1
+    return {"seeds": list(HELDOUT_SEEDS), "orders_per_day": orders_per_day, "rows": rows, "summary": by,
+            "metrics": [m.name for m in ms], "seconds": round(time.perf_counter() - t0),
+            "generated_at": time.strftime("%Y-%m-%d %H:%M:%S")}

@@ -1,0 +1,371 @@
+{
+  "seeds": [
+    31,
+    32
+  ],
+  "orders_per_day": 8000,
+  "rows": [
+    {
+      "seed": 31,
+      "metric": "daily_order_count",
+      "scenario": "Merchant table fans out, 5% of merchants",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 31,
+      "metric": "avg_basket_inr",
+      "scenario": "Merchant table fans out, 5% of merchants",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 6.49,
+      "held": false,
+      "outcome": "published WRONG"
+    },
+    {
+      "seed": 31,
+      "metric": "daily_order_count",
+      "scenario": "Merchant table fans out, 25% of merchants",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 31,
+      "metric": "avg_basket_inr",
+      "scenario": "Merchant table fans out, 25% of merchants",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 31.86,
+      "held": false,
+      "outcome": "published WRONG"
+    },
+    {
+      "seed": 31,
+      "metric": "daily_order_count",
+      "scenario": "Merchant table fans out, 100% of merchants",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 31,
+      "metric": "avg_basket_inr",
+      "scenario": "Merchant table fans out, 100% of merchants",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 100.0,
+      "held": false,
+      "outcome": "published WRONG"
+    },
+    {
+      "seed": 31,
+      "metric": "daily_order_count",
+      "scenario": "New category code, 25% of Electronics orders",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "error_pct": -3.97,
+      "held": true,
+      "outcome": "held, metric was fine"
+    },
+    {
+      "seed": 31,
+      "metric": "avg_basket_inr",
+      "scenario": "New category code, 25% of Electronics orders",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "error_pct": -5.8,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 31,
+      "metric": "daily_order_count",
+      "scenario": "Payment rows loaded twice, 25% of today's payment rows",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 31,
+      "metric": "avg_basket_inr",
+      "scenario": "Payment rows loaded twice, 25% of today's payment rows",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "error_pct": 25.71,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 31,
+      "metric": "daily_order_count",
+      "scenario": "IST written as UTC, 100% of payments on the gateway (GW_A)",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "error_pct": -21.92,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 31,
+      "metric": "avg_basket_inr",
+      "scenario": "IST written as UTC, 100% of payments on the gateway (GW_A)",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": -0.56,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 31,
+      "metric": "daily_order_count",
+      "scenario": "Unit change (amounts x100), 10% of payments on the gateway (GW_B)",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 31,
+      "metric": "avg_basket_inr",
+      "scenario": "Unit change (amounts x100), 10% of payments on the gateway (GW_B)",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "error_pct": 375.82,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 31,
+      "metric": "daily_order_count",
+      "scenario": "FX feed misses today",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 31,
+      "metric": "avg_basket_inr",
+      "scenario": "FX feed misses today",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "error_pct": -9.8,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 32,
+      "metric": "daily_order_count",
+      "scenario": "Merchant table fans out, 5% of merchants",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 32,
+      "metric": "avg_basket_inr",
+      "scenario": "Merchant table fans out, 5% of merchants",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 9.72,
+      "held": false,
+      "outcome": "published WRONG"
+    },
+    {
+      "seed": 32,
+      "metric": "daily_order_count",
+      "scenario": "Merchant table fans out, 25% of merchants",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 32,
+      "metric": "avg_basket_inr",
+      "scenario": "Merchant table fans out, 25% of merchants",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 34.56,
+      "held": false,
+      "outcome": "published WRONG"
+    },
+    {
+      "seed": 32,
+      "metric": "daily_order_count",
+      "scenario": "Merchant table fans out, 100% of merchants",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 32,
+      "metric": "avg_basket_inr",
+      "scenario": "Merchant table fans out, 100% of merchants",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 100.0,
+      "held": false,
+      "outcome": "published WRONG"
+    },
+    {
+      "seed": 32,
+      "metric": "daily_order_count",
+      "scenario": "New category code, 25% of Electronics orders",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "error_pct": -3.72,
+      "held": true,
+      "outcome": "held, metric was fine"
+    },
+    {
+      "seed": 32,
+      "metric": "avg_basket_inr",
+      "scenario": "New category code, 25% of Electronics orders",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "error_pct": -4.98,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 32,
+      "metric": "daily_order_count",
+      "scenario": "Payment rows loaded twice, 25% of today's payment rows",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 32,
+      "metric": "avg_basket_inr",
+      "scenario": "Payment rows loaded twice, 25% of today's payment rows",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "error_pct": 25.04,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 32,
+      "metric": "daily_order_count",
+      "scenario": "IST written as UTC, 100% of payments on the gateway (GW_A)",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "error_pct": -21.41,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 32,
+      "metric": "avg_basket_inr",
+      "scenario": "IST written as UTC, 100% of payments on the gateway (GW_A)",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": -0.14,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 32,
+      "metric": "daily_order_count",
+      "scenario": "Unit change (amounts x100), 10% of payments on the gateway (GW_B)",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 32,
+      "metric": "avg_basket_inr",
+      "scenario": "Unit change (amounts x100), 10% of payments on the gateway (GW_B)",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "error_pct": 361.73,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 32,
+      "metric": "daily_order_count",
+      "scenario": "FX feed misses today",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 32,
+      "metric": "avg_basket_inr",
+      "scenario": "FX feed misses today",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "error_pct": -9.05,
+      "held": true,
+      "outcome": "held, right"
+    }
+  ],
+  "summary": {
+    "daily_order_count": {
+      "published, right": 12,
+      "held, metric was fine": 2,
+      "held, right": 2
+    },
+    "avg_basket_inr": {
+      "published WRONG": 6,
+      "held, right": 8,
+      "published, right": 2
+    }
+  },
+  "metrics": [
+    "daily_order_count",
+    "avg_basket_inr"
+  ],
+  "seconds": 52,
+  "generated_at": "2026-10-27 07:10:42"
+}

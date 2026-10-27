@@ -293,6 +293,18 @@ def cmd_connect(a):
         return 2
     print(f"{len(ms)} metric{'s' if len(ms) != 1 else ''} in {a.config or 'receipts.yaml'}: "
           + ", ".join(f"{m.name} ({m.view}.{m.value_column})" for m in ms))
+    if a.heldout:
+        from .connect import heldout, to_markdown
+        rep = heldout(ms, orders_per_day=a.orders_per_day, log=lambda m: print(m, flush=True))
+        out = Path(a.out) if a.out else ROOT / "samples"
+        out.mkdir(parents=True, exist_ok=True)
+        name = f"metrics_heldout_{a.label}" if a.label else "metrics_heldout"
+        cmd = f"receipts connect --heldout --orders-per-day {a.orders_per_day}"
+        (out / f"{name}.json").write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
+        (out / f"{name}.md").write_text(to_markdown(rep, cmd, f"Held-out faults for the configured metrics ({a.label or 'current'})"),
+                                        encoding="utf-8")
+        print(f"Report: {out / (name + '.md')}")
+        return 0
     if a.scenarios:
         from .connect import scenarios, to_markdown
         rep = scenarios(ms, seeds=tuple(a.seeds), orders_per_day=a.orders_per_day, log=lambda m: print(m, flush=True))
@@ -655,6 +667,9 @@ def main(argv=None):
     cn.add_argument("--scenarios", action="store_true",
                     help="run every scenario for every metric on fresh synthetic data and write samples/metrics_report.md")
     cn.add_argument("--seeds", type=int, nargs="+", default=[11, 22])
+    cn.add_argument("--heldout", action="store_true",
+                    help="run the frozen held-out faults for the unpublished metrics (seeds 31, 32)")
+    cn.add_argument("--label", help="suffix for the held-out report name, for example before or after")
     cn.add_argument("--orders-per-day", type=int, default=8000)
     cn.add_argument("--out", help="folder for metrics_report.md (default samples/)")
     cn.set_defaults(fn=cmd_connect)
