@@ -55,7 +55,7 @@ Every number on this page is copied from a committed report in [`samples/`](samp
 | Real-data backtest, NYC taxi Jan to Mar 2024, on Exasol before the unit tail check | 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE; 6 of 6 planted faults caught; 62 of 62 gate runs agree with the DuckDB run; gate median 14,804 ms; the DuckDB re-run after the tail check matched every verdict and cause | [`samples/exasol/real_backtest.md`](samples/exasol/real_backtest.md) |
 | Real-data backtest, DuckDB stand-in, after the unit tail check | 56 days judged, 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (13 Feb -33.9%, 27 Feb +26.0%), 6 of 6 planted faults caught with the right cause; all 62 verdicts and causes the same as before the tail check; gate median 3,728 ms on the stand-in | [`samples/real_backtest.md`](samples/real_backtest.md) |
 | Wrong-fix control, DuckDB stand-in, 5 seeds, 20,000 orders a day | 235 deliberately wrong corrections tried, 225 rejected, 10 accepted (all on the smallest gateway; in each the gate's verdict named only the planted causes) | [`samples/wrongfix_report.md`](samples/wrongfix_report.md) |
-| Configured metrics, DuckDB stand-in, 2 seeds, every scenario | order count: 0 published wrong; average basket: 2 published wrong (merchant fan-out, +17% and +21%) | [`samples/metrics_report.md`](samples/metrics_report.md) |
+| Configured metrics, DuckDB stand-in, 2 seeds, every scenario | 0 published wrong for revenue, order count and average basket; on 16 held-out faults written before the history fix, average basket went from 6 published wrong to 0 | [`samples/metrics_report.md`](samples/metrics_report.md), [`metrics_heldout_after.md`](samples/metrics_heldout_after.md) |
 
 ## Verify in 3 minutes
 

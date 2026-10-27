@@ -68,6 +68,16 @@ def test_order_count_goes_through_the_same_gate_without_write_back(duck):
     assert duck.scalar("SELECT COUNT(*) FROM PUB.DAILY_REVENUE_PUBLISHED") == before
 
 
+def test_history_snapshot_keeps_a_fan_out_from_moving_the_baseline(duck):
+    """A fan-out rewrites past days in the views; the baseline comes from the snapshot taken at build time."""
+    ms = {m.name: m for m in metrics.load(ROOT / "receipts.yaml")}
+    assert duck.scalar("SELECT COUNT(*) FROM RECEIPTS.METRIC_HISTORY WHERE METRIC_NAME = 'avg_basket_inr'") > 30
+    ingest(duck, DAY, "join_fanout")
+    c = gate.run(duck, DAY, metric=ms["avg_basket_inr"])
+    assert c["verdict"] == "PROVEN_FAULT" and c["confirmed"] == ["key_fanout"]
+    assert c["combined_undo"]["history_check"] == "RESTORED"
+
+
 def test_shadow_exasol_path_runs_the_second_metric(shadow):
     ms = {m.name: m for m in metrics.load(ROOT / "receipts.yaml")}
     ingest(shadow, DAY, "ist_utc")

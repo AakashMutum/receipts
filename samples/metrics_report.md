@@ -1,6 +1,6 @@
 # Configured metrics through the same gate
 
-Metrics from `receipts.yaml`: daily_revenue_inr, daily_order_count, avg_basket_inr. On the DuckDB stand-in, synthetic data, 8,000 orders a day, seeds 11, 22. Generated 2026-10-27 06:31:04 in 95 s. Reproduce: `receipts connect --scenarios --seeds 11 22 --orders-per-day 8000`.
+Metrics from `receipts.yaml`: daily_revenue_inr, daily_order_count, avg_basket_inr. On the DuckDB stand-in, synthetic data, 8,000 orders a day, seeds 11, 22. Generated 2026-10-27 07:14:04 in 81 s. Reproduce: `receipts connect --scenarios --seeds 11 22 --orders-per-day 8000`.
 
 Each scenario is landed once and judged for every metric. The error is the metric's candidate value against the same night without the fault. A fault that does not move a metric should be published for that metric; a move of 4% or more should be held. Metrics other than revenue are judged without write-back. The six detectors and the slice breakdown are the revenue pipeline's own, so the causes they name are about the shared raw tables.
 
@@ -8,7 +8,7 @@ Each scenario is landed once and judged for every metric. The error is the metri
 |---|---|---|---|---|
 | daily_revenue_inr | 16 | 4 | 0 | 0 |
 | daily_order_count | 6 | 14 | 0 | 0 |
-| avg_basket_inr | 12 | 6 | 0 | 2 |
+| avg_basket_inr | 14 | 6 | 0 | 0 |
 
 ## Every run
 
@@ -28,7 +28,7 @@ Each scenario is landed once and judged for every metric. The error is the metri
 | 11 | avg_basket_inr | duplicate_load | +12.61% | PROVEN_FAULT | duplicate_key | held, right |
 | 11 | daily_revenue_inr | join_fanout | +20.81% | PROVEN_FAULT | key_fanout | held, right |
 | 11 | daily_order_count | join_fanout | +0.00% | NO_INCIDENT | - | published, right |
-| 11 | avg_basket_inr | join_fanout | +20.81% | NO_INCIDENT | - | published WRONG |
+| 11 | avg_basket_inr | join_fanout | +20.81% | PROVEN_FAULT | key_fanout | held, right |
 | 11 | daily_revenue_inr | stale_fx | -8.08% | PROVEN_FAULT | stale_feed | held, right |
 | 11 | daily_order_count | stale_fx | +0.00% | NO_INCIDENT | - | published, right |
 | 11 | avg_basket_inr | stale_fx | -8.08% | PROVEN_FAULT | stale_feed | held, right |
@@ -58,7 +58,7 @@ Each scenario is landed once and judged for every metric. The error is the metri
 | 22 | avg_basket_inr | duplicate_load | +12.63% | PROVEN_FAULT | duplicate_key | held, right |
 | 22 | daily_revenue_inr | join_fanout | +16.74% | PROVEN_FAULT | key_fanout | held, right |
 | 22 | daily_order_count | join_fanout | +0.00% | NO_INCIDENT | - | published, right |
-| 22 | avg_basket_inr | join_fanout | +16.74% | NO_INCIDENT | - | published WRONG |
+| 22 | avg_basket_inr | join_fanout | +16.74% | PROVEN_FAULT | key_fanout | held, right |
 | 22 | daily_revenue_inr | stale_fx | -8.41% | PROVEN_FAULT | stale_feed | held, right |
 | 22 | daily_order_count | stale_fx | +0.00% | NO_INCIDENT | - | published, right |
 | 22 | avg_basket_inr | stale_fx | -8.41% | PROVEN_FAULT | stale_feed | held, right |

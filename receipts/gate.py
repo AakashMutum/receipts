@@ -58,8 +58,17 @@ SEASON_MIN = 21    # with less history than this, fall back to the plain 14-day 
 
 
 def _view_history(be: Backend, day: date, m: Metric, days: int) -> dict[date, float]:
-    """Earlier days of a metric that is judged but not published: its own view is taken as trusted history."""
+    """Earlier days of a metric that is judged but not published.
+
+    From the snapshot taken when the database was built (RECEIPTS.METRIC_HISTORY), so a fault that rewrites
+    past days in the views does not move the baseline with it. A metric added to the config after the build has
+    no snapshot yet; its own view is used then, and `receipts init` takes the snapshot.
+    """
     D = be.dialect.day(day)
+    snap = be.query(f"SELECT TXN_DAY, METRIC_VALUE FROM RECEIPTS.METRIC_HISTORY WHERE METRIC_NAME = {lit(m.name)} "
+                    f"AND TXN_DAY < {D} AND TXN_DAY >= {be.dialect.add_days(D, -days)} ORDER BY TXN_DAY")
+    if snap:
+        return {to_date(r["txn_day"]): r["metric_value"] for r in snap}
     rows = be.query(f"SELECT {m.day_column} AS TXN_DAY, {m.value_column} AS METRIC_VALUE FROM {m.view} "
                     f"WHERE {m.day_column} < {D} AND {m.day_column} >= {be.dialect.add_days(D, -days)} "
                     f"ORDER BY {m.day_column}")
@@ -310,7 +319,7 @@ def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool =
     for s in eligible:
         if s["id"] in chosen_ids:
             s["outcome"] = "CONFIRMED"
-            s["reason"] = "Passes every rule, and undoing the confirmed causes together puts revenue back in range."
+            s["reason"] = "Passes every rule, and undoing the confirmed causes together puts the number back in range."
         else:
             s["outcome"] = "REJECTED"
             s["reason"] = "Real, but not needed to explain the change: the number comes back without it."

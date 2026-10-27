@@ -154,6 +154,14 @@ CREATE TABLE RECEIPTS.STEP_TIMINGS (
   ROWS_IN_SCOPE BIGINT
 );
 
+-- Trusted history of the configured metrics that are not published to PUB, snapshotted when the database
+-- is built, so a fault that rewrites past days in the views cannot also move the baseline.
+CREATE TABLE RECEIPTS.METRIC_HISTORY (
+  METRIC_NAME VARCHAR(60),
+  TXN_DAY DATE,
+  METRIC_VALUE DOUBLE
+);
+
 CREATE TABLE RECEIPTS.APPROVALS (
   CASE_ID VARCHAR(40),
   APPROVED_AT TIMESTAMP,

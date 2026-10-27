@@ -69,11 +69,33 @@ def init_database(be: Backend, data_dir: Path, log=print) -> dict:
         FROM PIPE.DAILY_REVENUE d WHERE d.TXN_DAY < {be.dialect.day(incoming)}""")
     n = be.scalar("SELECT COUNT(*) FROM PUB.DAILY_REVENUE_PUBLISHED")
     log(f"published {n} trusted history days")
+    snapshot_metric_history(be, incoming, log)
     if not be.is_standin:
         log(f"agent user: {create_agent_reader(be)}")
     meta = {"incoming_day": incoming.isoformat(), "udf": udf, "seconds": round(time.perf_counter() - t0, 1),
             "manifest": manifest}
     return meta
+
+
+def snapshot_metric_history(be: Backend, incoming: date, log=print) -> None:
+    """Keep the trusted history of every configured metric that is not published, as revenue's is in PUB.
+
+    Without it such a metric would take its history from the live view, and a fault that rewrites past days
+    there (a dimension table that fans out, for example) would move the baseline together with tonight.
+    """
+    from .metrics import ConfigError, load
+    try:
+        ms = [m for m in load() if not m.publish]
+    except ConfigError as e:
+        log(f"metric config not loaded ({e}); only daily_revenue_inr has trusted history")
+        return
+    D = be.dialect.day(incoming)
+    for m in ms:
+        try:
+            be.execute(f"INSERT INTO RECEIPTS.METRIC_HISTORY SELECT '{m.name}', {m.day_column}, {m.value_column} "
+                       f"FROM {m.view} WHERE {m.day_column} < {D}")
+        except Exception as e:  # a metric whose view is missing is reported by `receipts connect --check`
+            log(f"no trusted history for {m.name}: {str(e).splitlines()[0][:120]}")
 
 
 def create_agent_reader(be: Backend) -> str:

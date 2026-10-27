@@ -159,11 +159,13 @@
       "seed": 11,
       "metric": "avg_basket_inr",
       "scenario": "join_fanout",
-      "verdict": "NO_INCIDENT",
-      "confirmed": [],
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
       "error_pct": 20.81,
-      "held": false,
-      "outcome": "published WRONG"
+      "held": true,
+      "outcome": "held, right"
     },
     {
       "seed": 11,
@@ -490,11 +492,13 @@
       "seed": 22,
       "metric": "avg_basket_inr",
       "scenario": "join_fanout",
-      "verdict": "NO_INCIDENT",
-      "confirmed": [],
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
       "error_pct": 16.74,
-      "held": false,
-      "outcome": "published WRONG"
+      "held": true,
+      "outcome": "held, right"
     },
     {
       "seed": 22,
@@ -679,8 +683,7 @@
     },
     "avg_basket_inr": {
       "published, right": 6,
-      "held, right": 12,
-      "published WRONG": 2
+      "held, right": 14
     }
   },
   "metrics": [
@@ -688,6 +691,6 @@
     "daily_order_count",
     "avg_basket_inr"
   ],
-  "seconds": 95,
-  "generated_at": "2026-10-27 06:31:04"
+  "seconds": 81,
+  "generated_at": "2026-10-27 07:14:04"
 }

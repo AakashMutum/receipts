@@ -90,8 +90,8 @@ detector's nomination carries part of the proof there.
 * A fault without a detector is held as UNEXPLAINED when it leaves the normal range, and published when it
   does not. On real taxi data the normal range is about plus or minus 22%.
 * In the wrong-fix control 10 of 235 wrong corrections pass the rules on their own (above).
-* Configured metrics: on the stand-in the average basket was published wrong twice on a merchant fan-out
-  ([`samples/metrics_report.md`](../samples/metrics_report.md)); the detectors are bound to the payments layout.
+* Configured metrics: the detectors are bound to the payments layout. On the stand-in's 16 held-out faults, two orphan-code faults of -3.7% and -4.0% on order count were held although they sit just
+  under the 4% line ([`samples/metrics_heldout_after.md`](../samples/metrics_heldout_after.md)).
 * No holiday calendar; a verified real change becomes part of the baseline.
 * Red team and scaling ran on one seed and one laptop. The eval ran on 5 seeds.
 
