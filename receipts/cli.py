@@ -295,11 +295,11 @@ def cmd_connect(a):
           + ", ".join(f"{m.name} ({m.view}.{m.value_column})" for m in ms))
     if a.heldout:
         from .connect import heldout, to_markdown
-        rep = heldout(ms, orders_per_day=a.orders_per_day, log=lambda m: print(m, flush=True))
+        rep = heldout(ms, orders_per_day=a.orders_per_day, log=lambda m: print(m, flush=True), backend=a.backend)
         out = Path(a.out) if a.out else ROOT / "samples"
         out.mkdir(parents=True, exist_ok=True)
         name = f"metrics_heldout_{a.label}" if a.label else "metrics_heldout"
-        cmd = f"receipts connect --heldout --orders-per-day {a.orders_per_day}"
+        cmd = f"receipts connect --heldout --backend {a.backend} --orders-per-day {a.orders_per_day}"
         (out / f"{name}.json").write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
         (out / f"{name}.md").write_text(to_markdown(rep, cmd, f"Held-out faults for the configured metrics ({a.label or 'current'})"),
                                         encoding="utf-8")
@@ -307,7 +307,8 @@ def cmd_connect(a):
         return 0
     if a.scenarios:
         from .connect import scenarios, to_markdown
-        rep = scenarios(ms, seeds=tuple(a.seeds), orders_per_day=a.orders_per_day, log=lambda m: print(m, flush=True))
+        rep = scenarios(ms, seeds=tuple(a.seeds), orders_per_day=a.orders_per_day, log=lambda m: print(m, flush=True),
+                        backend=a.backend)
         out = Path(a.out) if a.out else ROOT / "samples"
         out.mkdir(parents=True, exist_ok=True)
         cmd = f"receipts connect --scenarios --seeds {' '.join(map(str, a.seeds))} --orders-per-day {a.orders_per_day}"
@@ -671,6 +672,8 @@ def main(argv=None):
                         description="Point Receipts at your own daily metric by editing receipts.yaml. --check validates "
                                     "it; with no flag every metric is judged for tonight without write-back.")
     cn.add_argument("--config", help="metric config file (default receipts.yaml in the project folder)")
+    cn.add_argument("--backend", choices=["duckdb", "exasol"], default="duckdb",
+                    help="for --heldout and --scenarios: where the fresh synthetic data is built")
     cn.add_argument("--check", action="store_true", help="only validate the config against the database")
     cn.add_argument("--scenarios", action="store_true",
                     help="run every scenario for every metric on fresh synthetic data and write samples/metrics_report.md")

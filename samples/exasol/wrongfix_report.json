@@ -1,0 +1,3753 @@
+{
+  "backend": {
+    "backend": "exasol",
+    "standin": false,
+    "version": "2026.2.0-nano.3"
+  },
+  "seeds": [
+    11,
+    22,
+    33,
+    44,
+    55
+  ],
+  "orders_per_day": 20000,
+  "rows": [
+    {
+      "seed": 11,
+      "scenario": "unit_paise",
+      "kind": "wrong_factor",
+      "fix": "divide GW_C by 10 instead of 100",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -74.34,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "unit_paise",
+      "kind": "wrong_factor",
+      "fix": "divide GW_C by 1000 instead of 100",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -82.52,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "unit_paise",
+      "kind": "every_day",
+      "fix": "divide GW_C by 100 on every day, not only tonight",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -81.77,
+      "history": "ALTERED",
+      "in_range": true,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "unit_paise",
+      "kind": "wrong_gateway",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -9.08,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -0.56,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "unit_paise",
+      "kind": "wrong_gateway",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -6.6,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -0.37,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -2.75,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 11,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -49.73,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -3.06,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -36.12,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -1.99,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -4.57,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -0.14,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -49.84,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -3.09,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -36.04,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -2.06,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -4.51,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -0.15,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 11,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -54.41,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -3.34,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -39.57,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -2.21,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -4.9,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -0.16,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 11,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -59.24,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "ist_utc",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -3.64,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -24.32,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -5.34,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "ist_utc",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -0.18,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 11,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -49.9,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -2.92,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -36.1,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -2.07,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -4.4,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -0.14,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 11,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -59.08,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "masked_pair",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -3.64,
+      "history": "ALTERED",
+      "in_range": true,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 11,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -24.34,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 11,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -5.41,
+      "history": "UNCHANGED",
+      "in_range": true,
+      "accepted": true,
+      "why": "would be confirmed: moves the number, keeps history and lands in range"
+    },
+    {
+      "seed": 11,
+      "scenario": "masked_pair",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -0.16,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "unit_paise",
+      "kind": "wrong_factor",
+      "fix": "divide GW_C by 10 instead of 100",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -74.82,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "unit_paise",
+      "kind": "wrong_factor",
+      "fix": "divide GW_C by 1000 instead of 100",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -83.06,
+      "history": "UNCHANGED",
+      "in_range": true,
+      "accepted": true,
+      "why": "would be confirmed: moves the number, keeps history and lands in range"
+    },
+    {
+      "seed": 22,
+      "scenario": "unit_paise",
+      "kind": "every_day",
+      "fix": "divide GW_C by 100 on every day, not only tonight",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -82.31,
+      "history": "ALTERED",
+      "in_range": true,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "unit_paise",
+      "kind": "wrong_gateway",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -8.69,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -0.48,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "unit_paise",
+      "kind": "wrong_gateway",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -6.37,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -0.35,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -5.11,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 22,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -49.1,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -2.71,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -35.83,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -1.95,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -4.61,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -0.27,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -49.02,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -2.8,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -36.07,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -1.93,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -4.6,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -0.3,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 22,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -54.11,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -2.99,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -39.64,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -2.16,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -5.13,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -0.32,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 22,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -58.34,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "ist_utc",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -3.23,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -24.12,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -5.53,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "ist_utc",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -0.34,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 22,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -48.77,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -2.6,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -36.7,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -1.98,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -4.27,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -0.29,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 22,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -58.35,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "masked_pair",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -3.3,
+      "history": "ALTERED",
+      "in_range": true,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 22,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -24.14,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 22,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -5.46,
+      "history": "UNCHANGED",
+      "in_range": true,
+      "accepted": true,
+      "why": "would be confirmed: moves the number, keeps history and lands in range"
+    },
+    {
+      "seed": 22,
+      "scenario": "masked_pair",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -0.31,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "unit_paise",
+      "kind": "wrong_factor",
+      "fix": "divide GW_C by 10 instead of 100",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -74.67,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "unit_paise",
+      "kind": "wrong_factor",
+      "fix": "divide GW_C by 1000 instead of 100",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -82.88,
+      "history": "UNCHANGED",
+      "in_range": true,
+      "accepted": true,
+      "why": "would be confirmed: moves the number, keeps history and lands in range"
+    },
+    {
+      "seed": 33,
+      "scenario": "unit_paise",
+      "kind": "every_day",
+      "fix": "divide GW_C by 100 on every day, not only tonight",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -82.14,
+      "history": "ALTERED",
+      "in_range": true,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "unit_paise",
+      "kind": "wrong_gateway",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -8.75,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -0.52,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "unit_paise",
+      "kind": "wrong_gateway",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -6.48,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -0.36,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -4.52,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 33,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -49.01,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -2.94,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -36.28,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -2.09,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -4.6,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -0.24,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -49.03,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -2.85,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -36.27,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -2.11,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -4.68,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -0.24,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 33,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -53.92,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -3.23,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -39.9,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -2.23,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -5.06,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -0.28,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 33,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -58.91,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "ist_utc",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -3.52,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -23.58,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -5.53,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "ist_utc",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -0.3,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 33,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -49.12,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -2.93,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -36.2,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -1.99,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -4.61,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -0.23,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 33,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -58.98,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "masked_pair",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -3.58,
+      "history": "ALTERED",
+      "in_range": true,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 33,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -23.6,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 33,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -5.55,
+      "history": "UNCHANGED",
+      "in_range": true,
+      "accepted": true,
+      "why": "would be confirmed: moves the number, keeps history and lands in range"
+    },
+    {
+      "seed": 33,
+      "scenario": "masked_pair",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -0.3,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "unit_paise",
+      "kind": "wrong_factor",
+      "fix": "divide GW_C by 10 instead of 100",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -75.46,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "unit_paise",
+      "kind": "wrong_factor",
+      "fix": "divide GW_C by 1000 instead of 100",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -83.76,
+      "history": "UNCHANGED",
+      "in_range": true,
+      "accepted": true,
+      "why": "would be confirmed: moves the number, keeps history and lands in range"
+    },
+    {
+      "seed": 44,
+      "scenario": "unit_paise",
+      "kind": "every_day",
+      "fix": "divide GW_C by 100 on every day, not only tonight",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -83.01,
+      "history": "ALTERED",
+      "in_range": true,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "unit_paise",
+      "kind": "wrong_gateway",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -8.37,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -0.49,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "unit_paise",
+      "kind": "wrong_gateway",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -6.15,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -0.39,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -2.88,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 44,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -49.29,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -2.86,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -36.09,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -2.37,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -4.92,
+      "history": "UNCHANGED",
+      "in_range": true,
+      "accepted": true,
+      "why": "would be confirmed: moves the number, keeps history and lands in range"
+    },
+    {
+      "seed": 44,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -0.17,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -49.22,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -2.84,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -36.07,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -2.29,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -4.92,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -0.15,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 44,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -53.94,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -3.13,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -39.6,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -2.51,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -5.35,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -0.19,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 44,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -58.79,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "ist_utc",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -3.41,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -24.03,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -5.83,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "ist_utc",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -0.2,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 44,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -49.35,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -2.67,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -36.2,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -2.29,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -4.88,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -0.15,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 44,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -58.57,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "masked_pair",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -3.36,
+      "history": "ALTERED",
+      "in_range": true,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 44,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -24.1,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 44,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -5.9,
+      "history": "UNCHANGED",
+      "in_range": true,
+      "accepted": true,
+      "why": "would be confirmed: moves the number, keeps history and lands in range"
+    },
+    {
+      "seed": 44,
+      "scenario": "masked_pair",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -0.21,
+      "history": "ALTERED",
+      "in_range": true,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "unit_paise",
+      "kind": "wrong_factor",
+      "fix": "divide GW_C by 10 instead of 100",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -74.75,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "unit_paise",
+      "kind": "wrong_factor",
+      "fix": "divide GW_C by 1000 instead of 100",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -82.98,
+      "history": "UNCHANGED",
+      "in_range": true,
+      "accepted": true,
+      "why": "would be confirmed: moves the number, keeps history and lands in range"
+    },
+    {
+      "seed": 55,
+      "scenario": "unit_paise",
+      "kind": "every_day",
+      "fix": "divide GW_C by 100 on every day, not only tonight",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -82.23,
+      "history": "ALTERED",
+      "in_range": true,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "unit_paise",
+      "kind": "wrong_gateway",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -8.89,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -0.46,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "unit_paise",
+      "kind": "wrong_gateway",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -6.34,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -0.36,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": -4.22,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "unit_paise",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 55,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -50.22,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -2.53,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -35.62,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -2.06,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -4.62,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "duplicate_load",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "move_pct": -0.22,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -50.04,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -2.64,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -35.74,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -2.07,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -4.6,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": -0.22,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "join_fanout",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 55,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -54.77,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -2.82,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -39.05,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -2.22,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -5.07,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": -0.26,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "stale_fx",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 55,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -59.48,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "ist_utc",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -3.07,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -23.68,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -5.5,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "ist_utc",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": -0.28,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "ist_utc",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 55,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -49.77,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -2.58,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -35.99,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -2.1,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -4.69,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": -0.2,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "new_code",
+      "kind": "different_cause",
+      "fix": "remove duplicate payments in tonight's batch",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "move_pct": 0.0,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "moves today's number only +0.00%"
+    },
+    {
+      "seed": 55,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -59.64,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "masked_pair",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_A",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -2.99,
+      "history": "ALTERED",
+      "in_range": true,
+      "accepted": false,
+      "why": "history would change"
+    },
+    {
+      "seed": 55,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_B",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -23.66,
+      "history": "UNCHANGED",
+      "in_range": false,
+      "accepted": false,
+      "why": "the corrected number is still outside the normal range"
+    },
+    {
+      "seed": 55,
+      "scenario": "masked_pair",
+      "kind": "different_cause",
+      "fix": "unit fix (divide by 100) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -5.47,
+      "history": "UNCHANGED",
+      "in_range": true,
+      "accepted": true,
+      "why": "would be confirmed: moves the number, keeps history and lands in range"
+    },
+    {
+      "seed": 55,
+      "scenario": "masked_pair",
+      "kind": "wrong_gateway",
+      "fix": "clock fix (shift back 5.5 hours) on GW_C",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "move_pct": -0.27,
+      "history": "ALTERED",
+      "in_range": false,
+      "accepted": false,
+      "why": "history would change"
+    }
+  ],
+  "summary": {
+    "tried": 235,
+    "rejected": 225,
+    "accepted": 10,
+    "by_kind": {
+      "wrong_factor": {
+        "tried": 10,
+        "rejected": 6,
+        "accepted": 4
+      },
+      "every_day": {
+        "tried": 5,
+        "rejected": 5,
+        "accepted": 0
+      },
+      "wrong_gateway": {
+        "tried": 30,
+        "rejected": 30,
+        "accepted": 0
+      },
+      "different_cause": {
+        "tried": 190,
+        "rejected": 184,
+        "accepted": 6
+      }
+    },
+    "accepted_list": [
+      {
+        "seed": 11,
+        "scenario": "masked_pair",
+        "kind": "different_cause",
+        "fix": "unit fix (divide by 100) on GW_C",
+        "verdict": "PROVEN_FAULT",
+        "confirmed": [
+          "clock_shift",
+          "duplicate_key"
+        ],
+        "move_pct": -5.41,
+        "history": "UNCHANGED",
+        "in_range": true,
+        "accepted": true,
+        "why": "would be confirmed: moves the number, keeps history and lands in range"
+      },
+      {
+        "seed": 22,
+        "scenario": "unit_paise",
+        "kind": "wrong_factor",
+        "fix": "divide GW_C by 1000 instead of 100",
+        "verdict": "PROVEN_FAULT",
+        "confirmed": [
+          "unit_scale"
+        ],
+        "move_pct": -83.06,
+        "history": "UNCHANGED",
+        "in_range": true,
+        "accepted": true,
+        "why": "would be confirmed: moves the number, keeps history and lands in range"
+      },
+      {
+        "seed": 22,
+        "scenario": "masked_pair",
+        "kind": "different_cause",
+        "fix": "unit fix (divide by 100) on GW_C",
+        "verdict": "PROVEN_FAULT",
+        "confirmed": [
+          "clock_shift",
+          "duplicate_key"
+        ],
+        "move_pct": -5.46,
+        "history": "UNCHANGED",
+        "in_range": true,
+        "accepted": true,
+        "why": "would be confirmed: moves the number, keeps history and lands in range"
+      },
+      {
+        "seed": 33,
+        "scenario": "unit_paise",
+        "kind": "wrong_factor",
+        "fix": "divide GW_C by 1000 instead of 100",
+        "verdict": "PROVEN_FAULT",
+        "confirmed": [
+          "unit_scale"
+        ],
+        "move_pct": -82.88,
+        "history": "UNCHANGED",
+        "in_range": true,
+        "accepted": true,
+        "why": "would be confirmed: moves the number, keeps history and lands in range"
+      },
+      {
+        "seed": 33,
+        "scenario": "masked_pair",
+        "kind": "different_cause",
+        "fix": "unit fix (divide by 100) on GW_C",
+        "verdict": "PROVEN_FAULT",
+        "confirmed": [
+          "clock_shift",
+          "duplicate_key"
+        ],
+        "move_pct": -5.55,
+        "history": "UNCHANGED",
+        "in_range": true,
+        "accepted": true,
+        "why": "would be confirmed: moves the number, keeps history and lands in range"
+      },
+      {
+        "seed": 44,
+        "scenario": "unit_paise",
+        "kind": "wrong_factor",
+        "fix": "divide GW_C by 1000 instead of 100",
+        "verdict": "PROVEN_FAULT",
+        "confirmed": [
+          "unit_scale"
+        ],
+        "move_pct": -83.76,
+        "history": "UNCHANGED",
+        "in_range": true,
+        "accepted": true,
+        "why": "would be confirmed: moves the number, keeps history and lands in range"
+      },
+      {
+        "seed": 44,
+        "scenario": "duplicate_load",
+        "kind": "different_cause",
+        "fix": "unit fix (divide by 100) on GW_C",
+        "verdict": "PROVEN_FAULT",
+        "confirmed": [
+          "duplicate_key"
+        ],
+        "move_pct": -4.92,
+        "history": "UNCHANGED",
+        "in_range": true,
+        "accepted": true,
+        "why": "would be confirmed: moves the number, keeps history and lands in range"
+      },
+      {
+        "seed": 44,
+        "scenario": "masked_pair",
+        "kind": "different_cause",
+        "fix": "unit fix (divide by 100) on GW_C",
+        "verdict": "PROVEN_FAULT",
+        "confirmed": [
+          "clock_shift",
+          "duplicate_key"
+        ],
+        "move_pct": -5.9,
+        "history": "UNCHANGED",
+        "in_range": true,
+        "accepted": true,
+        "why": "would be confirmed: moves the number, keeps history and lands in range"
+      },
+      {
+        "seed": 55,
+        "scenario": "unit_paise",
+        "kind": "wrong_factor",
+        "fix": "divide GW_C by 1000 instead of 100",
+        "verdict": "PROVEN_FAULT",
+        "confirmed": [
+          "unit_scale"
+        ],
+        "move_pct": -82.98,
+        "history": "UNCHANGED",
+        "in_range": true,
+        "accepted": true,
+        "why": "would be confirmed: moves the number, keeps history and lands in range"
+      },
+      {
+        "seed": 55,
+        "scenario": "masked_pair",
+        "kind": "different_cause",
+        "fix": "unit fix (divide by 100) on GW_C",
+        "verdict": "PROVEN_FAULT",
+        "confirmed": [
+          "clock_shift",
+          "duplicate_key"
+        ],
+        "move_pct": -5.47,
+        "history": "UNCHANGED",
+        "in_range": true,
+        "accepted": true,
+        "why": "would be confirmed: moves the number, keeps history and lands in range"
+      }
+    ]
+  },
+  "seconds": 615,
+  "generated_at": "2026-10-27 21:52:37"
+}
