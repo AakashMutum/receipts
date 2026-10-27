@@ -21,6 +21,13 @@ from .metrics import Metric
 
 WRONG_PCT = 4.0
 
+# Held-out cases for the configured metrics, written and committed before the history-snapshot fix was run.
+# (fault, share, gateway) on seeds 31 and 32; none of them was used while writing the fix.
+HELDOUT = [("key_fanout", 0.05, None), ("key_fanout", 0.25, None), ("key_fanout", 1.0, None),
+           ("orphan_code", 0.25, None), ("duplicate_key", 0.25, None), ("clock_shift", 1.0, "GW_A"),
+           ("unit_scale", 0.10, "GW_B"), ("stale_feed", 1.0, None)]
+HELDOUT_SEEDS = (31, 32)
+
 
 def _value(be, m: Metric, day) -> float:
     return be.scalar(f"SELECT {m.value_column} FROM {m.view} WHERE {m.day_column} = {be.dialect.day(day)}") or 0.0
