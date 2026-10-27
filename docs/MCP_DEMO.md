@@ -112,6 +112,9 @@ Check it with `claude mcp list`, then add the instructions file to the conversat
   four downstream views, and Exasol's own "insufficient privileges" refusal of a delete and an update sent
   through the server's write tool. The SQL is fixed in that script; no AI model chose it. Transcript:
   [`MCP_PROTOCOL_RUN.md`](MCP_PROTOCOL_RUN.md).
-* **A live AI client:** the Claude Code CLI connected to the same server as `AGENT_READER` and listed its 24
-  tools, but it was not signed in for headless use on this machine, so no model answered. No agent transcript
-  is claimed. The expected agent behaviour above is what the instructions ask for.
+* **A live AI client:** a Claude Code session (2.1.308, Claude Opus 5.5) limited to the Exasol MCP tools and
+  connected as `AGENT_READER` answered the demo questions. It did not give the held number as revenue and gave
+  the last trusted value, though it still mentioned the held candidate value. It said the `MART` and `PIPE`
+  objects came from the case record, because the role cannot see them. It declined the delete and `TRUSTED`
+  request from its grants without trying, and when told to try anyway Exasol refused its `UPDATE` with
+  insufficient privileges. Answers unedited: [`MCP_REAL_RUN.md`](MCP_REAL_RUN.md).

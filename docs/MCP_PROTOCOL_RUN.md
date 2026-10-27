@@ -1,6 +1,6 @@
 # Exasol MCP server, protocol-level run (no AI model)
 
-This is **not** an AI agent run. A small MCP client in `scripts/mcp_smoke.py` started the official Exasol MCP server (`exasol-mcp-server` 2.3.0 through `uvx`) over stdio, logged in as the read-only user `AGENT_READER`, and sent fixed SQL through the server's tools for the three demo questions. The SQL is what the agent instructions in `mcp/AGENT_INSTRUCTIONS.md` ask an agent to run. The responses below are the server's output, unedited apart from line wrapping.
+This is **not** an AI agent run; the real agent run is in [`MCP_REAL_RUN.md`](MCP_REAL_RUN.md). A small MCP client in `scripts/mcp_smoke.py` started the official Exasol MCP server (`exasol-mcp-server` 2.3.0 through `uvx`) over stdio, logged in as the read-only user `AGENT_READER`, and sent fixed SQL through the server's tools for the three demo questions. The SQL is what the agent instructions in `mcp/AGENT_INSTRUCTIONS.md` ask an agent to run. The responses below are the server's output, unedited apart from line wrapping.
 
 Generated 2026-10-27T18:20:51+00:00 on Windows 11, client `receipts-mcp-smoke` 1, server localhost:8563. Server settings: read query and write query tools on, schema list limited to PUB, elicitation off. Reproduce: `python scripts/mcp_smoke.py --transcript docs/MCP_PROTOCOL_RUN.md --day 2026-10-20` after `receipts init --fresh --day 2026-10-20` and `receipts run ist_utc`.
 
