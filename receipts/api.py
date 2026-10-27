@@ -41,7 +41,9 @@ def be() -> Backend:
             except Exception as e:  # not initialised yet, or Exasol not reachable
                 from .model import stale_message
                 _state["error"] = str(e)
-                raise HTTPException(503, f"{stale_message(None)} ({type(e).__name__})")
+                # a missing table just means nothing is built yet; other errors (Exasol unreachable) keep their name
+                kind = type(e).__name__
+                raise HTTPException(503, stale_message(None) + ("" if "Catalog" in kind else f" ({kind})"))
         return _state["be"]
 
 
