@@ -283,6 +283,50 @@ def cmd_wrongfix(a):
     return 0
 
 
+def cmd_connect(a):
+    """Validate receipts.yaml, judge tonight for every metric, or run every scenario per metric."""
+    from .metrics import ConfigError, check, load
+    try:
+        ms = load(a.config)
+    except ConfigError as e:
+        print(f"Config problem: {e}", file=sys.stderr)
+        return 2
+    print(f"{len(ms)} metric{'s' if len(ms) != 1 else ''} in {a.config or 'receipts.yaml'}: "
+          + ", ".join(f"{m.name} ({m.view}.{m.value_column})" for m in ms))
+    if a.scenarios:
+        from .connect import scenarios, to_markdown
+        rep = scenarios(ms, seeds=tuple(a.seeds), orders_per_day=a.orders_per_day, log=lambda m: print(m, flush=True))
+        out = Path(a.out) if a.out else ROOT / "samples"
+        out.mkdir(parents=True, exist_ok=True)
+        cmd = f"receipts connect --scenarios --seeds {' '.join(map(str, a.seeds))} --orders-per-day {a.orders_per_day}"
+        (out / "metrics_report.json").write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
+        (out / "metrics_report.md").write_text(to_markdown(rep, cmd), encoding="utf-8")
+        print(f"Report: {out / 'metrics_report.md'}")
+        return 0
+    be = _be()
+    results = check(be, ms)
+    for ok, msg in results:
+        print(f"  {'ok ' if ok else 'FIX'}  {msg}")
+    bad = sum(not ok for ok, _ in results)
+    if a.check or bad:
+        print("All good." if not bad else f"\n{bad} problem{'s' if bad != 1 else ''} to fix in the config.")
+        return 1 if bad else 0
+    from . import gate
+    from .load import incoming_day
+    day = incoming_day(be)
+    if not be.scalar(f"SELECT COUNT(*) FROM RAW.PAYMENTS WHERE BATCH_DAY = {be.dialect.day(day)}"):
+        print(f"Tonight's batch ({day}) has not landed in RAW yet, so there is nothing to judge. "
+              f"Land it (receipts watch, or receipts run <scenario> on synthetic data) and run this again.")
+        return 0
+    for m in ms:
+        c = gate.run(be, day, {"id": "connect"}, write_back=False, metric=m)
+        v = c["values"]
+        print(f"  {m.name:20s} {day}  {c['verdict']:13s} {c['trust_status']:11s} candidate {v['candidate']:,.2f} "
+              f"expected {v['baseline']:,.2f} ({v['change_pct']:+.1%})")
+    print("Judged without write-back. `receipts run` and the watcher write the published metric.")
+    return 0
+
+
 def cmd_scale(a):
     """Run the IST case at increasing order volumes and write samples/exasol/scaling.md and .json."""
     from .scale import run, to_markdown
@@ -571,6 +615,17 @@ def main(argv=None):
     wf.add_argument("--orders-per-day", type=int, default=20000)
     wf.add_argument("--out", help="folder for wrongfix_report.md and .json (default samples/, or samples/exasol/)")
     wf.set_defaults(fn=cmd_wrongfix)
+    cn = sub.add_parser("connect", help="check receipts.yaml against the database and judge every configured metric",
+                        description="Point Receipts at your own daily metric by editing receipts.yaml. --check validates "
+                                    "it; with no flag every metric is judged for tonight without write-back.")
+    cn.add_argument("--config", help="metric config file (default receipts.yaml in the project folder)")
+    cn.add_argument("--check", action="store_true", help="only validate the config against the database")
+    cn.add_argument("--scenarios", action="store_true",
+                    help="run every scenario for every metric on fresh synthetic data and write samples/metrics_report.md")
+    cn.add_argument("--seeds", type=int, nargs="+", default=[11, 22])
+    cn.add_argument("--orders-per-day", type=int, default=8000)
+    cn.add_argument("--out", help="folder for metrics_report.md (default samples/)")
+    cn.set_defaults(fn=cmd_connect)
     ho = sub.add_parser("heldout", help="frozen held-out partial unit errors (synthetic data only)")
     ho.add_argument("--backend", choices=["duckdb", "exasol"], default="duckdb")
     ho.add_argument("--seeds", type=int, nargs="+", default=[21, 22])

@@ -191,7 +191,32 @@ The **Red team** tab next to it shows the detection floor per fault class from t
 runs one attack live (`receipts redteam` writes the report; see the README). Run it on the built-in synthetic
 data or a sandbox copy, never on live production tables.
 
-## 9. Trust badge
+## 9. Point it at your own metric
+
+Metrics are listed in `receipts.yaml` in the project folder. Each entry names the daily view, its value and day
+columns, the raw tables the batch lands in, the amount, ID and time columns of the main raw table, and whether to
+use a weekday baseline (`auto`, `on` or `off`). Adding a metric is an edit to that file, not to the code. The
+sample file ships three metrics over the same pipeline: daily revenue (the one published to PUB), paid orders per
+day and the average basket.
+
+```bash
+receipts connect --check
+```
+
+checks every metric against the database: the view and raw tables exist, the columns exist, the value column is a
+number, the day and time columns are dates or timestamps, and the amount is a number. Each problem is printed in one
+plain line, for example `the value column NOPE is not in PIPE.DAILY_ORDERS. It has: AVG_BASKET_INR, ORDER_COUNT,
+TXN_DAY.` `receipts connect` with no flag judges tonight's batch for every metric without write-back, and
+`receipts connect --scenarios` runs every synthetic scenario for every metric and writes
+[`samples/metrics_report.md`](../samples/metrics_report.md).
+
+What a config change covers: the metric's own band and weekday baseline, lineage from the catalog to that metric,
+the undo test re-reading that metric in the sandbox, and the blast radius. What it does not cover: the six detectors
+are written for the payments layout of the sample pipeline, so a metric over a different raw layout gets the band
+and lineage but no detector would nominate a cause there; the slice breakdown runs on revenue; and only
+`daily_revenue_inr` is written to `PUB.METRIC_TRUST`, the other metrics are judged and reported.
+
+## 10. Trust badge
 
 With `receipts serve` running (normal or lab mode), `http://127.0.0.1:8000/badge.svg` is a small SVG: the metric
 name, today's trust status and the last trusted day, read from `PUB.METRIC_TRUST`. No values, no raw data, and it

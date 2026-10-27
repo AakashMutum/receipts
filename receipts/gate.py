@@ -25,6 +25,7 @@ from . import blast, explain, lineage
 from .db import Backend, to_date
 from .dialect import lit
 from .load import PROD_SRC, udf_status
+from .metrics import DEFAULT, Metric
 from .model import BASELINE_DAYS, METRIC_LABEL, METRIC_NAME
 from .undo import run_undo
 
@@ -56,7 +57,18 @@ SEASON_DAYS = 35   # five weeks of trusted history, so every weekday is seen fiv
 SEASON_MIN = 21    # with less history than this, fall back to the plain 14-day baseline
 
 
-def _history(be: Backend, day: date, days: int = SEASON_DAYS) -> dict[date, float]:
+def _view_history(be: Backend, day: date, m: Metric, days: int) -> dict[date, float]:
+    """Earlier days of a metric that is judged but not published: its own view is taken as trusted history."""
+    D = be.dialect.day(day)
+    rows = be.query(f"SELECT {m.day_column} AS TXN_DAY, {m.value_column} AS METRIC_VALUE FROM {m.view} "
+                    f"WHERE {m.day_column} < {D} AND {m.day_column} >= {be.dialect.add_days(D, -days)} "
+                    f"ORDER BY {m.day_column}")
+    return {to_date(r["txn_day"]): r["metric_value"] for r in rows}
+
+
+def _history(be: Backend, day: date, days: int = SEASON_DAYS, m: Metric = DEFAULT) -> dict[date, float]:
+    if not m.publish:
+        return _view_history(be, day, m, days)
     D = be.dialect.day(day)
     rows = be.query(f"SELECT TXN_DAY, METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY < {D} "
                     f"AND TXN_DAY >= {be.dialect.add_days(D, -days)} "
@@ -89,7 +101,7 @@ def _weekly_pattern(by_wd: dict[int, list[float]]) -> bool:
     return (ssb / (len(groups) - 1)) / (ssw / dfw) > 3.5
 
 
-def expected(hist: dict[date, float], day: date) -> tuple[float, float, bool]:
+def expected(hist: dict[date, float], day: date, weekday: str = "auto") -> tuple[float, float, bool]:
     """What this metric should be on `day`, the spread around it, and whether the weekday was used.
 
     Real business numbers have a weekly shape. With five weeks of trusted history we learn each
@@ -104,7 +116,8 @@ def expected(hist: dict[date, float], day: date) -> tuple[float, float, bool]:
     if len(days) >= SEASON_MIN and overall:
         for d in days:
             by_wd.setdefault(d.weekday(), []).append(hist[d] / overall)
-    if len(by_wd) == 7 and all(len(x) >= 3 for x in by_wd.values()) and _weekly_pattern(by_wd):
+    if (weekday != "off" and len(by_wd) == 7 and all(len(x) >= 3 for x in by_wd.values())
+            and (weekday == "on" or _weekly_pattern(by_wd))):
         idx = {w: statistics.mean(x) for w, x in by_wd.items()}
         flat = [hist[d] / idx[d.weekday()] for d in days]
         level = statistics.mean(flat)
@@ -115,7 +128,9 @@ def expected(hist: dict[date, float], day: date) -> tuple[float, float, bool]:
             statistics.pstdev(recent) if len(recent) > 1 else 0.0, False)
 
 
-def _published(be: Backend, day: date) -> dict[date, float]:
+def _published(be: Backend, day: date, m: Metric = DEFAULT) -> dict[date, float]:
+    if not m.publish:
+        return _view_history(be, day, m, BASELINE_DAYS)
     D = be.dialect.day(day)
     rows = be.query(f"SELECT TXN_DAY, METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY < {D} "
                     f"AND TXN_DAY >= {be.dialect.add_days(D, -BASELINE_DAYS)} "
@@ -123,13 +138,19 @@ def _published(be: Backend, day: date) -> dict[date, float]:
     return {to_date(r["txn_day"]): r["metric_value"] for r in rows}
 
 
-def _candidate(be: Backend, day: date) -> tuple[dict, dict, dict]:
+def _candidate(be: Backend, day: date, m: Metric = DEFAULT) -> tuple[dict, dict, dict]:
     D = be.dialect.day(day)
     rows = be.query(f"SELECT TXN_DAY, REVENUE_INR, TXN_COUNT FROM PIPE.DAILY_REVENUE "
                     f"WHERE TXN_DAY >= {be.dialect.add_days(D, -BASELINE_DAYS)} ORDER BY TXN_DAY")
-    vals = {to_date(r["txn_day"]): r["revenue_inr"] for r in rows if to_date(r["txn_day"]) <= day}
+    if (m.view, m.value_column) != (DEFAULT.view, DEFAULT.value_column):
+        mv = {to_date(r["d"]): r["v"] for r in be.query(
+            f"SELECT {m.day_column} AS D, {m.value_column} AS V FROM {m.view} "
+            f"WHERE {m.day_column} >= {be.dialect.add_days(D, -BASELINE_DAYS)}")}
+    else:
+        mv = {to_date(r["txn_day"]): r["revenue_inr"] for r in rows}
+    vals = {d: v for d, v in sorted(mv.items()) if d <= day}
     counts = {to_date(r["txn_day"]): r["txn_count"] for r in rows if to_date(r["txn_day"]) <= day}
-    spill = {to_date(r["txn_day"]): r["revenue_inr"] for r in rows if to_date(r["txn_day"]) > day}
+    spill = {d: v for d, v in sorted(mv.items()) if d > day}
     return vals, counts, spill
 
 
@@ -166,18 +187,21 @@ def _fix_diff(be: Backend, corrections: list) -> str:
                                         "pipeline.sql (production)", "pipeline.sql (proven by the undo test)", n=2))
 
 
-def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool = True, on_step=None) -> dict:
+def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool = True, on_step=None,
+        metric: Metric | None = None) -> dict:
+    m = metric or DEFAULT
+    write_back = write_back and m.publish  # only the published metric is written to PUB
     tm = Timer(on_step, be.server_marker)
     be.log.clear()
     case_id = f"RC-{day:%Y%m%d}-{uuid.uuid4().hex[:6].upper()}"
 
     # 0. the number and its history ----------------------------------------------------
     t = time.perf_counter()
-    published = _published(be, day)
-    cand_series, counts, spill = _candidate(be, day)
+    published = _published(be, day, m)
+    cand_series, counts, spill = _candidate(be, day, m)
     A = cand_series.get(day, 0.0)
-    hist_long = _history(be, day)
-    B, sd, seasonal = expected(hist_long, day)
+    hist_long = _history(be, day, m=m)
+    B, sd, seasonal = expected(hist_long, day, m.weekday_baseline)
     band = max(3 * sd, 0.04 * B)
     hist = list(hist_long.values())
     anomaly = abs(A - B) > band
@@ -195,7 +219,7 @@ def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool =
 
     # 2. lineage from the catalog -----------------------------------------------------------
     t = time.perf_counter()
-    lin = lineage.build(be)
+    lin = lineage.build(be, m.schema, (m.view_name, m.value_column))
     all_views = blast.read_views(be)
     tm.step("Read lineage from view definitions", t, rows=len(all_views))
 
@@ -234,9 +258,9 @@ def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool =
         s["rules"].append({"rule": "Evidence names a column and a slice", "passed": r1,
                            "detail": f"{f.blamed_table}.{f.blamed_column}, {s['slice_text']}"})
         s["rules"].append({"rule": "That column feeds this metric", "passed": r2,
-                           "detail": (f"{infl} lineage to {METRIC_NAME}" if infl else
+                           "detail": (f"{infl} lineage to {m.name}" if infl else
                                       f"{f.blamed_table} feeds the metric's rows") if r2 else "not in lineage"})
-        u = run_undo(be, day, [f.correction], cand_series, published) if f.correction else None
+        u = run_undo(be, day, [f.correction], cand_series, published, m) if f.correction else None
         s["undo"] = u
         move = (u["value"] - A) / A if (u and A) else 0.0
         r3 = abs(move) >= MATERIAL
@@ -272,7 +296,7 @@ def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool =
             for combo in combinations(pool, k):
                 tried += 1
                 u = combo[0]["undo"] if k == 1 else run_undo(be, day, [corr[c["id"]] for c in combo],
-                                                             cand_series, published)
+                                                             cand_series, published, m)
                 ok = in_band(u["value"]) and u["history_check"] in ("UNCHANGED", "RESTORED")
                 if ok and (best is None or abs(u["value"] - B) < abs(best[1]["value"] - B)):
                     best = (combo, u)
@@ -327,8 +351,8 @@ def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool =
 
     case = {
         "case_id": case_id,
-        "metric": METRIC_NAME,
-        "metric_label": METRIC_LABEL,
+        "metric": m.name if metric else METRIC_NAME,
+        "metric_label": (m.label or m.name) if metric else METRIC_LABEL,
         "day": day.isoformat(),
         "day_label": f"{day:%a %d %b %Y}",
         "opened_at": datetime.now().isoformat(timespec="seconds"),

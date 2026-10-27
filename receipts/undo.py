@@ -40,11 +40,13 @@ def build_sandbox(be: Backend, corrections: list[Correction], schema: str = SAND
     return src
 
 
-def series(be: Backend, schema: str, day: date, days_back: int = BASELINE_DAYS) -> dict[date, float]:
+def series(be: Backend, schema: str, day: date, days_back: int = BASELINE_DAYS, view: str = "DAILY_REVENUE",
+           column: str = "REVENUE_INR", day_column: str = "TXN_DAY") -> dict[date, float]:
     D = be.dialect.day(day)
-    rows = be.query(f"SELECT TXN_DAY, REVENUE_INR FROM {schema}.DAILY_REVENUE "
-                    f"WHERE TXN_DAY >= {be.dialect.add_days(D, -days_back)} AND TXN_DAY <= {D} ORDER BY TXN_DAY")
-    return {to_date(r["txn_day"]): r["revenue_inr"] for r in rows}
+    rows = be.query(f"SELECT {day_column} AS TXN_DAY, {column} AS V FROM {schema}.{view} "
+                    f"WHERE {day_column} >= {be.dialect.add_days(D, -days_back)} AND {day_column} <= {D} "
+                    f"ORDER BY {day_column}")
+    return {to_date(r["txn_day"]): r["v"] for r in rows}
 
 
 def history_check(fixed: dict, candidate: dict, published: dict, day: date, tol: float = 0.001) -> tuple[str, float]:
@@ -64,10 +66,13 @@ def history_check(fixed: dict, candidate: dict, published: dict, day: date, tol:
     return "ALTERED", min(vs_cand, vs_pub)
 
 
-def run_undo(be: Backend, day: date, corrections: list[Correction], candidate: dict, published: dict) -> dict:
+def run_undo(be: Backend, day: date, corrections: list[Correction], candidate: dict, published: dict,
+             metric=None) -> dict:
+    """`metric` (a receipts.metrics.Metric) picks the view and column re-read in the sandbox; default revenue."""
     t = time.perf_counter()
     src = build_sandbox(be, corrections)
-    fixed = series(be, SANDBOX, day)
+    fixed = (series(be, SANDBOX, day, view=metric.view_name, column=metric.value_column, day_column=metric.day_column)
+             if metric else series(be, SANDBOX, day))
     status, diff = history_check(fixed, candidate, published, day)
     return {
         "value": fixed.get(day, 0.0),

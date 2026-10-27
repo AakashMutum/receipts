@@ -80,7 +80,7 @@ SOURCE_TABLES: dict[str, list[tuple[str, str]]] = {
 # extra rows used only by the "real festival surge" control scenario
 FESTIVAL_TABLES = {"FESTIVAL_ORDERS": "ORDERS", "FESTIVAL_PAYMENTS": "PAYMENTS"}
 
-PIPE_VIEWS = ["STG_PAYMENTS", "STG_ORDERS", "DIM_MERCHANT", "DIM_CATEGORY", "FX_DAILY", "FCT_REVENUE", "DAILY_REVENUE"]
+PIPE_VIEWS = ["STG_PAYMENTS", "STG_ORDERS", "DIM_MERCHANT", "DIM_CATEGORY", "FX_DAILY", "FCT_REVENUE", "DAILY_REVENUE", "DAILY_ORDERS"]
 
 # dimensions the decomposition cube runs over
 CUBE_DIMS = ["CITY", "CATEGORY_NAME", "CHANNEL", "GATEWAY", "CURRENCY_CODE", "TIER"]

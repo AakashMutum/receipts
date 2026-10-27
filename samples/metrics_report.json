@@ -1,0 +1,693 @@
+{
+  "seeds": [
+    11,
+    22
+  ],
+  "orders_per_day": 8000,
+  "rows": [
+    {
+      "seed": 11,
+      "metric": "daily_revenue_inr",
+      "scenario": "healthy",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": -0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_order_count",
+      "scenario": "healthy",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 11,
+      "metric": "avg_basket_inr",
+      "scenario": "healthy",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": -0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_revenue_inr",
+      "scenario": "festival",
+      "verdict": "REAL_CHANGE",
+      "confirmed": [],
+      "error_pct": -0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_order_count",
+      "scenario": "festival",
+      "verdict": "REAL_CHANGE",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 11,
+      "metric": "avg_basket_inr",
+      "scenario": "festival",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_revenue_inr",
+      "scenario": "unit_paise",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "error_pct": 439.41,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_order_count",
+      "scenario": "unit_paise",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 11,
+      "metric": "avg_basket_inr",
+      "scenario": "unit_paise",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "error_pct": 439.41,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_revenue_inr",
+      "scenario": "duplicate_load",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "error_pct": 12.61,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_order_count",
+      "scenario": "duplicate_load",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 11,
+      "metric": "avg_basket_inr",
+      "scenario": "duplicate_load",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "error_pct": 12.61,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_revenue_inr",
+      "scenario": "join_fanout",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "error_pct": 20.81,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_order_count",
+      "scenario": "join_fanout",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 11,
+      "metric": "avg_basket_inr",
+      "scenario": "join_fanout",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 20.81,
+      "held": false,
+      "outcome": "published WRONG"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_revenue_inr",
+      "scenario": "stale_fx",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "error_pct": -8.08,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_order_count",
+      "scenario": "stale_fx",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 11,
+      "metric": "avg_basket_inr",
+      "scenario": "stale_fx",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "error_pct": -8.08,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_revenue_inr",
+      "scenario": "ist_utc",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "error_pct": -15.36,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_order_count",
+      "scenario": "ist_utc",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "error_pct": -15.73,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "avg_basket_inr",
+      "scenario": "ist_utc",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.44,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_revenue_inr",
+      "scenario": "new_code",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "error_pct": -16.42,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_order_count",
+      "scenario": "new_code",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "error_pct": -7.34,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "avg_basket_inr",
+      "scenario": "new_code",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "error_pct": -9.8,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_revenue_inr",
+      "scenario": "masked_pair",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "error_pct": 5.57,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_order_count",
+      "scenario": "masked_pair",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "error_pct": -15.73,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "avg_basket_inr",
+      "scenario": "masked_pair",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "error_pct": 25.28,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_revenue_inr",
+      "scenario": "unknown_discount",
+      "verdict": "UNEXPLAINED",
+      "confirmed": [],
+      "error_pct": -9.52,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 11,
+      "metric": "daily_order_count",
+      "scenario": "unknown_discount",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 11,
+      "metric": "avg_basket_inr",
+      "scenario": "unknown_discount",
+      "verdict": "UNEXPLAINED",
+      "confirmed": [],
+      "error_pct": -9.52,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_revenue_inr",
+      "scenario": "healthy",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": -0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_order_count",
+      "scenario": "healthy",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 22,
+      "metric": "avg_basket_inr",
+      "scenario": "healthy",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": -0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_revenue_inr",
+      "scenario": "festival",
+      "verdict": "REAL_CHANGE",
+      "confirmed": [],
+      "error_pct": -0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_order_count",
+      "scenario": "festival",
+      "verdict": "REAL_CHANGE",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 22,
+      "metric": "avg_basket_inr",
+      "scenario": "festival",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": -0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_revenue_inr",
+      "scenario": "unit_paise",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "error_pct": 435.09,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_order_count",
+      "scenario": "unit_paise",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 22,
+      "metric": "avg_basket_inr",
+      "scenario": "unit_paise",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "unit_scale"
+      ],
+      "error_pct": 435.09,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_revenue_inr",
+      "scenario": "duplicate_load",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "error_pct": 12.63,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_order_count",
+      "scenario": "duplicate_load",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 22,
+      "metric": "avg_basket_inr",
+      "scenario": "duplicate_load",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "error_pct": 12.63,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_revenue_inr",
+      "scenario": "join_fanout",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "key_fanout"
+      ],
+      "error_pct": 16.74,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_order_count",
+      "scenario": "join_fanout",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 22,
+      "metric": "avg_basket_inr",
+      "scenario": "join_fanout",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 16.74,
+      "held": false,
+      "outcome": "published WRONG"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_revenue_inr",
+      "scenario": "stale_fx",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "error_pct": -8.41,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_order_count",
+      "scenario": "stale_fx",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 22,
+      "metric": "avg_basket_inr",
+      "scenario": "stale_fx",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "stale_feed"
+      ],
+      "error_pct": -8.41,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_revenue_inr",
+      "scenario": "ist_utc",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "error_pct": -15.55,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_order_count",
+      "scenario": "ist_utc",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "error_pct": -15.56,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "avg_basket_inr",
+      "scenario": "ist_utc",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.01,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_revenue_inr",
+      "scenario": "new_code",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "error_pct": -17.67,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_order_count",
+      "scenario": "new_code",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "error_pct": -7.17,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "avg_basket_inr",
+      "scenario": "new_code",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "orphan_code"
+      ],
+      "error_pct": -11.31,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_revenue_inr",
+      "scenario": "masked_pair",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift",
+        "duplicate_key"
+      ],
+      "error_pct": 5.44,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_order_count",
+      "scenario": "masked_pair",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "clock_shift"
+      ],
+      "error_pct": -15.56,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "avg_basket_inr",
+      "scenario": "masked_pair",
+      "verdict": "PROVEN_FAULT",
+      "confirmed": [
+        "duplicate_key"
+      ],
+      "error_pct": 24.87,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_revenue_inr",
+      "scenario": "unknown_discount",
+      "verdict": "UNEXPLAINED",
+      "confirmed": [],
+      "error_pct": -11.0,
+      "held": true,
+      "outcome": "held, right"
+    },
+    {
+      "seed": 22,
+      "metric": "daily_order_count",
+      "scenario": "unknown_discount",
+      "verdict": "NO_INCIDENT",
+      "confirmed": [],
+      "error_pct": 0.0,
+      "held": false,
+      "outcome": "published, right"
+    },
+    {
+      "seed": 22,
+      "metric": "avg_basket_inr",
+      "scenario": "unknown_discount",
+      "verdict": "UNEXPLAINED",
+      "confirmed": [],
+      "error_pct": -11.0,
+      "held": true,
+      "outcome": "held, right"
+    }
+  ],
+  "summary": {
+    "daily_revenue_inr": {
+      "published, right": 4,
+      "held, right": 16
+    },
+    "daily_order_count": {
+      "published, right": 14,
+      "held, right": 6
+    },
+    "avg_basket_inr": {
+      "published, right": 6,
+      "held, right": 12,
+      "published WRONG": 2
+    }
+  },
+  "metrics": [
+    "daily_revenue_inr",
+    "daily_order_count",
+    "avg_basket_inr"
+  ],
+  "seconds": 95,
+  "generated_at": "2026-10-27 06:31:04"
+}

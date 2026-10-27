@@ -1,0 +1,45 @@
+# Which daily metrics Receipts judges. Check this file against the database with `receipts connect --check`.
+#
+# view              SCHEMA.VIEW with one row per day
+# value_column      the number people read (a number column of that view)
+# day_column        the day column of that view (a date)
+# raw_tables        the tables each night's batch lands in
+# amount, id, time  amount, row ID and timestamp of the main raw table, as SCHEMA.TABLE.COLUMN
+# weekday_baseline  auto: use a weekly pattern when the history shows one; on: always; off: plain 14-day mean
+# publish           true for the one metric the gate writes to PUB (daily_revenue_inr); the others are judged
+#                   with the same gate and reported, without write-back
+
+metrics:
+  - name: daily_revenue_inr
+    label: Daily revenue (INR)
+    view: PIPE.DAILY_REVENUE
+    value_column: REVENUE_INR
+    day_column: TXN_DAY
+    raw_tables: [RAW.PAYMENTS, RAW.ORDERS, RAW.MERCHANTS, RAW.CATEGORY_MAP, RAW.FX_RATES]
+    amount: RAW.PAYMENTS.AMOUNT
+    id: RAW.PAYMENTS.PAYMENT_ID
+    time: RAW.PAYMENTS.CAPTURED_AT
+    weekday_baseline: auto
+    publish: true
+
+  - name: daily_order_count
+    label: Paid orders per day
+    view: PIPE.DAILY_ORDERS
+    value_column: ORDER_COUNT
+    day_column: TXN_DAY
+    raw_tables: [RAW.ORDERS, RAW.PAYMENTS]
+    amount: RAW.PAYMENTS.AMOUNT
+    id: RAW.ORDERS.ORDER_ID
+    time: RAW.PAYMENTS.CAPTURED_AT
+    weekday_baseline: auto
+
+  - name: avg_basket_inr
+    label: Average basket (INR)
+    view: PIPE.DAILY_ORDERS
+    value_column: AVG_BASKET_INR
+    day_column: TXN_DAY
+    raw_tables: [RAW.ORDERS, RAW.PAYMENTS]
+    amount: RAW.PAYMENTS.AMOUNT
+    id: RAW.ORDERS.ORDER_ID
+    time: RAW.PAYMENTS.CAPTURED_AT
+    weekday_baseline: auto
