@@ -76,7 +76,7 @@ def blast_text(case: dict) -> str:
             if b["protected"] else "")
     reads = b.get("reads") or {}
     if reads.get("available") and reads.get("readers"):
-        who = "; ".join(f"{r.get('user_name')} ({r.get('reads')} reads)" for r in reads["readers"])
+        who = "; ".join(f"{r.get('user_name')} ({r.get('read_count')} reads)" for r in reads["readers"])
         log = f" Read during the bad window: {who}."
     elif reads.get("available"):
         log = " Nobody read them during the bad window, according to the audit log."

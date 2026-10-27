@@ -83,11 +83,16 @@ def radius(views: dict[str, ViewInfo], metric: tuple[str, str], blamed: set[tupl
 
 
 def audit_reads_sql(objects: list[str], since_sql: str) -> str:
-    """Exasol: sessions other than this one that ran a SELECT naming an exposed view since `since_sql`."""
+    """Exasol: sessions other than this one that ran a SELECT naming an exposed view since `since_sql`.
+
+    `since_sql` is a session-time timestamp (PUBLISHED_AT is written with CURRENT_TIMESTAMP), while the audit log
+    records START_TIME in system time, so the window start is shifted by the session's offset first.
+    """
     like = " OR ".join(f"UPPER(a.SQL_TEXT) LIKE '%{o.upper()}%'" for o in objects)
-    return (f"SELECT s.USER_NAME, s.CLIENT, MIN(a.START_TIME) AS FIRST_READ, COUNT(*) AS READS "
+    return (f"SELECT s.USER_NAME, s.CLIENT, MIN(a.START_TIME) AS FIRST_READ, COUNT(*) AS READ_COUNT "
             f"FROM EXA_DBA_AUDIT_SQL a JOIN EXA_DBA_AUDIT_SESSIONS s ON s.SESSION_ID = a.SESSION_ID "
-            f"WHERE a.COMMAND_NAME = 'SELECT' AND a.START_TIME >= {since_sql} "
+            f"WHERE a.COMMAND_NAME = 'SELECT' "
+            f"AND a.START_TIME >= ADD_SECONDS({since_sql}, SECONDS_BETWEEN(SYSTIMESTAMP, CURRENT_TIMESTAMP)) "
             f"AND a.SESSION_ID <> CURRENT_SESSION AND ({like}) "
             f"GROUP BY s.USER_NAME, s.CLIENT ORDER BY FIRST_READ")
 
@@ -99,6 +104,7 @@ def reads_in_window(be: Backend, objects: list[str], since_sql: str) -> dict:
     if not objects:
         return {"available": True, "readers": [], "note": "no exposed views to look for"}
     try:
+        be.execute("FLUSH STATISTICS")  # make the latest finished statements visible in the audit tables
         rows = be.query(audit_reads_sql(objects, since_sql))
     except Exception as e:
         return {"available": False, "note": f"Exasol audit log not readable ({str(e).splitlines()[0][:120]})"}
