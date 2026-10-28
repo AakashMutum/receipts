@@ -8,7 +8,7 @@
 
 ### Changed
 
-* The 50-run scored evaluation re-run on Exasol (29 Oct): 50 of 50 again, every verdict, cause and wrong-fix count the same as the committed run; gate latency median 4,535 ms to 2,969 ms and max 13,204 ms to 5,546 ms ([`samples/exasol/eval_report.md`](samples/exasol/eval_report.md)). `samples/eval_report.md` was an Exasol run from 21 Oct; it is now the same evaluation on the DuckDB stand-in, which gives the same verdicts and causes on all 50 runs.
+* The 50-run scored evaluation re-run on Exasol (29 Oct): 50 of 50 again, every verdict, cause and wrong-fix count the same as the committed run; gate latency median 4,535 ms to 2,969 ms and max 13,204 ms to 5,546 ms ([`samples/exasol/eval_report.md`](samples/exasol/eval_report.md)). The red team (seed 11) and the wrong-fix control (5 seeds) re-run on Exasol give the same floors, holes, combinations and 235 / 225 / 10 wrong fixes as the committed reports; only the timings changed. `samples/eval_report.md` was an Exasol run from 21 Oct; it is now the same evaluation on the DuckDB stand-in, which gives the same verdicts and causes on all 50 runs.
 
 ### Fixed
 

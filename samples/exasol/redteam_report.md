@@ -2,7 +2,7 @@
 
 **Run this on the built-in synthetic data or a sandbox copy, never on live production tables.** Every attack writes a planted fault into RAW.
 
-On Exasol 2026.2.0-nano.3, 20,000 orders a day, seeds 11. Generated 2026-10-27 22:56:31 in 8 minutes. Reproduce: `receipts redteam --backend exasol --seeds 11 --orders-per-day 20000`.
+On Exasol 2026.2.0-nano.3, 20,000 orders a day, seeds 11. Generated 2026-10-29 02:18:08 in 5 minutes. Reproduce: `receipts redteam --backend exasol --seeds 11 --orders-per-day 20000`.
 
 For each fault class an attacker shrinks the share of rows affected (100, 50, 25, 10, 5, 2 percent). After the first step the gate no longer proves, it keeps shrinking while the fault still moves the number by 4% or more (a smaller one cannot be published as a wrong number), then stops. The detection floor is the smallest share proven with the right cause at every step down to it; with several seeds the worst seed counts. Nothing was tuned for this run.
 

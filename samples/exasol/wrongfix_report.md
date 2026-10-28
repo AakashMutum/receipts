@@ -2,7 +2,7 @@
 
 Is the undo test circular? For every scenario with a planted fault, the gate's own rules are shown corrections that are deliberately wrong: the right fix on the wrong gateway, the wrong factor, the right fix applied to every day instead of tonight, or the fix for a cause that was not planted. A wrong fix is **accepted** if it moves today's number by at least 1.5%, keeps history as published and lands inside the normal range, which is what the gate needs to confirm a cause.
 
-On Exasol 2026.2.0-nano.3, 20,000 orders a day, seeds 11, 22, 33, 44, 55. Generated 2026-10-27 21:52:37 in 615 s. Reproduce: `receipts wrongfix --backend exasol --seeds 11 22 33 44 55 --orders-per-day 20000`.
+On Exasol 2026.2.0-nano.3, 20,000 orders a day, seeds 11, 22, 33, 44, 55. Generated 2026-10-29 02:27:08 in 481 s. Reproduce: `receipts wrongfix --backend exasol --seeds 11 22 33 44 55 --orders-per-day 20000`.
 
 **Wrong fixes tried 235, rejected 225, accepted 10.**
 
