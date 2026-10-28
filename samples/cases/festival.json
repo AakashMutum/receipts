@@ -814,7 +814,7 @@
   "db_ms": 1239.3,
   "explanation": {
     "source": "template",
-    "text": "Revenue for Tue 20 Oct 2026 moved +21.1%, outside the normal range, and Receipts found no data fault behind it. Transaction volume moved with the value and every raw payment reconciles to one revenue row. One check did raise a flag (duplicate rows), but undoing it did not move the number, so it was ruled out. It was published as a verified real change."
+    "text": "Revenue for Tue 20 Oct 2026 moved +21.1%, outside the normal range, and Receipts found no data fault behind it. Transaction volume moved with the value and every raw payment reconciles to one revenue row. One check did raise a flag (duplicate rows), but undoing it did not move the number, so it was ruled out. It was published as a real change, no fault found."
   },
   "timings": [
     {

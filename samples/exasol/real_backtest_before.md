@@ -21,7 +21,7 @@ Reproduce: `receipts backtest --backend exasol` (downloads about 150 MB once int
 * Real days called PROVEN_FAULT: **0**
 * Detector firings on real days that the undo test ruled out: 5 (clock_shift on 2024-02-17 Sat, clock_shift on 2024-02-24 Sat, clock_shift on 2024-03-09 Sat, clock_shift on 2024-03-16 Sat, clock_shift on 2024-03-30 Sat)
 
-Published as a verified real change: 2024-02-13 (-33.9%), 2024-02-27 (+26.0%).
+Published as a real change, no fault found: 2024-02-13 (-33.9%), 2024-02-27 (+26.0%).
 
 ## Planted faults on real days
 
