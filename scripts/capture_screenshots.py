@@ -9,7 +9,7 @@ a current date. Run with the same RECEIPTS_* / EXA_* variables as the server:
     python scripts/capture_screenshots.py --url http://127.0.0.1:8000
 
 `--only redteam` retakes just 09_redteam.png (no rebuild; the tab reads the committed red team report).
-`--only blast` lands the IST case and takes 11_who_saw.png; `--only badges` takes 12_badges.png from /badge.svg
+`--only masked` lands the masked pair and takes 05_masked_pair.png. `--only blast` lands the IST case and takes 11_who_saw.png; `--only badges` takes 12_badges.png from /badge.svg
 after a healthy night, the IST case, its approval and the festival (lab mode, no rebuild). `--only connect` needs
 no server (stop it first: the stand-in allows one process): it lands the IST case with `receipts run` and takes
 13_connect.png of `receipts connect`.
@@ -61,6 +61,14 @@ def redteam(page: Page) -> None:
     page.evaluate("document.querySelector('#lab').scrollIntoView({block: 'start'})")
     page.wait_for_timeout(500)
     shot(page.locator("#lab"), "09_redteam.png")
+
+
+def masked(page: Page, url: str) -> None:
+    open_page(page, url)
+    run(page, "masked_pair")
+    where = page.inner_text("#where")
+    assert "against its usual level" in where and "of the total change" not in where, where
+    shot(page.locator("#case"), "05_masked_pair.png")
 
 
 def blast(page: Page, url: str) -> None:
@@ -123,7 +131,7 @@ def main() -> None:
     global DAY
     ap.add_argument("--url", default="http://127.0.0.1:8000")
     ap.add_argument("--day", help="incoming day, YYYY-MM-DD (default: the one the server holds)")
-    ap.add_argument("--only", choices=["redteam", "blast", "badges", "connect"], help="take one screenshot only")
+    ap.add_argument("--only", choices=["redteam", "blast", "badges", "connect", "masked"], help="take one screenshot only")
     a = ap.parse_args()
     url = a.url
     import json
@@ -147,6 +155,10 @@ def main() -> None:
             redteam(page)
             browser.close()
             return
+        if a.only == "masked":
+            masked(page, url)
+            browser.close()
+            return
         if a.only in ("blast", "badges"):
             (blast if a.only == "blast" else badges)(page, url)
             browser.close()
@@ -168,11 +180,7 @@ def main() -> None:
         shot(page.locator(".ev-grid > div:nth-child(2)"), "10_measured_by_exasol.png")
 
         rebuild()
-        open_page(page, url)
-        run(page, "masked_pair")
-        where = page.inner_text("#where")
-        assert "against its usual level" in where and "of the total change" not in where, where
-        shot(page.locator("#case"), "05_masked_pair.png")
+        masked(page, url)
 
         rebuild()
         open_page(page, url)
