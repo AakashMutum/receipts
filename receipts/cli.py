@@ -372,6 +372,23 @@ def cmd_blindtest(a):
     return 0
 
 
+def cmd_audit_match(a):
+    """Match every statement of one full run against Exasol's audit log; write the report."""
+    if settings().backend != "exasol":
+        print("audit-match needs Exasol (RECEIPTS_BACKEND=exasol): the stand-in keeps no audit log.", file=sys.stderr)
+        return 2
+    from .auditmatch import run, to_markdown
+    rep = run(log=lambda m: print(m, flush=True))
+    out = Path(a.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.with_suffix(".json").write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
+    out.write_text(to_markdown(rep, "receipts audit-match"), encoding="utf-8")
+    g = rep["gate"]
+    print(f"gate: issued {g['issued']}, matched {g['matched']}, different {g['different']}, missing {g['missing']}, "
+          f"extra {g['extra']}. Report: {out}")
+    return 0
+
+
 def cmd_scale(a):
     """Run the IST case at increasing order volumes and write samples/exasol/scaling.md and .json."""
     from .scale import run, to_markdown
@@ -684,6 +701,9 @@ def main(argv=None):
     cn.add_argument("--orders-per-day", type=int, default=8000)
     cn.add_argument("--out", help="folder for metrics_report.md (default samples/)")
     cn.set_defaults(fn=cmd_connect)
+    am = sub.add_parser("audit-match", help="match every statement of one run against Exasol's audit log (Exasol only)")
+    am.add_argument("--out", default=str(ROOT / "docs" / "AUDIT_MATCH.md"), help="report path (JSON next to it)")
+    am.set_defaults(fn=cmd_audit_match)
     bl = sub.add_parser("blindtest", help="plant a fault you choose, let the gate judge it, log the result (lab only)",
                         description="Lab mode and synthetic data only. Without --fault a short prompt asks for the "
                                     "fault, share and gateway. See docs/BLIND_TEST.md.")
