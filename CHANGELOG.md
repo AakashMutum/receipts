@@ -1,12 +1,22 @@
 # Changelog
 
+## 1.0.2 (2026-10-29)
+
+### Added
+
+* [`docs/AUDIT_MATCH.md`](docs/AUDIT_MATCH.md) and its JSON, from `receipts audit-match` on live Exasol: 57 of 57 gate statements and 3 of 3 agent reads through the Exasol MCP server matched, none different or missing.
+
+### Fixed
+
+* `receipts audit-match` picked up `AGENT_READER` sessions from `receipts doctor` and from earlier runs; it now matches only this run's agent session. The incoming-day read is now in the client log.
+
 ## 1.0.1 (2026-10-28)
 
 No verdict, threshold or reported result changed.
 
 ### Added
 
-* `receipts audit-match`: lands the IST case, runs the gate with write-back and the agent's reads through the Exasol MCP server, then matches every statement against `EXA_DBA_AUDIT_SQL` (issued, matched, different, missing, extra). Covered by tests; not yet run on live Exasol.
+* `receipts audit-match`: lands the IST case, runs the gate with write-back and the agent's reads through the Exasol MCP server, then matches every statement against `EXA_DBA_AUDIT_SQL` (issued, matched, different, missing, extra). Covered by tests; not yet run on live Exasol (see 1.0.2).
 * [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) with cold and warm runs on the stand-in ([`scripts/bench_standin.py`](scripts/bench_standin.py)) next to the recorded Exasol timings, and [`docs/WHY_EXASOL.md`](docs/WHY_EXASOL.md) with what Exasol does here, measured.
 * A code of conduct, and one sentence near the top of the README on what one bad feed touches (4 views read the bad number, 3 were protected).
 * Windows steps in the run guide's "Without Exasol" section.

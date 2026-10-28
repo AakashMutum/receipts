@@ -6,7 +6,7 @@
 
 **When a daily business number moves, Receipts holds it back, proves inside Exasol which upstream fault caused it by undoing that fault in a sandbox, and tells dashboards and AI agents whether to trust it.**
 
-Version 1.0.1, last updated 2026-10-28.
+Version 1.0.2, last updated 2026-10-29.
 
 **Start in 30 seconds** (Python 3.10 or newer; the first run installs the packages, then the command center opens in your browser):
 
@@ -445,13 +445,13 @@ On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.
 * For a configured metric the band, weekday baseline, lineage, undo test and blast radius follow the config; the detectors and the slice breakdown are bound to the payments layout, and only `daily_revenue_inr` is written to `PUB`.
 * No holiday calendar; a real change with no fault found becomes part of the baseline. Corrections are hotfixes; the real fix is upstream.
 
-**Verified on Exasol Personal 2026.2.0-nano.3.** The scored eval, the red team, the held-out cases, the variants, the real-data backtest, the wrong-fix control and the held-out metric faults, after the unit tail check; and the newest checks (reader views, `DOWNSTREAM_*` columns, the audit-log query, `PIPE.DAILY_ORDERS`, the `RECEIPTS.METRIC_HISTORY` snapshot, `receipts connect --check` and the badge) in [`samples/exasol/live_checks.md`](samples/exasol/live_checks.md). The audit log shows a read a few seconds after the reading session ends.
+**Verified on Exasol Personal 2026.2.0-nano.3.** The scored eval, the red team, the held-out cases, the variants, the real-data backtest, the wrong-fix control and the held-out metric faults, after the unit tail check; and the newest checks (reader views, `DOWNSTREAM_*` columns, the audit-log query, `PIPE.DAILY_ORDERS`, the `RECEIPTS.METRIC_HISTORY` snapshot, `receipts connect --check` and the badge) in [`samples/exasol/live_checks.md`](samples/exasol/live_checks.md). The audit log shows a read a few seconds after the reading session ends. `receipts audit-match` ran one full IST run and the agent's three reads through the Exasol MCP server against `EXA_DBA_AUDIT_SQL`: 57 of 57 gate statements and 3 of 3 agent reads matched, none different or missing; the extras are autocommits and the timing code's own reads ([`docs/AUDIT_MATCH.md`](docs/AUDIT_MATCH.md)).
 
 **Measured once, on Exasol, before the unit tail check.** The scaling run up to 400,000 orders a day; nothing larger is claimed.
 
 **Verified with a real AI client.** A Claude Code session (2.1.308, Claude Opus 5.5) limited to the Exasol MCP tools, connected through `exasol-mcp-server` 2.3.0 as `AGENT_READER`, answered the three demo questions. It refused to give the held number as the day's revenue and gave the last trusted value, though it still mentioned the held candidate value. It listed the downstream objects it could see and said which it could not: the `MART` and `PIPE` objects came from the case record, because the role cannot see those schemas. It declined the delete and `TRUSTED` request by reasoning from its grants, without attempting the write (run 3); told to try anyway, it sent an `UPDATE` and Exasol itself refused it with "insufficient privileges for updating table DAILY_REVENUE_PUBLISHED" (run 4). Answers unedited: [`docs/MCP_REAL_RUN.md`](docs/MCP_REAL_RUN.md); the separate protocol-level run with fixed SQL and no model: [`docs/MCP_PROTOCOL_RUN.md`](docs/MCP_PROTOCOL_RUN.md).
 
-**Not run here.** The one-click scripts end to end on a Mac or Linux desktop: double-clicking `run.command` in Finder, the server start and the browser opening (CI covers their setup steps only, on hosted runners); `run.bat` and the `run-exasol` scripts beyond their syntax and the checks in `tests/test_scripts.py`; posting to a real Slack workspace (only that a failing webhook does not stop the watcher); building either Docker image and deploying the public demo; a blind test by someone other than the author. Written and tested on the stand-in but not yet run on live Exasol: `receipts audit-match`, which matches every statement of a run against `EXA_DBA_AUDIT_SQL`. Not measured: gate runs right after restarting the Exasol database, and the scaling run after the unit tail check.
+**Not run here.** The one-click scripts end to end on a Mac or Linux desktop: double-clicking `run.command` in Finder, the server start and the browser opening (CI covers their setup steps only, on hosted runners); `run.bat` and the `run-exasol` scripts beyond their syntax and the checks in `tests/test_scripts.py`; posting to a real Slack workspace (only that a failing webhook does not stop the watcher); building either Docker image and deploying the public demo; a blind test by someone other than the author. Not measured: gate runs right after restarting the Exasol database, and the scaling run after the unit tail check.
 
 ## Author
 

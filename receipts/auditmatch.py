@@ -74,9 +74,9 @@ def run(log=print) -> dict:
     cfg = settings()
     be = ExasolBackend(cfg)
     sid = int(be.con.execute("SELECT CURRENT_SESSION FROM DUAL").fetchval())
-    day = incoming_day(be)
     t0 = time.perf_counter()
     be.log.clear()
+    day = incoming_day(be)
     ingest(be, day, "ist_utc")
     issued = [e.sql for e in be.log]
     case = gate.run(be, day, {"id": "ist_utc"})
@@ -145,9 +145,10 @@ def _mcp_reads(cfg, day, log) -> dict | None:
     be = ExasolBackend(settings())
     be.con.execute("FLUSH STATISTICS")
     rows = be.con.execute(
-        f"SELECT DISTINCT a.SESSION_ID FROM EXA_DBA_AUDIT_SQL a JOIN EXA_DBA_AUDIT_SESSIONS s ON s.SESSION_ID = a.SESSION_ID "
+        f"SELECT a.SESSION_ID FROM EXA_DBA_AUDIT_SQL a JOIN EXA_DBA_AUDIT_SESSIONS s ON s.SESSION_ID = a.SESSION_ID "
         f"WHERE s.USER_NAME = '{cfg.agent_user}' AND s.LOGIN_TIME >= ADD_SECONDS(SYSTIMESTAMP, -300) "
-        f"AND UPPER(a.SQL_TEXT) LIKE '%PUB.METRIC_TRUST%'").fetchall()
+        f"AND UPPER(a.SQL_TEXT) LIKE '%AGENT_GUIDANCE FROM PUB.METRIC_TRUST%' "
+        f"ORDER BY s.LOGIN_TIME DESC LIMIT 1").fetchall()  # this run's session only, not doctor's grant checks
     be.close()
     return {"issued": sent, "sessions": [int(r[0]) for r in rows],
             "note": "the three reads were sent through execute_exasol_query; the server may add its own statements"}
@@ -175,4 +176,10 @@ def to_markdown(rep: dict, command: str) -> str:
            "statements are in the audit log for the same session but not in the client's statement log.", ""]
     out += block("Gate session: landing, detectors, CUBE, lineage, undo tests, write-back", rep["gate"])
     out += block("Agent reads through the Exasol MCP server as AGENT_READER", rep.get("mcp"))
+    out += ["## Why there are extra statements", "",
+            "None of the extras is a query Receipts or the agent sent that the client log hid. `COMMIT /* AUTO */` and "
+            "`ROLLBACK /* AUTO */` are Exasol's own autocommit records. The timing markers (`SELECT CURRENT_STATEMENT`), "
+            "a `FLUSH STATISTICS` and the `EXA_STATISTICS` read are the timing code reading Exasol's measurements; the "
+            "session id read and the other `FLUSH STATISTICS` are audit-match itself. They go straight to the "
+            "connection, outside the statement log, so that measuring does not change what is measured.", ""]
     return "\n".join(out) + "\n"
