@@ -58,6 +58,8 @@ the fix was written and were not used to tune it.
 Reports: `samples/exasol/*_before.md` and the files without the suffix. The DuckDB stand-in gives the same
 held-out counts and the same red team floors.
 
+On the masked pair the total stayed inside the normal range in 1 of 5 seeds (seed 44, +4.0%), and Receipts proved both causes in all 5.
+
 ## Wrong-fix control: is the undo test circular?
 
 For every scenario with a planted fault, the gate's own rules (moves today by at least 1.5%, keeps history as

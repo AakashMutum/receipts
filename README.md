@@ -35,7 +35,7 @@ Version 1.0.0, last updated 2026-10-28.
   <a href="https://downloads.exasol.com/exasol-personal"><img src="https://img.shields.io/badge/data%20platform-Exasol%20Personal-0c3d51.svg" alt="Exasol Personal"></a>
 </p>
 
-> More: [`NOVELTY.md`](NOVELTY.md) (what is new and what is not), [`docs/EVAL_CARD.md`](docs/EVAL_CARD.md) (what was tested), [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md) (how to run it), [Verified and not covered](#verified-and-not-covered), [`CHANGELOG.md`](CHANGELOG.md).
+> More: [`NOVELTY.md`](NOVELTY.md) (what is new and what is not), [`docs/EVAL_CARD.md`](docs/EVAL_CARD.md) (what was tested), [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md) (how to run it), [`docs/WHY_EXASOL.md`](docs/WHY_EXASOL.md) (what Exasol does here, measured), [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md), [Verified and not covered](#verified-and-not-covered), [`CHANGELOG.md`](CHANGELOG.md).
 
 Built for ExaThon India 2026, Track 4: The Work Behind the Work. Exasol Personal is the platform: every check, the slice decomposition, the Python UDF, lineage, the undo test and the write-back run inside Exasol, and agents read the result from Exasol through the Exasol MCP server. A DuckDB stand-in exists only for CI and for people without Exasol.
 
@@ -54,7 +54,7 @@ Every number below was measured on Exasol Personal 2026.2.0-nano.3 on one laptop
 | Held-out fault variants (17, written after the detectors were fixed) | caught 15, held 1, published but under 4% off 1, published wrong 0 (before the unit tail check: caught 13, held 3) | [`variants_report.md`](samples/exasol/variants_report.md) |
 | A read-only agent user | `AGENT_READER` reads `PUB.METRIC_TRUST`; Exasol refuses it on RAW, PIPE, RECEIPTS and on every write | [`MCP_DEMO.md`](docs/MCP_DEMO.md) |
 
-The ten scenarios were used to build the detectors, so 50 of 50 shows consistency, not generality. The real-data backtest, the variants and the red team are the tests of generality, and the red team found a hole, which the unit tail check closed (below).
+On the masked pair the total stayed inside the normal range in 1 of 5 seeds (seed 44, +4.0%), and Receipts proved both causes in all 5. The ten scenarios were used to build the detectors, so 50 of 50 shows consistency, not generality. The real-data backtest, the variants and the red team are the tests of generality, and the red team found a hole, which the unit tail check closed (below).
 
 ## The demo in 30 seconds
 
@@ -451,7 +451,7 @@ On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.
 
 **Verified with a real AI client.** A Claude Code session (2.1.308, Claude Opus 5.5) limited to the Exasol MCP tools, connected through `exasol-mcp-server` 2.3.0 as `AGENT_READER`, answered the three demo questions. It refused to give the held number as the day's revenue and gave the last trusted value, though it still mentioned the held candidate value. It listed the downstream objects it could see and said which it could not: the `MART` and `PIPE` objects came from the case record, because the role cannot see those schemas. It declined the delete and `TRUSTED` request by reasoning from its grants, without attempting the write (run 3); told to try anyway, it sent an `UPDATE` and Exasol itself refused it with "insufficient privileges for updating table DAILY_REVENUE_PUBLISHED" (run 4). Answers unedited: [`docs/MCP_REAL_RUN.md`](docs/MCP_REAL_RUN.md); the separate protocol-level run with fixed SQL and no model: [`docs/MCP_PROTOCOL_RUN.md`](docs/MCP_PROTOCOL_RUN.md).
 
-**Not run here.** The one-click scripts end to end on a Mac or Linux desktop: double-clicking `run.command` in Finder, the server start and the browser opening (CI covers their setup steps only, on hosted runners); `run.bat` and the `run-exasol` scripts beyond their syntax and the checks in `tests/test_scripts.py`; posting to a real Slack workspace (only that a failing webhook does not stop the watcher); building either Docker image and deploying the public demo; a blind test by someone other than the author.
+**Not run here.** The one-click scripts end to end on a Mac or Linux desktop: double-clicking `run.command` in Finder, the server start and the browser opening (CI covers their setup steps only, on hosted runners); `run.bat` and the `run-exasol` scripts beyond their syntax and the checks in `tests/test_scripts.py`; posting to a real Slack workspace (only that a failing webhook does not stop the watcher); building either Docker image and deploying the public demo; a blind test by someone other than the author. Written and tested on the stand-in but not yet run on live Exasol: `receipts audit-match`, which matches every statement of a run against `EXA_DBA_AUDIT_SQL`. Not measured: gate runs right after restarting the Exasol database, and the scaling run after the unit tail check.
 
 ## Author
 

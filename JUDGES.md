@@ -31,6 +31,8 @@ Every number on this page is copied from a committed report in [`samples/`](samp
 
 ## How Exasol is used
 
+Measured detail: [`docs/WHY_EXASOL.md`](docs/WHY_EXASOL.md) and [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md).
+
 | Exasol feature | Where in the code |
 |---|---|
 | `GROUP BY CUBE` with `GROUPING_ID` over six dimensions (11,074 slices) | [`receipts/decompose.py`](receipts/decompose.py) |
