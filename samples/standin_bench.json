@@ -1,44 +1,44 @@
 {
-  "generated_at": "2026-10-28 22:33:05",
+  "generated_at": "2026-10-29 02:42:29",
   "backend": "duckdb stand-in",
   "case": "ist_utc",
   "orders_per_day": 20000,
   "cold": {
     "total_ms": {
-      "median": 540.8,
-      "min": 537.0,
-      "max": 546.2
+      "median": 676.7,
+      "min": 661.9,
+      "max": 728.3
     },
     "steps": {
       "Read candidate and trusted history": {
-        "median": 45.9,
-        "min": 44.6,
-        "max": 48.1
+        "median": 56.0,
+        "min": 54.7,
+        "max": 59.2
       },
       "Run six detectors on the incoming batch": {
-        "median": 89.2,
-        "min": 87.9,
-        "max": 95.3
+        "median": 109.4,
+        "min": 106.7,
+        "max": 124.9
       },
       "Read lineage from view definitions": {
-        "median": 45.9,
-        "min": 44.9,
-        "max": 46.0
+        "median": 58.3,
+        "min": 58.3,
+        "max": 60.0
       },
       "Test 11,074 slices in one GROUP BY CUBE": {
-        "median": 190.6,
-        "min": 180.4,
-        "max": 194.1
+        "median": 234.1,
+        "min": 233.7,
+        "max": 247.1
       },
       "Reconcile raw payments to revenue rows": {
-        "median": 105.4,
-        "min": 97.3,
-        "max": 107.2
+        "median": 120.6,
+        "min": 117.8,
+        "max": 133.5
       },
       "Undo each suspect in a sandbox schema": {
-        "median": 62.4,
-        "min": 60.4,
-        "max": 63.6
+        "median": 92.5,
+        "min": 82.1,
+        "max": 95.4
       },
       "Evidence gate: find the causes that bring it back": {
         "median": 0.0,
@@ -52,45 +52,45 @@
   },
   "warm": {
     "total_ms": {
-      "median": 546.6,
-      "min": 510.6,
-      "max": 551.0
+      "median": 647.7,
+      "min": 631.3,
+      "max": 678.2
     },
     "steps": {
       "Read candidate and trusted history": {
-        "median": 43.3,
-        "min": 37.2,
-        "max": 54.8
+        "median": 50.4,
+        "min": 49.5,
+        "max": 50.7
       },
       "Run six detectors on the incoming batch": {
-        "median": 96.6,
-        "min": 93.5,
-        "max": 102.1
+        "median": 114.4,
+        "min": 112.7,
+        "max": 121.7
       },
       "Read lineage from view definitions": {
-        "median": 21.9,
-        "min": 20.1,
-        "max": 22.5
+        "median": 25.9,
+        "min": 25.6,
+        "max": 27.4
       },
       "Test 11,074 slices in one GROUP BY CUBE": {
-        "median": 189.2,
-        "min": 183.0,
-        "max": 194.1
+        "median": 233.0,
+        "min": 225.3,
+        "max": 242.0
       },
       "Reconcile raw payments to revenue rows": {
-        "median": 97.7,
-        "min": 93.8,
-        "max": 117.0
+        "median": 130.7,
+        "min": 129.6,
+        "max": 133.3
       },
       "Undo each suspect in a sandbox schema": {
-        "median": 70.2,
-        "min": 68.7,
-        "max": 85.5
+        "median": 86.4,
+        "min": 80.4,
+        "max": 98.5
       },
       "Evidence gate: find the causes that bring it back": {
         "median": 0.0,
         "min": 0.0,
-        "max": 0.0
+        "max": 0.1
       }
     },
     "verdicts": [
@@ -100,96 +100,96 @@
   "raw": {
     "cold": [
       {
-        "total_ms": 540.8,
+        "total_ms": 728.3,
         "verdict": "PROVEN_FAULT",
         "steps": {
-          "Read candidate and trusted history": 45.9,
-          "Run six detectors on the incoming batch": 95.3,
-          "Read lineage from view definitions": 46.0,
-          "Test 11,074 slices in one GROUP BY CUBE": 190.6,
-          "Reconcile raw payments to revenue rows": 97.3,
-          "Undo each suspect in a sandbox schema": 60.4,
+          "Read candidate and trusted history": 59.2,
+          "Run six detectors on the incoming batch": 124.9,
+          "Read lineage from view definitions": 60.0,
+          "Test 11,074 slices in one GROUP BY CUBE": 247.1,
+          "Reconcile raw payments to revenue rows": 133.5,
+          "Undo each suspect in a sandbox schema": 95.4,
           "Evidence gate: find the causes that bring it back": 0.0
         }
       },
       {
-        "total_ms": 537.0,
+        "total_ms": 676.7,
         "verdict": "PROVEN_FAULT",
         "steps": {
-          "Read candidate and trusted history": 48.1,
-          "Run six detectors on the incoming batch": 87.9,
-          "Read lineage from view definitions": 44.9,
-          "Test 11,074 slices in one GROUP BY CUBE": 180.4,
-          "Reconcile raw payments to revenue rows": 107.2,
-          "Undo each suspect in a sandbox schema": 63.6,
+          "Read candidate and trusted history": 54.7,
+          "Run six detectors on the incoming batch": 109.4,
+          "Read lineage from view definitions": 58.3,
+          "Test 11,074 slices in one GROUP BY CUBE": 233.7,
+          "Reconcile raw payments to revenue rows": 120.6,
+          "Undo each suspect in a sandbox schema": 92.5,
           "Evidence gate: find the causes that bring it back": 0.0
         }
       },
       {
-        "total_ms": 546.2,
+        "total_ms": 661.9,
         "verdict": "PROVEN_FAULT",
         "steps": {
-          "Read candidate and trusted history": 44.6,
-          "Run six detectors on the incoming batch": 89.2,
-          "Read lineage from view definitions": 45.9,
-          "Test 11,074 slices in one GROUP BY CUBE": 194.1,
-          "Reconcile raw payments to revenue rows": 105.4,
-          "Undo each suspect in a sandbox schema": 62.4,
+          "Read candidate and trusted history": 56.0,
+          "Run six detectors on the incoming batch": 106.7,
+          "Read lineage from view definitions": 58.3,
+          "Test 11,074 slices in one GROUP BY CUBE": 234.1,
+          "Reconcile raw payments to revenue rows": 117.8,
+          "Undo each suspect in a sandbox schema": 82.1,
           "Evidence gate: find the causes that bring it back": 0.0
         }
       }
     ],
     "warm": [
       {
-        "total_ms": 589.5,
+        "total_ms": 679.6,
         "verdict": "PROVEN_FAULT",
         "steps": {
-          "Read candidate and trusted history": 51.3,
-          "Run six detectors on the incoming batch": 104.8,
-          "Read lineage from view definitions": 50.2,
-          "Test 11,074 slices in one GROUP BY CUBE": 197.1,
-          "Reconcile raw payments to revenue rows": 105.3,
-          "Undo each suspect in a sandbox schema": 74.8,
+          "Read candidate and trusted history": 54.1,
+          "Run six detectors on the incoming batch": 107.9,
+          "Read lineage from view definitions": 63.4,
+          "Test 11,074 slices in one GROUP BY CUBE": 236.9,
+          "Reconcile raw payments to revenue rows": 120.3,
+          "Undo each suspect in a sandbox schema": 88.6,
           "Evidence gate: find the causes that bring it back": 0.0
         }
       },
       {
-        "total_ms": 510.6,
+        "total_ms": 678.2,
         "verdict": "PROVEN_FAULT",
         "steps": {
-          "Read candidate and trusted history": 43.3,
-          "Run six detectors on the incoming batch": 96.6,
-          "Read lineage from view definitions": 20.1,
-          "Test 11,074 slices in one GROUP BY CUBE": 183.0,
-          "Reconcile raw payments to revenue rows": 93.8,
-          "Undo each suspect in a sandbox schema": 68.7,
+          "Read candidate and trusted history": 50.4,
+          "Run six detectors on the incoming batch": 121.7,
+          "Read lineage from view definitions": 25.9,
+          "Test 11,074 slices in one GROUP BY CUBE": 242.0,
+          "Reconcile raw payments to revenue rows": 133.3,
+          "Undo each suspect in a sandbox schema": 98.5,
           "Evidence gate: find the causes that bring it back": 0.0
         }
       },
       {
-        "total_ms": 551.0,
+        "total_ms": 647.7,
         "verdict": "PROVEN_FAULT",
         "steps": {
-          "Read candidate and trusted history": 37.2,
-          "Run six detectors on the incoming batch": 93.5,
-          "Read lineage from view definitions": 21.9,
-          "Test 11,074 slices in one GROUP BY CUBE": 189.2,
-          "Reconcile raw payments to revenue rows": 117.0,
-          "Undo each suspect in a sandbox schema": 85.5,
+          "Read candidate and trusted history": 50.7,
+          "Run six detectors on the incoming batch": 114.4,
+          "Read lineage from view definitions": 27.4,
+          "Test 11,074 slices in one GROUP BY CUBE": 233.0,
+          "Reconcile raw payments to revenue rows": 129.6,
+          "Undo each suspect in a sandbox schema": 86.4,
           "Evidence gate: find the causes that bring it back": 0.0
         }
       },
       {
-        "total_ms": 546.6,
+        "total_ms": 631.3,
         "verdict": "PROVEN_FAULT",
         "steps": {
-          "Read candidate and trusted history": 54.8,
-          "Run six detectors on the incoming batch": 102.1,
-          "Read lineage from view definitions": 22.5,
-          "Test 11,074 slices in one GROUP BY CUBE": 194.1,
-          "Reconcile raw payments to revenue rows": 97.7,
-          "Undo each suspect in a sandbox schema": 70.2,
-          "Evidence gate: find the causes that bring it back": 0.0
+          "Read candidate and trusted history": 49.5,
+          "Run six detectors on the incoming batch": 112.7,
+          "Read lineage from view definitions": 25.6,
+          "Test 11,074 slices in one GROUP BY CUBE": 225.3,
+          "Reconcile raw payments to revenue rows": 130.7,
+          "Undo each suspect in a sandbox schema": 80.4,
+          "Evidence gate: find the causes that bring it back": 0.1
         }
       }
     ]

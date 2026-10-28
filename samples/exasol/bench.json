@@ -1,0 +1,387 @@
+{
+  "generated_at": "2026-10-29 02:41:39",
+  "backend": "exasol",
+  "case": "ist_utc",
+  "orders_per_day": 20000,
+  "cold": {
+    "total_ms": {
+      "median": 3379.9,
+      "min": 3172.3,
+      "max": 4150.6
+    },
+    "steps": {
+      "Read candidate and trusted history": {
+        "median": 130.7,
+        "min": 99.5,
+        "max": 148.3
+      },
+      "Run six detectors on the incoming batch": {
+        "median": 660.6,
+        "min": 653.8,
+        "max": 824.9
+      },
+      "Read lineage from view definitions": {
+        "median": 69.5,
+        "min": 62.8,
+        "max": 83.6
+      },
+      "Test 11,074 slices in one GROUP BY CUBE": {
+        "median": 675.3,
+        "min": 659.1,
+        "max": 776.5
+      },
+      "Reconcile raw payments to revenue rows": {
+        "median": 244.0,
+        "min": 226.6,
+        "max": 264.2
+      },
+      "Undo each suspect in a sandbox schema": {
+        "median": 923.1,
+        "min": 774.4,
+        "max": 1179.9
+      },
+      "Evidence gate: find the causes that bring it back": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "verdicts": [
+      "PROVEN_FAULT"
+    ]
+  },
+  "warm": {
+    "total_ms": {
+      "median": 3229.8,
+      "min": 3122.3,
+      "max": 3268.1
+    },
+    "steps": {
+      "Read candidate and trusted history": {
+        "median": 97.8,
+        "min": 96.0,
+        "max": 107.8
+      },
+      "Run six detectors on the incoming batch": {
+        "median": 536.2,
+        "min": 512.0,
+        "max": 538.6
+      },
+      "Read lineage from view definitions": {
+        "median": 55.8,
+        "min": 54.7,
+        "max": 57.6
+      },
+      "Test 11,074 slices in one GROUP BY CUBE": {
+        "median": 668.9,
+        "min": 623.6,
+        "max": 712.3
+      },
+      "Reconcile raw payments to revenue rows": {
+        "median": 234.7,
+        "min": 233.5,
+        "max": 257.4
+      },
+      "Undo each suspect in a sandbox schema": {
+        "median": 981.0,
+        "min": 941.7,
+        "max": 981.4
+      },
+      "Evidence gate: find the causes that bring it back": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "verdicts": [
+      "PROVEN_FAULT"
+    ]
+  },
+  "exasol_measured": {
+    "cold": {
+      "total_ms": {
+        "median": 2277.0,
+        "min": 2029.0,
+        "max": 2736.0
+      },
+      "steps": {
+        "Read candidate and trusted history": {
+          "median": 113.0,
+          "min": 84.0,
+          "max": 127.0
+        },
+        "Run six detectors on the incoming batch": {
+          "median": 619.0,
+          "min": 607.0,
+          "max": 772.0
+        },
+        "Read lineage from view definitions": {
+          "median": 33.0,
+          "min": 26.0,
+          "max": 38.0
+        },
+        "Test 11,074 slices in one GROUP BY CUBE": {
+          "median": 471.0,
+          "min": 404.0,
+          "max": 498.0
+        },
+        "Reconcile raw payments to revenue rows": {
+          "median": 231.0,
+          "min": 212.0,
+          "max": 249.0
+        },
+        "Undo each suspect in a sandbox schema": {
+          "median": 839.0,
+          "min": 667.0,
+          "max": 1052.0
+        },
+        "Evidence gate: find the causes that bring it back": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "temp_ram_peak_mib": {
+        "median": 65.5,
+        "min": 63.5,
+        "max": 65.7
+      },
+      "sources": [
+        "EXA_STATISTICS.EXA_SQL_LAST_DAY"
+      ]
+    },
+    "warm": {
+      "total_ms": {
+        "median": 2155.0,
+        "min": 2118.0,
+        "max": 2181.0
+      },
+      "steps": {
+        "Read candidate and trusted history": {
+          "median": 81.0,
+          "min": 81.0,
+          "max": 90.0
+        },
+        "Run six detectors on the incoming batch": {
+          "median": 485.0,
+          "min": 469.0,
+          "max": 486.0
+        },
+        "Read lineage from view definitions": {
+          "median": 27.0,
+          "min": 23.0,
+          "max": 27.0
+        },
+        "Test 11,074 slices in one GROUP BY CUBE": {
+          "median": 450.0,
+          "min": 443.0,
+          "max": 475.0
+        },
+        "Reconcile raw payments to revenue rows": {
+          "median": 222.0,
+          "min": 219.0,
+          "max": 242.0
+        },
+        "Undo each suspect in a sandbox schema": {
+          "median": 884.0,
+          "min": 857.0,
+          "max": 893.0
+        },
+        "Evidence gate: find the causes that bring it back": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "temp_ram_peak_mib": {
+        "median": 66.0,
+        "min": 62.5,
+        "max": 67.7
+      },
+      "sources": [
+        "EXA_STATISTICS.EXA_SQL_LAST_DAY"
+      ]
+    }
+  },
+  "raw": {
+    "cold": [
+      {
+        "total_ms": 3172.3,
+        "verdict": "PROVEN_FAULT",
+        "steps": {
+          "Read candidate and trusted history": 130.7,
+          "Run six detectors on the incoming batch": 653.8,
+          "Read lineage from view definitions": 69.5,
+          "Test 11,074 slices in one GROUP BY CUBE": 675.3,
+          "Reconcile raw payments to revenue rows": 226.6,
+          "Undo each suspect in a sandbox schema": 774.4,
+          "Evidence gate: find the causes that bring it back": 0.0
+        },
+        "exasol_ms": 2029.0,
+        "exasol_source": "EXA_STATISTICS.EXA_SQL_LAST_DAY",
+        "exasol_steps": {
+          "Read candidate and trusted history": 113.0,
+          "Run six detectors on the incoming batch": 607.0,
+          "Read lineage from view definitions": 26.0,
+          "Test 11,074 slices in one GROUP BY CUBE": 404.0,
+          "Reconcile raw payments to revenue rows": 212.0,
+          "Undo each suspect in a sandbox schema": 667.0,
+          "Evidence gate: find the causes that bring it back": 0
+        },
+        "temp_ram_peak_mib": 65.5
+      },
+      {
+        "total_ms": 4150.6,
+        "verdict": "PROVEN_FAULT",
+        "steps": {
+          "Read candidate and trusted history": 148.3,
+          "Run six detectors on the incoming batch": 824.9,
+          "Read lineage from view definitions": 83.6,
+          "Test 11,074 slices in one GROUP BY CUBE": 776.5,
+          "Reconcile raw payments to revenue rows": 264.2,
+          "Undo each suspect in a sandbox schema": 1179.9,
+          "Evidence gate: find the causes that bring it back": 0.0
+        },
+        "exasol_ms": 2736.0,
+        "exasol_source": "EXA_STATISTICS.EXA_SQL_LAST_DAY",
+        "exasol_steps": {
+          "Read candidate and trusted history": 127.0,
+          "Run six detectors on the incoming batch": 772.0,
+          "Read lineage from view definitions": 38.0,
+          "Test 11,074 slices in one GROUP BY CUBE": 498.0,
+          "Reconcile raw payments to revenue rows": 249.0,
+          "Undo each suspect in a sandbox schema": 1052.0,
+          "Evidence gate: find the causes that bring it back": 0
+        },
+        "temp_ram_peak_mib": 65.7
+      },
+      {
+        "total_ms": 3379.9,
+        "verdict": "PROVEN_FAULT",
+        "steps": {
+          "Read candidate and trusted history": 99.5,
+          "Run six detectors on the incoming batch": 660.6,
+          "Read lineage from view definitions": 62.8,
+          "Test 11,074 slices in one GROUP BY CUBE": 659.1,
+          "Reconcile raw payments to revenue rows": 244.0,
+          "Undo each suspect in a sandbox schema": 923.1,
+          "Evidence gate: find the causes that bring it back": 0.0
+        },
+        "exasol_ms": 2277.0,
+        "exasol_source": "EXA_STATISTICS.EXA_SQL_LAST_DAY",
+        "exasol_steps": {
+          "Read candidate and trusted history": 84.0,
+          "Run six detectors on the incoming batch": 619.0,
+          "Read lineage from view definitions": 33.0,
+          "Test 11,074 slices in one GROUP BY CUBE": 471.0,
+          "Reconcile raw payments to revenue rows": 231.0,
+          "Undo each suspect in a sandbox schema": 839.0,
+          "Evidence gate: find the causes that bring it back": 0
+        },
+        "temp_ram_peak_mib": 63.5
+      }
+    ],
+    "warm": [
+      {
+        "total_ms": 3393.2,
+        "verdict": "PROVEN_FAULT",
+        "steps": {
+          "Read candidate and trusted history": 118.8,
+          "Run six detectors on the incoming batch": 553.7,
+          "Read lineage from view definitions": 65.4,
+          "Test 11,074 slices in one GROUP BY CUBE": 678.8,
+          "Reconcile raw payments to revenue rows": 252.6,
+          "Undo each suspect in a sandbox schema": 980.2,
+          "Evidence gate: find the causes that bring it back": 0.0
+        },
+        "exasol_ms": 2259.0,
+        "exasol_source": "EXA_STATISTICS.EXA_SQL_LAST_DAY",
+        "exasol_steps": {
+          "Read candidate and trusted history": 97.0,
+          "Run six detectors on the incoming batch": 511.0,
+          "Read lineage from view definitions": 34.0,
+          "Test 11,074 slices in one GROUP BY CUBE": 487.0,
+          "Reconcile raw payments to revenue rows": 240.0,
+          "Undo each suspect in a sandbox schema": 890.0,
+          "Evidence gate: find the causes that bring it back": 0
+        },
+        "temp_ram_peak_mib": 64.7
+      },
+      {
+        "total_ms": 3229.8,
+        "verdict": "PROVEN_FAULT",
+        "steps": {
+          "Read candidate and trusted history": 97.8,
+          "Run six detectors on the incoming batch": 512.0,
+          "Read lineage from view definitions": 55.8,
+          "Test 11,074 slices in one GROUP BY CUBE": 668.9,
+          "Reconcile raw payments to revenue rows": 257.4,
+          "Undo each suspect in a sandbox schema": 981.4,
+          "Evidence gate: find the causes that bring it back": 0.0
+        },
+        "exasol_ms": 2155.0,
+        "exasol_source": "EXA_STATISTICS.EXA_SQL_LAST_DAY",
+        "exasol_steps": {
+          "Read candidate and trusted history": 81.0,
+          "Run six detectors on the incoming batch": 469.0,
+          "Read lineage from view definitions": 27.0,
+          "Test 11,074 slices in one GROUP BY CUBE": 443.0,
+          "Reconcile raw payments to revenue rows": 242.0,
+          "Undo each suspect in a sandbox schema": 893.0,
+          "Evidence gate: find the causes that bring it back": 0
+        },
+        "temp_ram_peak_mib": 67.7
+      },
+      {
+        "total_ms": 3122.3,
+        "verdict": "PROVEN_FAULT",
+        "steps": {
+          "Read candidate and trusted history": 96.0,
+          "Run six detectors on the incoming batch": 538.6,
+          "Read lineage from view definitions": 54.7,
+          "Test 11,074 slices in one GROUP BY CUBE": 623.6,
+          "Reconcile raw payments to revenue rows": 234.7,
+          "Undo each suspect in a sandbox schema": 941.7,
+          "Evidence gate: find the causes that bring it back": 0.0
+        },
+        "exasol_ms": 2118.0,
+        "exasol_source": "EXA_STATISTICS.EXA_SQL_LAST_DAY",
+        "exasol_steps": {
+          "Read candidate and trusted history": 81.0,
+          "Run six detectors on the incoming batch": 485.0,
+          "Read lineage from view definitions": 23.0,
+          "Test 11,074 slices in one GROUP BY CUBE": 450.0,
+          "Reconcile raw payments to revenue rows": 222.0,
+          "Undo each suspect in a sandbox schema": 857.0,
+          "Evidence gate: find the causes that bring it back": 0
+        },
+        "temp_ram_peak_mib": 66.0
+      },
+      {
+        "total_ms": 3268.1,
+        "verdict": "PROVEN_FAULT",
+        "steps": {
+          "Read candidate and trusted history": 107.8,
+          "Run six detectors on the incoming batch": 536.2,
+          "Read lineage from view definitions": 57.6,
+          "Test 11,074 slices in one GROUP BY CUBE": 712.3,
+          "Reconcile raw payments to revenue rows": 233.5,
+          "Undo each suspect in a sandbox schema": 981.0,
+          "Evidence gate: find the causes that bring it back": 0.0
+        },
+        "exasol_ms": 2181.0,
+        "exasol_source": "EXA_STATISTICS.EXA_SQL_LAST_DAY",
+        "exasol_steps": {
+          "Read candidate and trusted history": 90.0,
+          "Run six detectors on the incoming batch": 486.0,
+          "Read lineage from view definitions": 27.0,
+          "Test 11,074 slices in one GROUP BY CUBE": 475.0,
+          "Reconcile raw payments to revenue rows": 219.0,
+          "Undo each suspect in a sandbox schema": 884.0,
+          "Evidence gate: find the causes that bring it back": 0
+        },
+        "temp_ram_peak_mib": 62.5
+      }
+    ]
+  }
+}

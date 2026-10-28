@@ -9,65 +9,55 @@ timestamps as UTC) at 20,000 orders a day is the reference: 863,336 payment rows
 |---|---|
 | Laptop | Intel Core 5 120U (10 cores, 12 threads), 15.6 GiB RAM, Windows 11 Pro 10.0.26300 |
 | Exasol | Exasol Personal 2026.2.0-nano.3 in Podman 5.8.3 on WSL2 (VM set to 6 CPUs; about 7.7 GiB visible to it) |
-| Free RAM | 2.1 GiB free on the host when the stand-in runs below were recorded (28 Oct, other work open) |
+| Free RAM | 0.9 GiB free on the host on 29 Oct, with the Exasol VM running during every run below |
 | Stand-in | DuckDB, in the same Python process as Receipts |
 
-## Exasol, IST case
+## The IST case on Exasol and on the stand-in
 
-Recorded on 26 Oct 2026 after the unit tail check, one session on an idle laptop
-([`samples/exasol/timings.md`](../samples/exasol/timings.md)). "First run" is the first gate run after
-`receipts init --fresh` (a fresh load, not a database restart); "repeats" are 4 more runs on the same data.
+Recorded on 29 Oct 2026, one job at a time, with the same method on both: [`scripts/bench_exasol.py`](../scripts/bench_exasol.py)
+([`samples/exasol/bench.json`](../samples/exasol/bench.json)) and [`scripts/bench_standin.py`](../scripts/bench_standin.py)
+([`samples/standin_bench.json`](../samples/standin_bench.json)). Cold: a freshly built database (`receipts init --fresh`
+on Exasol) and a new process that runs the gate once, 3 times. This is a fresh load and a new session, not a database
+restart. Warm: 3 repeats in one process after a first run. Without write-back. All 14 runs, the first warm runs included, gave PROVEN_FAULT.
 
-| | End to end | Measured by Exasol |
+| Gate, end to end | Cold, median (range) | Warm, median (range) |
 |---|---|---|
-| First run after a fresh load | 6.6 s | 5.4 s |
-| Repeats, median (range) | 5.6 s (4.2 to 5.7 s) | 4.6 s |
-| Peak temporary memory per run | | 62.8 to 68.8 MiB |
-| Statements per run | 27 sent by the client | 37 in Exasol's statistics |
+| Exasol | 3.38 s (3.17 to 4.15) | 3.23 s (3.12 to 3.27) |
+| Exasol, measured by Exasol | 2.28 s (2.03 to 2.74) | 2.16 s (2.12 to 2.18) |
+| DuckDB stand-in | 0.68 s (0.66 to 0.73) | 0.65 s (0.63 to 0.68) |
 
-Median per step over the 4 repeats:
+Peak temporary memory on Exasol: 62.5 to 67.7 MiB per run.
 
-| Step | End to end | Measured by Exasol |
-|---|---|---|
-| Read candidate and trusted history | 166 ms | 139 ms |
-| Run six detectors (clock check is the Python UDF) | 890 ms | 816 ms |
-| Read lineage from view definitions | 46 ms | 15 ms |
-| Test 11,074 slices in one GROUP BY CUBE | 1,306 ms | 918 ms |
-| Reconcile raw payments to revenue rows | 466 ms | 440 ms |
-| Undo each suspect in a sandbox schema | 1,420 ms | 1,258 ms |
-| Write receipts back to the database (cases, evidence, trust table) | 825 ms | 718 ms |
+Median per step, warm:
 
-Click Break the pipeline to the HELD banner: median 8.4 s over 5 runs (6.8 to 20.5 s), same report.
+| Step | Exasol, end to end | Measured by Exasol | Stand-in |
+|---|---|---|---|
+| Read candidate and trusted history | 98 ms | 81 ms | 50 ms |
+| Run six detectors (on Exasol the clock check is the Python UDF; on the stand-in the same source runs through a local shim) | 536 ms | 485 ms | 114 ms |
+| Read lineage from view definitions | 56 ms | 27 ms | 26 ms |
+| Test 11,074 slices in one GROUP BY CUBE | 669 ms | 450 ms | 233 ms |
+| Reconcile raw payments to revenue rows | 235 ms | 222 ms | 131 ms |
+| Undo each suspect in a sandbox schema | 981 ms | 884 ms | 86 ms |
 
-## DuckDB stand-in, IST case
-
-Recorded on 28 Oct 2026 with [`scripts/bench_standin.py`](../scripts/bench_standin.py)
-([`samples/standin_bench.json`](../samples/standin_bench.json)). Cold: a new process on a freshly built database,
-3 times. Warm: 3 repeats in one process after a first run. Without write-back.
-
-| | Cold, median (range) | Warm, median (range) |
-|---|---|---|
-| Gate, end to end | 541 ms (537 to 546) | 547 ms (511 to 551) |
-| Read candidate and trusted history | 46 ms | 43 ms |
-| Run six detectors (the UDF source runs through a local shim) | 89 ms | 97 ms |
-| Read lineage from view definitions | 46 ms | 22 ms |
-| Test 11,074 slices in one GROUP BY CUBE | 191 ms | 189 ms |
-| Reconcile raw payments to revenue rows | 105 ms | 98 ms |
-| Undo each suspect in a sandbox schema | 62 ms | 70 ms |
-
-All 6 runs gave PROVEN_FAULT, clock shift.
+Earlier recordings of the same case, with write-back: 5.6 s median end to end and 4.6 s measured by Exasol on 26 Oct
+([`samples/exasol/timings.md`](../samples/exasol/timings.md)), and 0.54 s cold and 0.55 s warm on the stand-in on 28 Oct
+(without write-back). Click Break the pipeline to the HELD banner: median 8.4 s over 5 runs (6.8 to 20.5 s), 26 Oct, same report.
 
 ## Scaling on Exasol
 
-Recorded on 24 Oct 2026, before the unit tail check ([`samples/exasol/scaling.md`](../samples/exasol/scaling.md)).
-Each size is the first gate run after a fresh load.
+Recorded on 29 Oct 2026, after the unit tail check ([`samples/exasol/scaling.md`](../samples/exasol/scaling.md)).
+Each size is the first gate run after a fresh load, with write-back. Every size gave the right verdict and cause.
 
 | Orders a day | Payment rows | Gate end to end | Measured by Exasol | CUBE | Peak temp memory |
 |---|---|---|---|---|---|
-| 20,000 | 863,336 | 9.1 s | 7.6 s | 2.4 s | 73 MiB |
-| 100,000 | 4,323,746 | 14.0 s | 12.6 s | 2.9 s | 168 MiB |
-| 200,000 | 8,636,296 | 18.4 s | 16.9 s | 3.4 s | 229 MiB |
-| 400,000 | 17,346,085 | 27.5 s | 26.3 s | 5.9 s | 353 MiB |
+| 20,000 | 863,336 | 4.5 s | 4.0 s | 0.7 s | 65 MiB |
+| 100,000 | 4,323,746 | 7.2 s | 6.6 s | 1.2 s | 157 MiB |
+| 200,000 | 8,636,296 | 9.0 s | 8.5 s | 1.6 s | 218 MiB |
+| 400,000 | 17,346,085 | 15.8 s | 15.1 s | 2.7 s | 344 MiB |
+
+The first recording, on 24 Oct before the tail check, took 9.1 / 14.0 / 18.4 / 27.5 s end to end on the same laptop.
+The tail check adds statements (33 per run instead of 26), so the later run does more work; why it was faster was not
+measured (other load on the laptop was not recorded on 24 Oct).
 
 ## Real data on Exasol
 
@@ -77,12 +67,12 @@ max 12.9 s per gate run on Exasol; 3.7 s median on the stand-in for the same 62 
 
 ## Not measured
 
-* Cold runs after restarting the Exasol database, and a repeat of the scaling run after the unit tail check: both were
-  planned for 28 Oct, but bulk loading into Exasol failed on the laptop that night, so neither was run.
+* Cold runs right after restarting the Exasol database. A restart has to be done from a normal PowerShell window,
+  not from the tool that ran these benchmarks, so it was not part of this run.
 * Anything above 400,000 orders a day, and any other machine.
 
 ## How to read it
 
 On this laptop and at these sizes the stand-in is faster than Exasol for the gate: it runs inside the Python process,
-while Exasol runs in a container behind a network round trip for each of about 30 statements. The stand-in exists so
+while Exasol runs in a container behind a network round trip for each of about 30 statements; the largest gap is the undo step, which rebuilds the pipeline views in a sandbox schema. The stand-in exists so
 tests, CI and the demo run anywhere; the numbers above do not show Exasol's own speed at scale.
