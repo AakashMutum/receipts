@@ -33,7 +33,7 @@ Version 1.0.0, last updated 2026-10-28.
   <a href="https://downloads.exasol.com/exasol-personal"><img src="https://img.shields.io/badge/data%20platform-Exasol%20Personal-0c3d51.svg" alt="Exasol Personal"></a>
 </p>
 
-> More: [`NOVELTY.md`](NOVELTY.md) (what is new and what is not), [`docs/EVAL_CARD.md`](docs/EVAL_CARD.md) (what was tested), [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md) (how to run it), [Verified and not covered](#verified-and-not-covered).
+> More: [`NOVELTY.md`](NOVELTY.md) (what is new and what is not), [`docs/EVAL_CARD.md`](docs/EVAL_CARD.md) (what was tested), [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md) (how to run it), [Verified and not covered](#verified-and-not-covered), [`CHANGELOG.md`](CHANGELOG.md).
 
 Built for ExaThon India 2026, Track 4: The Work Behind the Work. Exasol Personal is the platform: every check, the slice decomposition, the Python UDF, lineage, the undo test and the write-back run inside Exasol, and agents read the result from Exasol through the Exasol MCP server. A DuckDB stand-in exists only for CI and for people without Exasol.
 

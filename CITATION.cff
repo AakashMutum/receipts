@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Receipts: Proof for Every Number That Moves"
+abstract: "Receipts holds a daily business number when it moves, proves inside Exasol which upstream fault caused it by undoing that fault in a sandbox, and tells dashboards and AI agents whether to trust it."
+authors:
+  - family-names: "Mutum"
+    given-names: "Aakash Singh"
+version: "1.0.0"
+date-released: "2026-10-28"
+license: MIT
+repository-code: "https://github.com/AakashMutum/receipts"
+type: software
