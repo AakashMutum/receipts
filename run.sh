@@ -45,6 +45,13 @@ if [ ! -x "$VBIN/receipts" ] && [ ! -x "$VBIN/receipts.exe" ]; then
     "$VBIN/python" -m pip install --disable-pip-version-check -e . || fail "The install did not finish. Check your internet connection and run this again."
 fi
 
+# --check (used by CI): the steps above ran for real; confirm the command works and stop before the server starts
+if [ "${1:-}" = "--check" ]; then
+    "$VBIN/receipts" --help >/dev/null || fail "The receipts command does not start. Delete the .venv folder and run this again."
+    echo "  Check passed: Python, .venv and the receipts command are ready."
+    exit 0
+fi
+
 # 3. Build the demo database if needed, start the command center and open the browser
 export RECEIPTS_BACKEND=duckdb
 echo
