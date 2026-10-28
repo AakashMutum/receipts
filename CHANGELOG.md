@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.0.1 (2026-10-28)
+
+No verdict, threshold or reported result changed.
+
+### Added
+
+* `receipts audit-match`: lands the IST case, runs the gate with write-back and the agent's reads through the Exasol MCP server, then matches every statement against `EXA_DBA_AUDIT_SQL` (issued, matched, different, missing, extra). Covered by tests; not yet run on live Exasol.
+* [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) with cold and warm runs on the stand-in ([`scripts/bench_standin.py`](scripts/bench_standin.py)) next to the recorded Exasol timings, and [`docs/WHY_EXASOL.md`](docs/WHY_EXASOL.md) with what Exasol does here, measured.
+* A code of conduct, and one sentence near the top of the README on what one bad feed touches (4 views read the bad number, 3 were protected).
+* Windows steps in the run guide's "Without Exasol" section.
+
+### Changed
+
+* The backtest reports and the festival case file were regenerated from their saved JSON and now say "real change, no fault found".
+
 ## 1.0.0 (2026-10-28)
 
 ### Added
