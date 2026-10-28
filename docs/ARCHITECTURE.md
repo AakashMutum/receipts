@@ -56,7 +56,7 @@ agent can say why a value is held without reading `RECEIPTS`.
 
 ## Why these choices
 
-* **Detectors on the raw batch, not on the metric.** A metric check cannot see two faults that cancel. The masked-pair scenario exists to prove this.
+* **Detectors on the raw batch, not on the metric.** A metric check sees only the net move. On the masked pair (two faults that partly cancel, net +4.0% to +7.9%) a threshold alert held 4 of 5 seeds without naming either cause and stayed silent on the fifth, where the net move (+4.0%) was inside the range; the detectors found both causes on all 5.
 * **Undo instead of scoring.** A score says "probably". Undoing the fault and getting the clean number back is a demonstration, and it also yields the corrected value and the fix.
 * **History as a check.** A correction that rewrites trusted history is not a fix for today's batch. The fan-out fix is the interesting case: it changes the candidate history back to exactly what was published, which is strong evidence on its own.
 * **The LLM last.** It can be wrong without consequence because it only rewords a decision already made.

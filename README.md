@@ -21,7 +21,7 @@
 | Scored evaluation, 10 scenarios x 5 seeds, Exasol | **50 of 50** right verdict and right causes; without the undo test, 5 wrong causes | [`eval_report.md`](samples/exasol/eval_report.md) |
 | Held-out partial unit changes, frozen before the fix, Exasol | 24 cases: 12 caught, 12 held, **0 published** | [`heldout_unit_after.md`](samples/exasol/heldout_unit_after.md) |
 | Red team, every fault shrunk until it is no longer proven, Exasol | **0 holes** after the unit tail check (1 found and closed) | [`redteam_report.md`](samples/exasol/redteam_report.md) |
-| Real data, 9,554,757 NYC taxi trips, Exasol | 56 real days, **0 held**, 2 verified real changes; 6 of 6 planted faults caught; 62 of 62 gate runs agree with the stand-in | [`real_backtest.md`](samples/exasol/real_backtest.md) |
+| Real data, 9,554,757 NYC taxi trips, Exasol | 56 real days, **0 held**, 2 real changes with no fault found; 6 of 6 planted faults caught; 62 of 62 gate runs agree with the stand-in | [`real_backtest.md`](samples/exasol/real_backtest.md) |
 | Wrong-fix control, Exasol | 235 deliberately wrong corrections: 225 rejected, 10 accepted and listed | [`wrongfix_report.md`](samples/exasol/wrongfix_report.md) |
 
 <p align="center">
@@ -42,7 +42,7 @@ Every number below was measured on Exasol Personal 2026.2.0-nano.3 on one laptop
 | What | Result on Exasol | Report |
 |---|---|---|
 | Scored evaluation, 10 scenarios x 5 seeds, 20,000 orders a day | **50 of 50** right verdict and exactly the right causes; cause precision and recall 100%, 0 wrong causes. Without the undo test: 5 wrong causes. A threshold alert: 0% of causes found | [`eval_report.md`](samples/exasol/eval_report.md) |
-| Real data: NYC taxi trips, Jan to Mar 2024, 9,554,757 trips | 56 real days judged, **0 held**, 2 verified real changes (13 Feb -33.9%, 27 Feb +26.0%); **6 of 6** planted faults caught with the right cause; 62 of 62 gate runs agree with the DuckDB stand-in | [`real_backtest.md`](samples/exasol/real_backtest.md) |
+| Real data: NYC taxi trips, Jan to Mar 2024, 9,554,757 trips | 56 real days judged, **0 held**, 2 real changes with no fault found (13 Feb -33.9%, 27 Feb +26.0%); **6 of 6** planted faults caught with the right cause; 62 of 62 gate runs agree with the DuckDB stand-in | [`real_backtest.md`](samples/exasol/real_backtest.md) |
 | Red team: shrink each fault until the gate stops proving it | Floors: unit change 2%, duplicates 2%, fan-out 2%, new codes 5%, clock faults 100%, stale FX caught. **0 holes** (1 before the unit tail check: a x100 unit change on 2% of one gateway was published, 6.5% off) | [`redteam_report.md`](samples/exasol/redteam_report.md) |
 | Held-out partial unit changes (24, frozen before the tail check was written) | Before: caught 0, held 24. After: **caught 12** (every x1000 case), held 12 (every x10 case). Published 0 in both | [`heldout_unit_after.md`](samples/exasol/heldout_unit_after.md) |
 | Scaling: the IST case after a fresh load | Right verdict at every size up to **400,000 orders a day, 17,346,085 payment rows**: gate 27.5 s, CUBE over 5.95 million rows 5.9 s. Nothing larger was measured | [`scaling.md`](samples/exasol/scaling.md) |
@@ -150,7 +150,7 @@ More commands, alerts with `--watch`, an optional LLM explanation, and troublesh
 
 `receipts backtest --backend exasol` runs the gate on public data: **NYC TLC yellow taxi trip records, January to March 2024**, 9,554,757 trips, no login needed. The metric is the daily total of `total_amount`. A thin adapter maps trips onto the pipeline's tables (vendor as gateway, borough as city, rate code as category), the mapped tables are bulk loaded into Exasol with `IMPORT`, and the detectors, the CUBE and the undo test run unchanged. No threshold was changed. The first 35 days are trusted history, then the gate judges 56 days one night at a time. Full report: [`samples/exasol/real_backtest.md`](samples/exasol/real_backtest.md).
 
-* **Real days, no faults planted: 56 judged, 0 held, 0 called PROVEN_FAULT.** 54 published as `NO_INCIDENT`, 2 as a verified `REAL_CHANGE`: Tue 13 Feb (-33.9%, a snowstorm day when New York City schools went remote) and Tue 27 Feb (+26.0%, the busiest Tuesday so far).
+* **Real days, no faults planted: 56 judged, 0 held, 0 called PROVEN_FAULT.** 54 published as `NO_INCIDENT`, 2 as `REAL_CHANGE` (a real change, no fault found): Tue 13 Feb (-33.9%, a snowstorm day when New York City schools went remote) and Tue 27 Feb (+26.0%, the busiest Tuesday so far).
 * **Planted faults on real days: 6 of 6 caught with the right cause.** Three unit changes (one vendor in cents, +2,111% to +2,371%) and three duplicated payment files (+8.2% to +8.3%, inside the normal range, so a threshold alert would have missed them).
 * **The same on both databases:** all 62 gate runs reach the same verdict and causes on Exasol and on the DuckDB stand-in; the daily values differ by at most 1e-08 relative.
 * **Timing on Exasol:** median 6.5 s per gate run (max 12.9 s) as RAW grows to 9.5 million rows; loading and building took 85 s.
@@ -170,7 +170,7 @@ More commands, alerts with `--watch`, an optional LLM explanation, and troublesh
 | FX feed misses today | caught (one rate is there or not) | nothing to shrink |
 | IST written as UTC on one gateway | 100% | held, nothing proven, at 50% and 25% |
 
-* **The hole, and the fix.** A x100 unit change on 2% of one small gateway's payments moved revenue up 6.5% and was published as a verified `REAL_CHANGE`: the unit check compared medians, which 2% of rows do not move. The unit detector now also counts, per gateway and currency, today's amounts above 20 times the baseline median and compares that count with the baseline share (a Poisson test, false-alarm budget one in a million per slice and night); it then works out the factor (10, 100 or 1000) and the undo test divides only those rows. The stricter real-change test that was also proposed turned out not to be needed and is not applied.
+* **The hole, and the fix.** A x100 unit change on 2% of one small gateway's payments moved revenue up 6.5% and was published as `REAL_CHANGE` (a real change, no fault found): the unit check compared medians, which 2% of rows do not move. The unit detector now also counts, per gateway and currency, today's amounts above 20 times the baseline median and compares that count with the baseline share (a Poisson test, false-alarm budget one in a million per slice and night); it then works out the factor (10, 100 or 1000) and the undo test divides only those rows. The stricter real-change test that was also proposed turned out not to be needed and is not applied.
 * **Before and after the tail check, same seeds, same thresholds otherwise:**
 
 | Test on Exasol | Before | After |
@@ -257,7 +257,7 @@ The four rules for confirming a cause: the evidence names a specific column and 
 
 ![The receipt for the IST case](docs/screenshots/03_receipt_ist.png)
 
-More screenshots: [held](docs/screenshots/02_held_ist.png), [two faults that cancel out](docs/screenshots/05_masked_pair.png), [a real festival surge, published](docs/screenshots/06_festival_published.png), [Break the pipeline](docs/screenshots/08_break_it.png). The full design is in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+More screenshots: [held](docs/screenshots/02_held_ist.png), [two faults that partly cancel](docs/screenshots/05_masked_pair.png), [a real festival surge, published](docs/screenshots/06_festival_published.png), [Break the pipeline](docs/screenshots/08_break_it.png). The full design is in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ### System architecture
 
@@ -439,7 +439,7 @@ On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.
 * A x10 unit change on 2% to 10% of one gateway, and a clock shift on 25% to 50% of one, are held without a proven cause.
 * On a slice smaller than the normal range the undo test alone cannot tell a right correction from a wrong one: in the wrong-fix control 10 of 235 wrong corrections pass the rules, all on the smallest gateway (about 5% of revenue), for example dividing it by 1000 where x100 was planted, or by 100 when the total was already in range. The gate's verdicts stayed right because no detector nominated them; the detector carries the proof there.
 * For a configured metric the band, weekday baseline, lineage, undo test and blast radius follow the config; the detectors and the slice breakdown are bound to the payments layout, and only `daily_revenue_inr` is written to `PUB`.
-* No holiday calendar; a verified real change becomes part of the baseline. Corrections are hotfixes; the real fix is upstream.
+* No holiday calendar; a real change with no fault found becomes part of the baseline. Corrections are hotfixes; the real fix is upstream.
 
 **Verified on Exasol Personal 2026.2.0-nano.3.** The scored eval, the red team, the held-out cases, the variants, the real-data backtest, the wrong-fix control and the held-out metric faults, after the unit tail check; and the newest checks (reader views, `DOWNSTREAM_*` columns, the audit-log query, `PIPE.DAILY_ORDERS`, the `RECEIPTS.METRIC_HISTORY` snapshot, `receipts connect --check` and the badge) in [`samples/exasol/live_checks.md`](samples/exasol/live_checks.md). The audit log shows a read a few seconds after the reading session ends.
 

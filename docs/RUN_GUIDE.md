@@ -102,7 +102,7 @@ Bigger data for timing claims: `receipts init --fresh --orders-per-day 200000` g
 ```bash
 receipts run ist_utc          # land a batch with a planted fault and run the gate
 receipts run festival         # the real-change control
-receipts run masked_pair      # two faults that cancel out
+receipts run masked_pair      # two faults that partly cancel
 receipts eval                 # full scored evaluation, 5 seeds, writes samples/eval_report.md
 receipts eval --backend exasol  # the same evaluation on Exasol
 receipts sample               # writes an unedited case file per scenario to samples/cases

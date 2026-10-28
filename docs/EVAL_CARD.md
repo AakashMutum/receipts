@@ -27,9 +27,9 @@ Core 5, Podman on WSL2, about 7.7 GiB visible to the VM), unless a line says the
 
 | Test | Result | Report |
 |---|---|---|
-| Scored evaluation, 10 scenarios x 5 seeds, 20,000 orders a day | 50 of 50; cause precision and recall 100%, 0 wrong causes. Ablation without the undo test: 5 wrong causes. Threshold alert: 0% of causes, misses the masked pair. Corrected values within 0.017% of the clean value | [`samples/exasol/eval_report.md`](../samples/exasol/eval_report.md) |
+| Scored evaluation, 10 scenarios x 5 seeds, 20,000 orders a day | 50 of 50; cause precision and recall 100%, 0 wrong causes. Ablation without the undo test: 5 wrong causes. Threshold alert: 0% of causes; on the masked pair it held 4 of 5 seeds without naming a cause and stayed silent on the fifth (+4.0%, inside the range). Corrected values within 0.017% of the clean value | [`samples/exasol/eval_report.md`](../samples/exasol/eval_report.md) |
 | Held-out variants, 17, written after the detectors were fixed | caught 15, held 1, published under 4% off 1, published wrong 0 (before the tail check: caught 13, held 3) | [`samples/exasol/variants_report.md`](../samples/exasol/variants_report.md) |
-| Real data, 56 days judged, after the tail check | 0 held, 54 NO_INCIDENT, 2 verified REAL_CHANGE; 6 of 6 planted faults caught; 62 of 62 runs agree with the DuckDB stand-in; the same verdicts as before the tail check | [`samples/exasol/real_backtest.md`](../samples/exasol/real_backtest.md) |
+| Real data, 56 days judged, after the tail check | 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (real change, no fault found); 6 of 6 planted faults caught; 62 of 62 runs agree with the DuckDB stand-in; the same verdicts as before the tail check | [`samples/exasol/real_backtest.md`](../samples/exasol/real_backtest.md) |
 | Newest checks on live Exasol | 10 of 10 pass: blast radius, audit-log reader, `DOWNSTREAM_*` columns, metric history, `connect --check`, both new metrics, badge | [`samples/exasol/live_checks.md`](../samples/exasol/live_checks.md) |
 | Red team, seed 11, 20,000 orders a day | Floors: unit 2%, duplicates 2%, fan-out 2%, new codes 5%, clock faults 100%, stale FX caught. 0 holes (1 before the tail check). 8 of 9 opposite-direction pairs caught, 1 held with one cause |
 | Held-out partial unit changes, 24, frozen before the tail check | before: caught 0, held 24; after: caught 12 (all x1000), held 12 (all x10); published 0 both times | [`samples/exasol/heldout_unit_after.md`](../samples/exasol/heldout_unit_after.md) | [`samples/exasol/redteam_report.md`](../samples/exasol/redteam_report.md) |
@@ -80,7 +80,7 @@ The 10 accepted, on Exasol and on the stand-in alike, all act on GW_C, the small
 
 | Runs | Wrong fix | Why the rules accepted it |
 |---|---|---|
-| masked pair, all 5 seeds | divide GW_C by 100, although GW_C was not touched | The masked pair's total already sits inside the normal range (+4.0% to +7.0%). Removing about 5.5% moves today by more than 1.5%, keeps history and still lands in range. |
+| masked pair, all 5 seeds | divide GW_C by 100, although GW_C was not touched | The two faults partly cancel, so the total moved only +4.0% to +7.9%, about the size of the smallest gateway; it was inside the normal range in 1 of 5 seeds. Taking about 5.5% off brings it inside the range on every seed, moves today by more than 1.5% and keeps history. |
 | unit change, seeds 22, 33, 44, 55 | divide GW_C by 1000 where x100 was planted | The right cause with the wrong size. Over-correcting a 5% slice leaves revenue about 4% under the clean value, inside the range. |
 | file loaded twice, seed 44 | divide GW_C by 100 | The planted duplicates moved revenue +11.2%; taking 4.9% off happens to land inside the range. |
 
@@ -102,7 +102,7 @@ past days, and every wrong-gateway fix was rejected.
   10 of 235 wrong corrections, all on the smallest gateway, pass the rules (above). Detector nomination covers it.
 * Configured metrics: the detectors are bound to the payments layout. On the stand-in's 16 held-out faults, two orphan-code faults of -3.7% and -4.0% on order count were held although they sit just
   under the 4% line ([`samples/metrics_heldout_after.md`](../samples/metrics_heldout_after.md)).
-* No holiday calendar; a verified real change becomes part of the baseline.
+* No holiday calendar; a real change with no fault found becomes part of the baseline.
 * Red team and scaling ran on one seed and one laptop. The eval ran on 5 seeds.
 
 Where each result was verified, and what was not run here, is in one place:
