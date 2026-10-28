@@ -24,3 +24,6 @@ dist/
 
 # local MCP client config (connects as AGENT_READER; password comes from EXA_AGENT_PASSWORD)
 .mcp.json
+
+# a stray file left by a Windows redirect to NUL
+NUL
