@@ -433,7 +433,7 @@ On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.
 
 ## Verified and not covered
 
-**Verified.** Every number in this README comes from a committed report in [`samples/`](samples/). Numbers from Exasol Personal 2026.2.0-nano.3 are in `samples/exasol/`; numbers from the DuckDB stand-in say so where they are quoted. CI runs the tests on the stand-in and renders every Exasol statement through sqlglot's Exasol grammar.
+**Verified.** Every number in this README comes from a committed report in [`samples/`](samples/). Numbers from Exasol Personal 2026.2.0-nano.3 are in `samples/exasol/`; numbers from the DuckDB stand-in say so where they are quoted. CI runs the tests and `receipts judge-check` on the stand-in on GitHub's ubuntu-latest, macos-latest and windows-latest runners, and the tests render every Exasol statement through sqlglot's Exasol grammar. On the Linux and macOS runners CI also checks the syntax of every shell script and runs `./run.sh --check` and `run.command --check`, which find Python, create `.venv`, install Receipts, confirm the `receipts` command starts, and stop before the server.
 
 **What the gate does not prove.**
 
@@ -449,7 +449,7 @@ On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.
 
 **Verified with a real AI client.** A Claude Code session (2.1.308, Claude Opus 5.5) limited to the Exasol MCP tools, connected through `exasol-mcp-server` 2.3.0 as `AGENT_READER`, answered the three demo questions. It refused to give the held number as the day's revenue and gave the last trusted value, though it still mentioned the held candidate value. It listed the downstream objects it could see and said which it could not: the `MART` and `PIPE` objects came from the case record, because the role cannot see those schemas. It declined the delete and `TRUSTED` request by reasoning from its grants, without attempting the write (run 3); told to try anyway, it sent an `UPDATE` and Exasol itself refused it with "insufficient privileges for updating table DAILY_REVENUE_PUBLISHED" (run 4). Answers unedited: [`docs/MCP_REAL_RUN.md`](docs/MCP_REAL_RUN.md); the separate protocol-level run with fixed SQL and no model: [`docs/MCP_PROTOCOL_RUN.md`](docs/MCP_PROTOCOL_RUN.md).
 
-**Not run here.** `run.command` and `run.sh` on a real Mac or Linux machine (run under Git Bash on Windows); posting to a real Slack workspace (only that a failing webhook does not stop the watcher); building either Docker image and deploying the public demo; a blind test by someone other than the author.
+**Not run here.** The one-click scripts end to end on a Mac or Linux desktop: double-clicking `run.command` in Finder, the server start and the browser opening (CI covers their setup steps only, on hosted runners); `run.bat` and the `run-exasol` scripts beyond their syntax and the checks in `tests/test_scripts.py`; posting to a real Slack workspace (only that a failing webhook does not stop the watcher); building either Docker image and deploying the public demo; a blind test by someone other than the author.
 
 ## Author
 

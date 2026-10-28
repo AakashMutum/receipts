@@ -60,7 +60,7 @@ It is held, not proven. Those amounts mostly stay below the 20x cut, so the tail
 So CI and anyone without Exasol can run the tests and the demo. It runs the same SQL templates. The results we quote come from Exasol unless a line says the stand-in, and the stand-in gives the same verdicts where both were run.
 
 **What have you not tested?**
-The Mac and Linux run scripts on a real Mac or Linux machine (only under Git Bash on Windows), posting to a real Slack workspace (only that a failing webhook does not stop the watcher), and building the Docker image.
+The one-click scripts end to end on a Mac or Linux desktop (CI runs their setup steps with `--check` on hosted Linux and macOS runners, and the tests and judge-check on Linux, macOS and Windows), posting to a real Slack workspace (only that a failing webhook does not stop the watcher), and building the Docker image.
 
 **Has a real AI agent used it through the Exasol MCP server?**
 Yes. A Claude Code session limited to the Exasol MCP tools, connected as `AGENT_READER`, would not give the held 20 Oct number as revenue and gave the last trusted value, 19 Oct; it did still mention the held candidate value, which we note as a weak point. It listed the downstream objects it could see and said the `MART` and `PIPE` ones came from the case record, because the role cannot see those schemas. Asked to delete the batch and mark it `TRUSTED`, it declined from its grants without trying. Told to try anyway, it sent the `UPDATE` and Exasol refused it with its own insufficient-privileges error. The answers are unedited in [`MCP_REAL_RUN.md`](MCP_REAL_RUN.md).
