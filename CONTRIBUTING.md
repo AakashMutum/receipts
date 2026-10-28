@@ -2,6 +2,8 @@
 
 Thanks for taking a look. Receipts is maintained by Aakash Singh Mutum. Issues and pull requests are welcome.
 
+Please follow the [code of conduct](CODE_OF_CONDUCT.md). Security issues: see [SECURITY.md](SECURITY.md).
+
 ## Set up and run the tests
 
 ```bash
