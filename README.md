@@ -6,6 +6,8 @@
 
 **When a daily business number moves, Receipts holds it back, proves inside Exasol which upstream fault caused it by undoing that fault in a sandbox, and tells dashboards and AI agents whether to trust it.**
 
+Version 1.0.0, last updated 2026-10-28.
+
 **Start in 30 seconds** (Python 3.10 or newer; the first run installs the packages, then the command center opens in your browser):
 
 | Windows | macOS | Linux |
