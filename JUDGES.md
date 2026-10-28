@@ -6,6 +6,7 @@
 | Author | Aakash Singh Mutum |
 | Track | ExaThon India 2026, Track 4: The Work Behind the Work |
 | Repository | https://github.com/AakashMutum/receipts |
+| Submission | [Pitch deck (PDF)](docs/Receipts_ExaThon_2026_Deck.pdf), [Pitch deck (PowerPoint, with transitions)](docs/Receipts_ExaThon_2026_Deck.pptx) |
 | Licence | MIT ([`LICENSE`](LICENSE)) |
 | Platform | Exasol Personal 2026.2.0-nano.3; a DuckDB stand-in exists only for CI and for people without Exasol |
 
@@ -65,6 +66,7 @@ No Exasol needed for the first three.
 
 | Step | Command | What to expect |
 |---|---|---|
+| Pitch deck | open [Pitch deck (PDF)](docs/Receipts_ExaThon_2026_Deck.pdf) or [Pitch deck (PowerPoint, with transitions)](docs/Receipts_ExaThon_2026_Deck.pptx) | 30 slides |
 | Demo | Windows: double-click `run.bat`. macOS: double-click `run.command`. Linux: `./run.sh` | Sets up `.venv` on the first run (a few minutes on a slow connection), builds the stand-in data, opens the command center in lab mode. The header says **Local stand-in**. Click **Break the pipeline**: the steps appear one by one, then **HELD** and the receipt |
 | Headline claims | `receipts judge-check` | 20 runs on fresh data, 8 checks, ending in `ALL CHECKS PASSED (20/20 runs, ...)`; about 51 s on the laptop above |
 | Tests | `pytest -q` | 171 tests, all pass; 2 tests are skipped unless a live Exasol is set up |

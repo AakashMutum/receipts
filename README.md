@@ -14,6 +14,8 @@
 
 **Judging?** Read [`JUDGES.md`](JUDGES.md): every criterion, its evidence and the command that reproduces it, in three minutes.
 
+**Submission:** [Pitch deck (PDF)](docs/Receipts_ExaThon_2026_Deck.pdf) | [Pitch deck (PowerPoint, with transitions)](docs/Receipts_ExaThon_2026_Deck.pptx)
+
 | Strongest evidence | Result | Report |
 |---|---|---|
 | Scored evaluation, 10 scenarios x 5 seeds, Exasol | **50 of 50** right verdict and right causes; without the undo test, 5 wrong causes | [`eval_report.md`](samples/exasol/eval_report.md) |

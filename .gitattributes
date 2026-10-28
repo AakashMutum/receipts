@@ -3,3 +3,6 @@
 # Shell scripts must be LF to run on macOS and Linux
 *.sh text eol=lf
 *.command text eol=lf
+# Office files and PDFs are binary: never touch their line endings
+*.pptx binary
+*.pdf binary
