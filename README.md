@@ -49,7 +49,7 @@ Every number below was measured on Exasol Personal 2026.2.0-nano.3 on one laptop
 | Real data: NYC taxi trips, Jan to Mar 2024, 9,554,757 trips | 56 real days judged, **0 held**, 2 real changes with no fault found (13 Feb -33.9%, 27 Feb +26.0%); **6 of 6** planted faults caught with the right cause; 62 of 62 gate runs agree with the DuckDB stand-in | [`real_backtest.md`](samples/exasol/real_backtest.md) |
 | Red team: shrink each fault until the gate stops proving it | Floors: unit change 2%, duplicates 2%, fan-out 2%, new codes 5%, clock faults 100%, stale FX caught. **0 holes** (1 before the unit tail check: a x100 unit change on 2% of one gateway was published, 6.5% off) | [`redteam_report.md`](samples/exasol/redteam_report.md) |
 | Held-out partial unit changes (24, frozen before the tail check was written) | Before: caught 0, held 24. After: **caught 12** (every x1000 case), held 12 (every x10 case). Published 0 in both | [`heldout_unit_after.md`](samples/exasol/heldout_unit_after.md) |
-| Scaling: the IST case after a fresh load | Right verdict at every size up to **400,000 orders a day, 17,346,085 payment rows**: gate 27.5 s, CUBE over 5.95 million rows 5.9 s. Nothing larger was measured | [`scaling.md`](samples/exasol/scaling.md) |
+| Scaling: the IST case after a fresh load | Right verdict at every size up to **400,000 orders a day, 17,346,085 payment rows**: gate 15.8 s, CUBE over 5.95 million rows 2.7 s (29 Oct, after the unit tail check). Nothing larger was measured | [`scaling.md`](samples/exasol/scaling.md) |
 | Live demo: click Break the pipeline to the HELD banner | **8.4 s** median over 5 runs (6.8 to 20.5 s), every gate step shown as it finishes | [`timings.md`](samples/exasol/timings.md) |
 | Held-out fault variants (17, written after the detectors were fixed) | caught 15, held 1, published but under 4% off 1, published wrong 0 (before the unit tail check: caught 13, held 3) | [`variants_report.md`](samples/exasol/variants_report.md) |
 | A read-only agent user | `AGENT_READER` reads `PUB.METRIC_TRUST`; Exasol refuses it on RAW, PIPE, RECEIPTS and on every write | [`MCP_DEMO.md`](docs/MCP_DEMO.md) |
@@ -194,16 +194,16 @@ The **Red team** tab in lab mode charts these floors and runs one attack live.
 
 ## Scaling
 
-Measured on 24 Oct, before the unit tail check. `receipts scale --backend exasol` runs the IST case after `receipts init --fresh --orders-per-day N`, one gate run per size. Full report: [`samples/exasol/scaling.md`](samples/exasol/scaling.md).
+Measured on 29 Oct, after the unit tail check. `receipts scale --backend exasol` runs the IST case after `receipts init --fresh --orders-per-day N`, one gate run per size. Full report: [`samples/exasol/scaling.md`](samples/exasol/scaling.md).
 
 | Orders a day | Payment rows | Load and build | Gate end to end | Measured by Exasol | CUBE | Peak temp memory | Verdict |
 |---|---|---|---|---|---|---|---|
-| 20,000 | 863,336 | 25 s | 9.1 s | 7.6 s | 2.4 s | 73 MiB | right |
-| 100,000 | 4,323,746 | 40 s | 14.0 s | 12.6 s | 2.9 s | 168 MiB | right |
-| 200,000 | 8,636,296 | 86 s | 18.4 s | 16.9 s | 3.4 s | 229 MiB | right |
-| 400,000 | 17,346,085 | 215 s | 27.5 s | 26.3 s | 5.9 s | 353 MiB | right |
+| 20,000 | 863,336 | 11 s | 4.5 s | 4.0 s | 0.7 s | 65 MiB | right |
+| 100,000 | 4,323,746 | 26 s | 7.2 s | 6.6 s | 1.2 s | 157 MiB | right |
+| 200,000 | 8,636,296 | 46 s | 9.0 s | 8.5 s | 1.6 s | 218 MiB | right |
+| 400,000 | 17,346,085 | 92 s | 15.8 s | 15.1 s | 2.7 s | 344 MiB | right |
 
-Each run is the first after a fresh load, which is slower than a repeat. The run stopped at 400,000 on purpose: the laptop's free disk would not hold the next size. Nothing larger is claimed.
+Each run is the first after a fresh load, which is slower than a repeat. Sizes stop at 400,000 on purpose: the laptop's free disk would not hold the next size. Nothing larger is claimed. The first recording, on 24 Oct before the tail check, took 27.5 s end to end at 400,000; [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) has both.
 
 ## Agent demo
 
@@ -447,11 +447,11 @@ On a live Exasol, also `RECEIPTS_LIVE_EXASOL=1 pytest -q tests/test_exasol_live.
 
 **Verified on Exasol Personal 2026.2.0-nano.3.** The scored eval, the red team, the held-out cases, the variants, the real-data backtest, the wrong-fix control and the held-out metric faults, after the unit tail check; and the newest checks (reader views, `DOWNSTREAM_*` columns, the audit-log query, `PIPE.DAILY_ORDERS`, the `RECEIPTS.METRIC_HISTORY` snapshot, `receipts connect --check` and the badge) in [`samples/exasol/live_checks.md`](samples/exasol/live_checks.md). The audit log shows a read a few seconds after the reading session ends. `receipts audit-match` ran one full IST run and the agent's three reads through the Exasol MCP server against `EXA_DBA_AUDIT_SQL`: 57 of 57 gate statements and 3 of 3 agent reads matched, none different or missing; the extras are autocommits and the timing code's own reads ([`docs/AUDIT_MATCH.md`](docs/AUDIT_MATCH.md)).
 
-**Measured once, on Exasol, before the unit tail check.** The scaling run up to 400,000 orders a day; nothing larger is claimed.
+**Measured on Exasol, before and after the unit tail check.** The scaling run up to 400,000 orders a day (24 and 29 Oct); nothing larger is claimed. The 50-run eval, the red team and the wrong-fix control were re-run on Exasol on 29 Oct with the same results; the eval also ran on the stand-in with the same verdicts and causes on all 50 runs.
 
 **Verified with a real AI client.** A Claude Code session (2.1.308, Claude Opus 5.5) limited to the Exasol MCP tools, connected through `exasol-mcp-server` 2.3.0 as `AGENT_READER`, answered the three demo questions. It refused to give the held number as the day's revenue and gave the last trusted value, though it still mentioned the held candidate value. It listed the downstream objects it could see and said which it could not: the `MART` and `PIPE` objects came from the case record, because the role cannot see those schemas. It declined the delete and `TRUSTED` request by reasoning from its grants, without attempting the write (run 3); told to try anyway, it sent an `UPDATE` and Exasol itself refused it with "insufficient privileges for updating table DAILY_REVENUE_PUBLISHED" (run 4). Answers unedited: [`docs/MCP_REAL_RUN.md`](docs/MCP_REAL_RUN.md); the separate protocol-level run with fixed SQL and no model: [`docs/MCP_PROTOCOL_RUN.md`](docs/MCP_PROTOCOL_RUN.md).
 
-**Not run here.** The one-click scripts end to end on a Mac or Linux desktop: double-clicking `run.command` in Finder, the server start and the browser opening (CI covers their setup steps only, on hosted runners); `run.bat` and the `run-exasol` scripts beyond their syntax and the checks in `tests/test_scripts.py`; posting to a real Slack workspace (only that a failing webhook does not stop the watcher); building either Docker image and deploying the public demo; a blind test by someone other than the author. Not measured: gate runs right after restarting the Exasol database, and the scaling run after the unit tail check.
+**Not run here.** The one-click scripts end to end on a Mac or Linux desktop: double-clicking `run.command` in Finder, the server start and the browser opening (CI covers their setup steps only, on hosted runners); `run.bat` and the `run-exasol` scripts beyond their syntax and the checks in `tests/test_scripts.py`; posting to a real Slack workspace (only that a failing webhook does not stop the watcher); building either Docker image and deploying the public demo; a blind test by someone other than the author. Not measured: gate runs right after restarting the Exasol database.
 
 ## Author
 

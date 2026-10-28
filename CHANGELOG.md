@@ -10,6 +10,9 @@
 
 * The 50-run scored evaluation re-run on Exasol (29 Oct): 50 of 50 again, every verdict, cause and wrong-fix count the same as the committed run; gate latency median 4,535 ms to 2,969 ms and max 13,204 ms to 5,546 ms ([`samples/exasol/eval_report.md`](samples/exasol/eval_report.md)). The red team (seed 11) and the wrong-fix control (5 seeds) re-run on Exasol give the same floors, holes, combinations and 235 / 225 / 10 wrong fixes as the committed reports; only the timings changed. `samples/eval_report.md` was an Exasol run from 21 Oct; it is now the same evaluation on the DuckDB stand-in, which gives the same verdicts and causes on all 50 runs.
 
+* The scaling run re-run on Exasol after the unit tail check (29 Oct): the right verdict at every size; at 400,000 orders a day (17,346,085 payment rows) the gate took 15.8 s (was 27.5 s), 15.1 s measured by Exasol (was 26.3 s), CUBE 2.7 s (was 5.9 s), peak temporary memory 344 MiB (was 353 MiB) ([`samples/exasol/scaling.md`](samples/exasol/scaling.md)).
+* [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) now compares Exasol and the stand-in measured the same way on the same day, with [`scripts/bench_exasol.py`](scripts/bench_exasol.py) next to the stand-in script: IST case warm median 3.23 s on Exasol (2.16 s measured by Exasol) and 0.65 s on the stand-in. [`docs/WHY_EXASOL.md`](docs/WHY_EXASOL.md) uses these numbers and adds the 50-run comparison.
+
 ### Fixed
 
 * `receipts audit-match` picked up `AGENT_READER` sessions from `receipts doctor` and from earlier runs; it now matches only this run's agent session. The incoming-day read is now in the client log.
