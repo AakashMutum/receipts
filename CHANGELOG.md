@@ -6,6 +6,10 @@
 
 * [`docs/AUDIT_MATCH.md`](docs/AUDIT_MATCH.md) and its JSON, from `receipts audit-match` on live Exasol: 57 of 57 gate statements and 3 of 3 agent reads through the Exasol MCP server matched, none different or missing.
 
+### Changed
+
+* The 50-run scored evaluation re-run on Exasol (29 Oct): 50 of 50 again, every verdict, cause and wrong-fix count the same as the committed run; gate latency median 4,535 ms to 2,969 ms and max 13,204 ms to 5,546 ms ([`samples/exasol/eval_report.md`](samples/exasol/eval_report.md)). `samples/eval_report.md` was an Exasol run from 21 Oct; it is now the same evaluation on the DuckDB stand-in, which gives the same verdicts and causes on all 50 runs.
+
 ### Fixed
 
 * `receipts audit-match` picked up `AGENT_READER` sessions from `receipts doctor` and from earlier runs; it now matches only this run's agent session. The incoming-day read is now in the client log.

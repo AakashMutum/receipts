@@ -1,6 +1,6 @@
 # Receipts evaluation
 
-50 runs: 10 scenarios x 5 seeds (20,000 orders a day, 42 days of history, backend exasol). Generated 2026-10-21 14:02:40.
+50 runs: 10 scenarios x 5 seeds (20,000 orders a day, 42 days of history, backend duckdb). Generated 2026-10-29 02:10:52.
 
 **Receipts passed 50 of 50 runs** (right verdict and exactly the right causes).
 
@@ -11,7 +11,7 @@
 | Threshold alert (typical monitor) | 88% | 100% | 0% | 0 | 40 |
 
 Corrected value after the proven fix, against the true clean value: mean error 0.001%, max 0.017%.
-Gate latency per run: median 3047 ms, max 6200 ms.
+Gate latency per run: median 754 ms, max 1249 ms.
 
 ## Per scenario
 
@@ -37,16 +37,16 @@ Gate latency per run: median 3047 ms, max 6200 ms.
 | new_code | 22 | -16.3% | PROVEN_FAULT | PROVEN_FAULT | orphan_code | yes |
 | masked_pair | 22 | +7.0% | PROVEN_FAULT | PROVEN_FAULT | clock_shift, duplicate_key | yes |
 | unknown_discount | 22 | -9.5% | UNEXPLAINED | UNEXPLAINED | - | yes |
-| healthy | 33 | +2.0% | NO_INCIDENT | NO_INCIDENT | - | yes |
-| festival | 33 | +25.2% | REAL_CHANGE | REAL_CHANGE | - | yes |
-| unit_paise | 33 | +470.8% | PROVEN_FAULT | PROVEN_FAULT | unit_scale | yes |
-| duplicate_load | 33 | +14.8% | PROVEN_FAULT | PROVEN_FAULT | duplicate_key | yes |
-| join_fanout | 33 | +22.6% | PROVEN_FAULT | PROVEN_FAULT | key_fanout | yes |
-| stale_fx | 33 | -7.3% | PROVEN_FAULT | PROVEN_FAULT | stale_feed | yes |
-| ist_utc | 33 | -15.2% | PROVEN_FAULT | PROVEN_FAULT | clock_shift | yes |
-| new_code | 33 | -15.2% | PROVEN_FAULT | PROVEN_FAULT | orphan_code | yes |
-| masked_pair | 33 | +6.6% | PROVEN_FAULT | PROVEN_FAULT | clock_shift, duplicate_key | yes |
-| unknown_discount | 33 | -8.8% | UNEXPLAINED | UNEXPLAINED | - | yes |
+| healthy | 33 | +3.2% | NO_INCIDENT | NO_INCIDENT | - | yes |
+| festival | 33 | +26.7% | REAL_CHANGE | REAL_CHANGE | - | yes |
+| unit_paise | 33 | +477.9% | PROVEN_FAULT | PROVEN_FAULT | unit_scale | yes |
+| duplicate_load | 33 | +16.2% | PROVEN_FAULT | PROVEN_FAULT | duplicate_key | yes |
+| join_fanout | 33 | +24.1% | PROVEN_FAULT | PROVEN_FAULT | key_fanout | yes |
+| stale_fx | 33 | -6.2% | PROVEN_FAULT | PROVEN_FAULT | stale_feed | yes |
+| ist_utc | 33 | -14.1% | PROVEN_FAULT | PROVEN_FAULT | clock_shift | yes |
+| new_code | 33 | -14.1% | PROVEN_FAULT | PROVEN_FAULT | orphan_code | yes |
+| masked_pair | 33 | +7.9% | PROVEN_FAULT | PROVEN_FAULT | clock_shift, duplicate_key | yes |
+| unknown_discount | 33 | -7.6% | UNEXPLAINED | UNEXPLAINED | - | yes |
 | healthy | 44 | -1.4% | NO_INCIDENT | NO_INCIDENT | - | yes |
 | festival | 44 | +21.6% | REAL_CHANGE | REAL_CHANGE | - | yes |
 | unit_paise | 44 | +480.4% | PROVEN_FAULT | PROVEN_FAULT | unit_scale | yes |
@@ -74,3 +74,18 @@ Gate latency per run: median 3047 ms, max 6200 ms.
 * **Detectors only** is the ablation. It names every check that fired. On the festival day the retry burst trips the duplicate check, so it blames a fault that is not there. The undo test removes it.
 * **Threshold alert** never names a cause and holds the real festival surge. On the masked pair it holds the number without a cause when the net move leaves the normal range, and stays silent when it does not.
 * The unknown fault has no detector by design. The right answer is UNEXPLAINED (held, no cause named), and that is what is scored.
+
+## Wrong-fix control
+
+Deliberately wrong corrections for every planted fault (wrong gateway, wrong factor, every day instead of tonight, or the fix for another cause), judged by the gate's own rules: tried 235, rejected 225, accepted 10.
+
+* Accepted: unit fix (divide by 100) on GW_C (-5.41%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed clock_shift, duplicate_key.
+* Accepted: divide GW_C by 1000 instead of 100 (-83.06%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed unit_scale.
+* Accepted: unit fix (divide by 100) on GW_C (-5.46%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed clock_shift, duplicate_key.
+* Accepted: divide GW_C by 1000 instead of 100 (-82.88%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed unit_scale.
+* Accepted: unit fix (divide by 100) on GW_C (-5.55%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed clock_shift, duplicate_key.
+* Accepted: divide GW_C by 1000 instead of 100 (-83.76%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed unit_scale.
+* Accepted: unit fix (divide by 100) on GW_C (-4.92%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed duplicate_key.
+* Accepted: unit fix (divide by 100) on GW_C (-5.90%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed clock_shift, duplicate_key.
+* Accepted: divide GW_C by 1000 instead of 100 (-82.98%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed unit_scale.
+* Accepted: unit fix (divide by 100) on GW_C (-5.47%, history unchanged, in range); gate verdict PROVEN_FAULT, confirmed clock_shift, duplicate_key.

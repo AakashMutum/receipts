@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-27 22:48:03",
+  "generated_at": "2026-10-29 02:08:27",
   "backend": "exasol",
   "seeds": [
     11,
@@ -47,10 +47,10 @@
     "mean": 0.001
   },
   "latency_ms": {
-    "median": 4535.4,
-    "max": 13203.6
+    "median": 2968.8,
+    "max": 5546.0
   },
-  "seconds": 895.0,
+  "seconds": 579.5,
   "runs_detail": [
     {
       "seed": 11,
@@ -75,7 +75,7 @@
         "held": false,
         "verdict": "NO_INCIDENT"
       },
-      "ms": 2687.1,
+      "ms": 2463.1,
       "pass": true
     },
     {
@@ -103,7 +103,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 3663.6,
+      "ms": 3177.9,
       "pass": true
     },
     {
@@ -135,7 +135,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 3774.7,
+      "ms": 3109.1,
       "pass": true,
       "wrong_fixes": [
         {
@@ -286,7 +286,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 3670.2,
+      "ms": 3980.3,
       "pass": true,
       "wrong_fixes": [
         {
@@ -398,7 +398,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 3513.0,
+      "ms": 4189.5,
       "pass": true,
       "wrong_fixes": [
         {
@@ -523,7 +523,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 3602.3,
+      "ms": 3545.9,
       "pass": true,
       "wrong_fixes": [
         {
@@ -648,7 +648,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4759.9,
+      "ms": 2940.0,
       "pass": true,
       "wrong_fixes": [
         {
@@ -760,7 +760,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 3947.9,
+      "ms": 2813.0,
       "pass": true,
       "wrong_fixes": [
         {
@@ -888,7 +888,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 7050.8,
+      "ms": 4963.2,
       "pass": true,
       "wrong_fixes": [
         {
@@ -986,7 +986,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 2993.6,
+      "ms": 2212.4,
       "pass": true
     },
     {
@@ -1012,7 +1012,7 @@
         "held": false,
         "verdict": "NO_INCIDENT"
       },
-      "ms": 3664.0,
+      "ms": 2338.0,
       "pass": true
     },
     {
@@ -1040,7 +1040,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 5447.8,
+      "ms": 3114.7,
       "pass": true
     },
     {
@@ -1072,7 +1072,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4535.4,
+      "ms": 2888.5,
       "pass": true,
       "wrong_fixes": [
         {
@@ -1223,7 +1223,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 5028.0,
+      "ms": 2968.8,
       "pass": true,
       "wrong_fixes": [
         {
@@ -1335,7 +1335,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4802.5,
+      "ms": 3506.0,
       "pass": true,
       "wrong_fixes": [
         {
@@ -1460,7 +1460,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4267.4,
+      "ms": 2872.0,
       "pass": true,
       "wrong_fixes": [
         {
@@ -1585,7 +1585,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 7495.8,
+      "ms": 2783.8,
       "pass": true,
       "wrong_fixes": [
         {
@@ -1697,7 +1697,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4886.9,
+      "ms": 2914.8,
       "pass": true,
       "wrong_fixes": [
         {
@@ -1825,7 +1825,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 13203.6,
+      "ms": 5157.3,
       "pass": true,
       "wrong_fixes": [
         {
@@ -1923,7 +1923,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4786.1,
+      "ms": 2135.6,
       "pass": true
     },
     {
@@ -1949,7 +1949,7 @@
         "held": false,
         "verdict": "NO_INCIDENT"
       },
-      "ms": 5194.8,
+      "ms": 2312.1,
       "pass": true
     },
     {
@@ -1977,7 +1977,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 9137.2,
+      "ms": 3139.8,
       "pass": true
     },
     {
@@ -2009,7 +2009,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 7068.3,
+      "ms": 3005.4,
       "pass": true,
       "wrong_fixes": [
         {
@@ -2160,7 +2160,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4835.1,
+      "ms": 3764.4,
       "pass": true,
       "wrong_fixes": [
         {
@@ -2272,7 +2272,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 9384.2,
+      "ms": 3765.5,
       "pass": true,
       "wrong_fixes": [
         {
@@ -2397,7 +2397,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4865.0,
+      "ms": 3401.2,
       "pass": true,
       "wrong_fixes": [
         {
@@ -2522,7 +2522,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4095.6,
+      "ms": 3607.0,
       "pass": true,
       "wrong_fixes": [
         {
@@ -2634,7 +2634,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4032.0,
+      "ms": 3062.4,
       "pass": true,
       "wrong_fixes": [
         {
@@ -2762,7 +2762,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 6613.7,
+      "ms": 5546.0,
       "pass": true,
       "wrong_fixes": [
         {
@@ -2860,7 +2860,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 3125.9,
+      "ms": 2576.9,
       "pass": true
     },
     {
@@ -2886,7 +2886,7 @@
         "held": false,
         "verdict": "NO_INCIDENT"
       },
-      "ms": 3386.0,
+      "ms": 2128.7,
       "pass": true
     },
     {
@@ -2914,7 +2914,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 5017.3,
+      "ms": 3333.6,
       "pass": true
     },
     {
@@ -2946,7 +2946,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4244.3,
+      "ms": 2918.8,
       "pass": true,
       "wrong_fixes": [
         {
@@ -3097,7 +3097,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4094.4,
+      "ms": 3100.4,
       "pass": true,
       "wrong_fixes": [
         {
@@ -3209,7 +3209,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4167.3,
+      "ms": 2868.2,
       "pass": true,
       "wrong_fixes": [
         {
@@ -3334,7 +3334,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 3904.1,
+      "ms": 2931.4,
       "pass": true,
       "wrong_fixes": [
         {
@@ -3459,7 +3459,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 5899.8,
+      "ms": 2940.6,
       "pass": true,
       "wrong_fixes": [
         {
@@ -3571,7 +3571,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4108.0,
+      "ms": 3015.6,
       "pass": true,
       "wrong_fixes": [
         {
@@ -3699,7 +3699,7 @@
         "held": false,
         "verdict": "NO_INCIDENT"
       },
-      "ms": 10928.9,
+      "ms": 4602.2,
       "pass": true,
       "wrong_fixes": [
         {
@@ -3797,7 +3797,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 3022.1,
+      "ms": 2260.9,
       "pass": true
     },
     {
@@ -3823,7 +3823,7 @@
         "held": false,
         "verdict": "NO_INCIDENT"
       },
-      "ms": 3932.4,
+      "ms": 2384.4,
       "pass": true
     },
     {
@@ -3851,7 +3851,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 6233.6,
+      "ms": 3309.3,
       "pass": true
     },
     {
@@ -3883,7 +3883,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4098.8,
+      "ms": 3057.5,
       "pass": true,
       "wrong_fixes": [
         {
@@ -4034,7 +4034,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4840.9,
+      "ms": 2842.1,
       "pass": true,
       "wrong_fixes": [
         {
@@ -4146,7 +4146,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4214.7,
+      "ms": 2899.8,
       "pass": true,
       "wrong_fixes": [
         {
@@ -4271,7 +4271,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 5419.8,
+      "ms": 2757.8,
       "pass": true,
       "wrong_fixes": [
         {
@@ -4396,7 +4396,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 6182.9,
+      "ms": 2781.5,
       "pass": true,
       "wrong_fixes": [
         {
@@ -4508,7 +4508,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 4392.7,
+      "ms": 2855.2,
       "pass": true,
       "wrong_fixes": [
         {
@@ -4636,7 +4636,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 6352.2,
+      "ms": 4626.1,
       "pass": true,
       "wrong_fixes": [
         {
@@ -4734,7 +4734,7 @@
         "held": true,
         "verdict": "UNEXPLAINED"
       },
-      "ms": 2982.3,
+      "ms": 2090.3,
       "pass": true
     }
   ],
