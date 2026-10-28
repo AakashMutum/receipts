@@ -24,12 +24,26 @@ On macOS, the first double-click on a downloaded `.command` file may be blocked 
 
 Requires Python 3.10 or newer.
 
+macOS and Linux:
+
 ```bash
 git clone https://github.com/AakashMutum/receipts.git && cd receipts
 python3 -m venv .venv && source .venv/bin/activate
 make install
 make judge-check
 ```
+
+Windows (PowerShell; `make` is usually not installed, so run what it runs):
+
+```powershell
+git clone https://github.com/AakashMutum/receipts.git; cd receipts
+py -m venv .venv; .venv\Scripts\Activate.ps1
+pip install -e ".[dev]"
+receipts judge-check
+```
+
+If PowerShell refuses to run `Activate.ps1`, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, or skip
+activation and call `.venv\Scripts\receipts.exe` directly.
 
 `judge-check` generates fresh data on two seeds, runs all ten scenarios, scores them against ground truth and prints PASS or FAIL for eight claims. It needs no API key and no network.
 
@@ -38,6 +52,8 @@ Then the command center:
 ```bash
 make demo        # same as: receipts demo (builds if needed, serves, opens the browser)
 ```
+
+On Windows run `receipts demo` directly.
 
 Open http://127.0.0.1:8000. The header chip says **Local stand-in** so nobody mistakes it for Exasol.
 
