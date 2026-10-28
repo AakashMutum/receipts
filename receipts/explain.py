@@ -43,13 +43,18 @@ def template(case: dict) -> str:
                    "), but undoing it did not move the number, so it was ruled out.")
         return (f"Revenue for {day} moved {chg:+.1%}, outside the normal range, and Receipts found no data fault behind "
                 f"it. Transaction volume moved with the value and every raw payment reconciles to one revenue row."
-                f"{rej} It was published as a verified real change.")
+                f"{rej} It was published as a real change, no fault found.")
     if verdict == "PROVEN_FAULT":
         causes = "; ".join(f"{s['title'].lower()} in {s['blamed']['table']}.{s['blamed']['column']} ({s['slice_text']})"
                            for s in confirmed)
         masked = ""
+        moves = [s.get("move_pct") or 0 for s in confirmed]
         if not case["anomaly"]:
-            masked = " The total looked normal because the faults cancel each other out, which a threshold alert would miss."
+            masked = (" The total stayed inside the normal range because the faults partly cancel each other out, so a "
+                      "threshold alert would stay silent.")
+        elif len(confirmed) > 1 and any(m > 0 for m in moves) and any(m < 0 for m in moves):
+            masked = (f" The faults push in opposite directions, so the net move is only {chg:+.1%}: a threshold alert "
+                      f"would hold the number without naming a cause, while Receipts names both.")
         return (f"Revenue for {day} came in at {inr(v['candidate'])} ({chg:+.1%}). Receipts held it. "
                 f"Proven cause{'s' if len(confirmed) > 1 else ''}: {causes}. Undoing "
                 f"{'them' if len(confirmed) > 1 else 'it'} in a sandbox brings revenue to {inr(v['corrected'])}, "

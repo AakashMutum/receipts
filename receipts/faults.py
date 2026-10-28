@@ -73,9 +73,10 @@ SCENARIOS: dict[str, Scenario] = {s.id: s for s in [
              "The catalogue team split Electronics and started sending a new code the mapping table "
              "does not know. An inner join drops those orders without a sound.",
              "PROVEN_FAULT", frozenset({"orphan_code"}), [ORPHAN]),
-    Scenario("masked_pair", "Two faults that cancel out",
+    Scenario("masked_pair", "Two faults that partly cancel",
              "Two payment files are loaded twice and a gateway shifts to IST on the same night. "
-             "The errors cancel and the total looks normal. A threshold alert stays silent.",
+             "The errors push in opposite directions, so the total moves only a few percent. On the 5 eval seeds "
+             "it stayed inside the normal range once; a threshold alert held the other 4 without naming a cause.",
              "PROVEN_FAULT", frozenset({"duplicate_key", "clock_shift"}), [DUP2, TZ]),
     Scenario("unknown_discount", "A fault Receipts has no detector for",
              "A coupon is applied twice on many Electronics orders. None of the six detectors covers "

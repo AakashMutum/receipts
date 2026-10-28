@@ -129,7 +129,7 @@ def cmd_judge_check(a):
         ("Every planted cause found (recall 100%)", s["receipts"]["cause_recall"] == 1.0),
         ("Healthy control: no incident invented",
          all(r["receipts"]["verdict"] == "NO_INCIDENT" for r in rep["runs_detail"] if r["scenario"] == "healthy")),
-        ("Real festival surge published as a verified real change",
+        ("Real festival surge published as a real change, no fault found",
          all(r["receipts"]["verdict"] == "REAL_CHANGE" for r in rep["runs_detail"] if r["scenario"] == "festival")),
         ("Unknown fault held without guessing a cause",
          all(r["receipts"]["verdict"] == "UNEXPLAINED" and not r["receipts"]["causes"]

@@ -301,7 +301,7 @@ def to_markdown(rep: dict, command: str, compare: dict | None = None) -> str:
         out.append("")
     moved = [r for r in clean if r["verdict"] == "REAL_CHANGE"]
     if moved:
-        out += ["Published as a verified real change: " + ", ".join(f"{r['day']} ({r['change_pct']:+.1%})"
+        out += ["Published as a real change, no fault found: " + ", ".join(f"{r['day']} ({r['change_pct']:+.1%})"
                                                                      for r in moved) + ".", ""]
     out += ["## Planted faults on real days", "",
             "| Day | Fault | Real error | Outside the normal range | Verdict | Causes named | Caught |",

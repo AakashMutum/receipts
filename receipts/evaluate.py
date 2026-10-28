@@ -144,8 +144,8 @@ def to_markdown(rep: dict) -> str:
             "* **Hold decision right**: faulty batches held, healthy and genuinely changed batches published.",
             "* **Detectors only** is the ablation. It names every check that fired. On the festival day the retry "
             "burst trips the duplicate check, so it blames a fault that is not there. The undo test removes it.",
-            "* **Threshold alert** never names a cause, holds the real festival surge, and misses the masked pair "
-            "because the total looks normal.",
+            "* **Threshold alert** never names a cause and holds the real festival surge. On the masked pair it holds "
+            "the number without a cause when the net move leaves the normal range, and stays silent when it does not.",
             "* The unknown fault has no detector by design. The right answer is UNEXPLAINED (held, no cause named), "
             "and that is what is scored.", ""]
     w = rep.get("wrong_fix")
