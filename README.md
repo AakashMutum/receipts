@@ -14,6 +14,8 @@ Version 1.0.0, last updated 2026-10-28.
 |---|---|---|
 | double-click `run.bat` | double-click `run.command` | `./run.sh` |
 
+**What one bad feed touches:** in the demo, one faulty payments feed (the IST case) reaches **4 views** that read the pipeline directly and would have shown the wrong number (3 reports and the order-count metric); while the number is held, the **3 views** that dashboards and agents read, `PUB.METRIC_TRUST`, `PUB.DASHBOARD_REVENUE` and the executive summary built on it, show the last trusted value instead. Measured on Exasol from the view catalog ([`live_checks.md`](samples/exasol/live_checks.md)).
+
 **Judging?** Read [`JUDGES.md`](JUDGES.md): every criterion, its evidence and the command that reproduces it, in three minutes.
 
 **Submission:** [Pitch deck (PDF)](docs/Receipts_ExaThon_2026_Deck.pdf) | [Pitch deck (PowerPoint, with transitions)](docs/Receipts_ExaThon_2026_Deck.pptx)

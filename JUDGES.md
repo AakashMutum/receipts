@@ -14,6 +14,8 @@
 
 **The problem (from the README):** a finance analyst at an Indian fintech marketplace cannot tell whether a sudden change in daily revenue is real or a silent data bug, because the number passes through several tables and every check says green.
 
+**What one bad feed touches:** in the demo, one faulty payments feed (the IST case) reaches **4 views** that read the pipeline directly and would have shown the wrong number (3 reports and the order-count metric); while the number is held, the **3 views** that dashboards and agents read, `PUB.METRIC_TRUST`, `PUB.DASHBOARD_REVENUE` and the executive summary built on it, show the last trusted value instead. Measured on Exasol from the view catalog ([`live_checks.md`](samples/exasol/live_checks.md)).
+
 Every number on this page is copied from a committed report in [`samples/`](samples/) and names that file. Unless a line says otherwise, they were measured on one Windows 11 laptop (Intel Core 5, Podman on WSL2, about 7.7 GiB visible to the VM).
 
 ## The judging criteria and the evidence
