@@ -154,28 +154,43 @@ def _mcp_reads(cfg, day, log) -> dict | None:
             "note": "the three reads were sent through execute_exasol_query; the server may add its own statements"}
 
 
-def to_markdown(rep: dict, command: str) -> str:
-    def block(name, m):
-        if not m:
-            return [f"## {name}", "", "Not run (the Exasol MCP server could not be started).", ""]
-        lines = [f"## {name}", "", "| Issued | Matched | Different | Missing | Extra in the audit log |", "|---|---|---|---|---|",
-                 f"| {m['issued']} | {m['matched']} | {m['different']} | {m['missing']} | {m['extra']} |", ""]
-        if m.get("extra_kinds"):
-            lines += ["Extra statements in the audit log, by kind: " +
-                      ", ".join(f"{k} {v}" for k, v in sorted(m["extra_kinds"].items())) + ".", ""]
-        odd = [r for r in m["rows"] if r["result"] != "matched"]
-        if odd:
-            lines += ["Not matched exactly:", ""] + [f"* {r['result']}: `{r['sql'][:120]}`" for r in odd] + [""]
+def to_markdown(reps: dict | list[dict], command: str) -> str:
+    """One report for one or more runs: a table row per run for the gate session and for the agent's reads."""
+    reps = [reps] if isinstance(reps, dict) else reps
+
+    def block(name, key, first_cols):
+        ms = [r.get(key) for r in reps]
+        lines = [f"## {name}", ""]
+        if not any(ms):
+            return lines + ["Not run (the Exasol MCP server could not be started).", ""]
+        head = ["Run"] + [c for c, _ in first_cols] + ["Issued", "Matched", "Different", "Missing", "Extra in the audit log"]
+        lines += ["| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
+        for n, (r, m) in enumerate(zip(reps, ms), 1):
+            vals = [str(n)] + [str(f(r)) for _, f in first_cols]
+            vals += [str(m[k]) for k in ("issued", "matched", "different", "missing", "extra")] if m else ["not run"] * 5
+            lines.append("| " + " | ".join(vals) + " |")
+        lines.append("")
+        kinds = [", ".join(f"{k} {v}" for k, v in sorted(m["extra_kinds"].items())) for m in ms if m and m.get("extra_kinds")]
+        if kinds and len(set(kinds)) == 1:
+            lines += [f"Extra statements in the audit log, by kind, the same in every run: {kinds[0]}.", ""]
+        else:
+            lines += [f"Extra statements in the audit log, by kind, run {n}: {k}." for n, k in enumerate(kinds, 1)] + [""]
+        for n, m in enumerate(ms, 1):
+            odd = [x for x in (m or {}).get("rows", []) if x["result"] != "matched"]
+            if odd:
+                lines += [f"Not matched exactly in run {n}:", ""] + [f"* {x['result']}: `{x['sql'][:120]}`" for x in odd] + [""]
         return lines
+    r0 = reps[0]
+    runs = "one full run" if len(reps) == 1 else f"{len(reps)} full runs, each a new session that lands the batch again"
     out = ["# Audit-log match", "",
-           f"Every statement Receipts sent in one full run, matched against `EXA_DBA_AUDIT_SQL` on Exasol "
-           f"{rep['exasol']}. Batch day {rep['day']}, case {rep['case']}, verdict {rep['verdict']}, {rep['seconds']} s. "
-           f"Reproduce: `{command}` (needs Exasol with the demo data).", "",
+           f"Every statement Receipts sent in {runs}, matched against `EXA_DBA_AUDIT_SQL` on Exasol {r0['exasol']}. "
+           f"Batch day {r0['day']}, the IST case. Reproduce: `{command}` (needs Exasol with the demo data).", "",
            "Matched means the same text, ignoring whitespace and a trailing semicolon; different means a statement at the "
            "same place whose text differs after the first 60 characters; missing means nothing in the audit log. Extra "
            "statements are in the audit log for the same session but not in the client's statement log.", ""]
-    out += block("Gate session: landing, detectors, CUBE, lineage, undo tests, write-back", rep["gate"])
-    out += block("Agent reads through the Exasol MCP server as AGENT_READER", rep.get("mcp"))
+    out += block("Gate session: landing, detectors, CUBE, lineage, undo tests, write-back", "gate",
+                 [("Case", lambda r: r["case"]), ("Verdict", lambda r: r["verdict"]), ("Seconds", lambda r: r["seconds"])])
+    out += block("Agent reads through the Exasol MCP server as AGENT_READER", "mcp", [])
     out += ["## Why there are extra statements", "",
             "None of the extras is a query Receipts or the agent sent that the client log hid. `COMMIT /* AUTO */` and "
             "`ROLLBACK /* AUTO */` are Exasol's own autocommit records. The timing markers (`SELECT CURRENT_STATEMENT`), "

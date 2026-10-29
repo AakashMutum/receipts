@@ -378,14 +378,21 @@ def cmd_audit_match(a):
         print("audit-match needs Exasol (RECEIPTS_BACKEND=exasol): the stand-in keeps no audit log.", file=sys.stderr)
         return 2
     from .auditmatch import run, to_markdown
-    rep = run(log=lambda m: print(m, flush=True))
+    reps = []
+    for n in range(a.runs):
+        rep = run(log=lambda m: print(m, flush=True))
+        reps.append(rep)
+        for k in ("gate", "mcp"):
+            if rep.get(k):
+                g = rep[k]
+                print(f"run {n + 1} {k}: issued {g['issued']}, matched {g['matched']}, different {g['different']}, "
+                      f"missing {g['missing']}, extra {g['extra']}", flush=True)
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.with_suffix(".json").write_text(json.dumps(rep, indent=2, default=str), encoding="utf-8")
-    out.write_text(to_markdown(rep, "receipts audit-match"), encoding="utf-8")
-    g = rep["gate"]
-    print(f"gate: issued {g['issued']}, matched {g['matched']}, different {g['different']}, missing {g['missing']}, "
-          f"extra {g['extra']}. Report: {out}")
+    out.with_suffix(".json").write_text(json.dumps({"runs": reps}, indent=2, default=str), encoding="utf-8")
+    cmd = "receipts audit-match" + (f" --runs {a.runs}" if a.runs > 1 else "")
+    out.write_text(to_markdown(reps, cmd), encoding="utf-8")
+    print(f"Report: {out}")
     return 0
 
 
@@ -703,6 +710,7 @@ def main(argv=None):
     cn.set_defaults(fn=cmd_connect)
     am = sub.add_parser("audit-match", help="match every statement of one run against Exasol's audit log (Exasol only)")
     am.add_argument("--out", default=str(ROOT / "docs" / "AUDIT_MATCH.md"), help="report path (JSON next to it)")
+    am.add_argument("--runs", type=int, default=1, help="full runs to match, each in a new session (default 1)")
     am.set_defaults(fn=cmd_audit_match)
     bl = sub.add_parser("blindtest", help="plant a fault you choose, let the gate judge it, log the result (lab only)",
                         description="Lab mode and synthetic data only. Without --fault a short prompt asks for the "

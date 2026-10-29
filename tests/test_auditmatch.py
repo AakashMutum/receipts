@@ -34,6 +34,15 @@ def test_report_has_no_em_dashes():
     assert "| 1 | 1 | 0 | 0 | 0 |" in md and chr(0x2014) not in md
 
 
+def test_report_has_one_row_per_run_and_names_a_difference():
+    a = auditmatch.match(["SELECT 1"], ["SELECT 1"])
+    b = auditmatch.match(["SELECT 1", "SELECT 2"], ["SELECT 1"])
+    rep = lambda m, c: {"exasol": "x", "day": "d", "case": c, "verdict": "v", "seconds": 1, "gate": m, "mcp": None}
+    md = auditmatch.to_markdown([rep(a, "c1"), rep(b, "c2")], "receipts audit-match --runs 2")
+    assert "| 1 | c1 | v | 1 | 1 | 1 | 0 | 0 | 0 |" in md and "| 2 | c2 | v | 1 | 2 | 1 | 0 | 1 | 0 |" in md
+    assert "Not matched exactly in run 2" in md and "2 full runs" in md
+
+
 def test_refused_on_the_stand_in(monkeypatch, capsys):
     monkeypatch.setenv("RECEIPTS_BACKEND", "duckdb")
     try:
