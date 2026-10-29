@@ -252,5 +252,6 @@ is never cached. `/badge/<metric>.svg` selects a metric by name; an unknown name
 |---|---|
 | Command center says "Database not ready" | Run `make init` (or `make exasol-init`) first |
 | `receipts doctor` says the UDF is unavailable | `exasol slc install python3`, then `make exasol-init` again. Until then the clock check runs the same UDF source on the client and the receipt says so |
+| Loading into Exasol fails at once with error 42636 (ETL-5105, "Failed to connect to 127.0.0.1 port ...") | Exasol pulls the files back from the client over HTTP, and a proxy inherited from the shell that started Podman sends that through an address that does not exist inside the container. Check with `podman inspect <container> --format "{{.Config.Env}}"` and `podman machine ssh "env | grep -i proxy"`. If `HTTP_PROXY` or `HTTPS_PROXY` is set, remove it from the VM (`/etc/profile.d`, `/etc/environment.d` and `/etc/systemd/*.conf.d` hold it), then from a normal PowerShell window with no proxy variables set run `exasol stop`, `wsl --shutdown`, `podman machine start` and `exasol start` |
 | DuckDB "could not set lock" | Stop the running `receipts serve` before running CLI commands against the same stand-in file |
 | Fonts look plain | The page loads Archivo and IBM Plex Mono from Google Fonts and falls back to system fonts offline |
