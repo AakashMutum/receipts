@@ -10,13 +10,16 @@ A metric is a daily view in the database plus the raw tables behind it. The conf
   weekday_baseline  auto (use a weekly pattern when the history shows one), on, or off
   publish           true only for the metric the gate writes to PUB; others are judged and reported
 
-`receipts connect --check` validates the file against the database. Pointing the gate at a new metric is an
+Names are checked when the file is loaded: every name must be a plain SQL identifier (letters, digits and
+underscores, not starting with a digit, at most 128 characters, not a reserved word), because the gate writes them
+into SQL. `receipts connect --check` validates the file against the database. Pointing the gate at a new metric is an
 edit to this file, not to the code. What is not covered: the six detectors are written for the payments layout
 of the sample pipeline, and the slice breakdown runs on revenue.
 """
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -25,6 +28,12 @@ from .config import ROOT
 CONFIG = ROOT / "receipts.yaml"
 NUMERIC = ("DOUBLE", "DECIMAL", "INTEGER", "BIGINT", "HUGEINT", "FLOAT", "REAL", "NUMERIC", "SMALLINT", "TINYINT")
 DATEISH = ("DATE", "TIMESTAMP")
+IDENT = re.compile(r"[A-Z_][A-Z0-9_]{0,127}")
+# reserved in Exasol and in DuckDB alike; an unquoted reserved word cannot be a table or column name
+RESERVED = frozenset("""ALL ALTER AND ANY AS ASC BETWEEN BY CASE CAST CHECK COLUMN CONSTRAINT CREATE CROSS CURRENT_DATE
+    CURRENT_TIMESTAMP CURRENT_USER DATE DEFAULT DELETE DESC DISTINCT DROP ELSE END EXCEPT EXISTS FALSE FOR FOREIGN FROM
+    FULL GRANT GROUP HAVING IN INNER INSERT INTERSECT INTO IS JOIN LEFT LIKE LIMIT NOT NULL ON OR ORDER OUTER PRIMARY
+    REFERENCES RIGHT SELECT SET TABLE THEN TO TRUE UNION UNIQUE UPDATE USER USING VALUES VIEW WHEN WHERE WITH""".split())
 
 
 @dataclass(frozen=True)
@@ -80,6 +89,7 @@ def load(path: Path | str | None = None) -> list[Metric]:
         missing = [k for k in ("name", "view", "value_column") if not m.get(k)]
         if missing:
             raise ConfigError(f"metric {i} ({m.get('name', 'unnamed')}) is missing: {', '.join(missing)}.")
+        _check_names(m, p.name)
         wb = str(m.get("weekday_baseline", "auto")).lower()
         wb = {"true": "on", "false": "off"}.get(wb, wb)
         if wb not in ("auto", "on", "off"):
@@ -99,6 +109,24 @@ def load(path: Path | str | None = None) -> list[Metric]:
     if any(m.publish and m.name != DEFAULT.name for m in out):
         raise ConfigError(f"publish: true is supported for {DEFAULT.name} only; other metrics are judged and reported.")
     return out
+
+
+def _check_names(m: dict, file: str) -> None:
+    """Every name that reaches SQL is a plain identifier, or the file is rejected before anything runs."""
+    name = str(m["name"])
+    if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,127}", name):
+        raise ConfigError(f"metric name {name[:60]!r} in {file}: use letters, digits and underscores only.")
+    fields = [("view", m["view"], 2), ("value_column", m["value_column"], 1), ("day_column", m.get("day_column"), 1),
+              ("amount", m.get("amount"), 3), ("id", m.get("id"), 3), ("time", m.get("time"), 3)]
+    fields += [("raw_tables", t, 2) for t in (m.get("raw_tables") or [])]
+    for key, value, most in fields:
+        if value is None or value == "":
+            continue
+        parts = str(value).upper().split(".")
+        bad = len(parts) > most or any(not IDENT.fullmatch(x) or x in RESERVED for x in parts)
+        if bad:
+            raise ConfigError(f"metric {name}: {key} {str(value)[:60]!r} is not a plain name. Use SCHEMA.NAME with "
+                              "letters, digits and underscores, at most 128 characters each, and no reserved words.")
 
 
 def _columns(be, table: str) -> dict[str, str] | None:

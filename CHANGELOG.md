@@ -25,6 +25,7 @@ re-run gave the same verdicts and causes as the committed reports.
 
 ### Fixed
 
+* Names in `receipts.yaml` are now checked when the file is loaded: each must be a plain SQL identifier (letters, digits and underscores, at most 128 characters, not a reserved word). Before, any text was accepted and written straight into SQL, so a crafted name could have added its own statement. Tests: `tests/test_metric_names.py` (20 hostile names, and `connect --check` refusing a hostile file before connecting).
 * `receipts audit-match` picked up `AGENT_READER` sessions from `receipts doctor` and from earlier runs; it now matches only this run's agent session. The incoming-day read is now in the client log.
 
 ## 1.0.0 (2026-10-28)
