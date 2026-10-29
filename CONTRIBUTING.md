@@ -14,6 +14,25 @@ python -m pytest -q                # every scenario on the stand-in and on the E
 receipts judge-check               # the headline claims on fresh data
 ```
 
+What the suite contains besides the scenario tests:
+
+* `tests/test_properties.py`: property-based tests with [Hypothesis](https://hypothesis.readthedocs.io). Each example plants a generated fault (class, share, gateway) and checks rules that hold for any fault, for example that a held number never reaches the trusted value agents read. Examples are fixed (`derandomize=True`, 30 of them) so every run and every system sees the same cases.
+* `tests/test_failure_injection.py`: the database raises in the undo test, the lineage read and each write-back statement; the test checks what is left behind and that the next run works.
+* `tests/test_metric_names.py`: hostile names in `receipts.yaml` are rejected before any SQL runs.
+
+Run one file with `python -m pytest -q tests/test_properties.py`. CI also runs these two:
+
+```bash
+ruff check .                                   # syntax errors and unused imports only, no formatting rules
+python -m pytest -q --cov=receipts             # coverage of the receipts package
+```
+
+Against a running Exasol with the demo data (`receipts init` first):
+
+```bash
+RECEIPTS_LIVE_EXASOL=1 python -m pytest -q tests/test_exasol_live.py tests/test_failure_injection.py
+```
+
 Changes to SQL or the UDF should also be checked on Exasol Personal: set `RECEIPTS_BACKEND=exasol` and the `EXA_*` variables, then run `receipts init`, `receipts doctor` and `receipts run ist_utc` (see [docs/RUN_GUIDE.md](docs/RUN_GUIDE.md)).
 
 ## Add a detector
