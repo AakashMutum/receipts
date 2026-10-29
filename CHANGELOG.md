@@ -11,6 +11,7 @@ re-run gave the same verdicts and causes as the committed reports.
 * [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md): Exasol and the stand-in measured the same way on the same day with [`scripts/bench_exasol.py`](scripts/bench_exasol.py) and [`scripts/bench_standin.py`](scripts/bench_standin.py); IST case warm median 3.23 s on Exasol (2.16 s measured by Exasol) and 0.65 s on the stand-in.
 * [`docs/WHY_EXASOL.md`](docs/WHY_EXASOL.md): what Exasol does here, measured, and the same-gate comparison with the stand-in on the real-data backtest and the 50-run evaluation.
 * A code of conduct, linked from the contributing guide, and one sentence near the top of the README on what one bad feed touches (4 views read the bad number, 3 were protected).
+* Property-based tests with Hypothesis (`tests/test_properties.py`): for 30 generated faults (class, share, gateway) and every scenario, the verdict and trust status stay in their fixed sets and match, a published number is inside the normal range unless published as a real change, a proven correction lands in the range and is never further from the clean value than the number it corrects, the same batch gives the same verdict twice, and a held number never reaches `PUB.METRIC_TRUST.TRUSTED_VALUE`.
 
 ### Changed
 
