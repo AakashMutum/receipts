@@ -2,35 +2,28 @@
 
 ## 1.0.2 (2026-10-29)
 
+Everything since 1.0.0. Version 1.0.1 was never tagged; its changes are listed here. No threshold changed, and every
+re-run gave the same verdicts and causes as the committed reports.
+
 ### Added
 
-* [`docs/AUDIT_MATCH.md`](docs/AUDIT_MATCH.md) and its JSON, from `receipts audit-match` on live Exasol: 57 of 57 gate statements and 3 of 3 agent reads through the Exasol MCP server matched, none different or missing.
+* `receipts audit-match`: lands the IST case, runs the gate with write-back and the agent's reads through the Exasol MCP server, then matches every statement against `EXA_DBA_AUDIT_SQL` (issued, matched, different, missing, extra). `--runs N` repeats it in new sessions and writes one table row per run. On live Exasol, one run: 57 of 57 gate statements and 3 of 3 agent reads matched, none different or missing ([`docs/AUDIT_MATCH.md`](docs/AUDIT_MATCH.md)).
+* [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md): Exasol and the stand-in measured the same way on the same day with [`scripts/bench_exasol.py`](scripts/bench_exasol.py) and [`scripts/bench_standin.py`](scripts/bench_standin.py); IST case warm median 3.23 s on Exasol (2.16 s measured by Exasol) and 0.65 s on the stand-in.
+* [`docs/WHY_EXASOL.md`](docs/WHY_EXASOL.md): what Exasol does here, measured, and the same-gate comparison with the stand-in on the real-data backtest and the 50-run evaluation.
+* A code of conduct, linked from the contributing guide, and one sentence near the top of the README on what one bad feed touches (4 views read the bad number, 3 were protected).
 
 ### Changed
 
-* The 50-run scored evaluation re-run on Exasol (29 Oct): 50 of 50 again, every verdict, cause and wrong-fix count the same as the committed run; gate latency median 4,535 ms to 2,969 ms and max 13,204 ms to 5,546 ms ([`samples/exasol/eval_report.md`](samples/exasol/eval_report.md)). The red team (seed 11) and the wrong-fix control (5 seeds) re-run on Exasol give the same floors, holes, combinations and 235 / 225 / 10 wrong fixes as the committed reports; only the timings changed. `samples/eval_report.md` was an Exasol run from 21 Oct; it is now the same evaluation on the DuckDB stand-in, which gives the same verdicts and causes on all 50 runs.
-
-* The scaling run re-run on Exasol after the unit tail check (29 Oct): the right verdict at every size; at 400,000 orders a day (17,346,085 payment rows) the gate took 15.8 s (was 27.5 s), 15.1 s measured by Exasol (was 26.3 s), CUBE 2.7 s (was 5.9 s), peak temporary memory 344 MiB (was 353 MiB) ([`samples/exasol/scaling.md`](samples/exasol/scaling.md)).
-* [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) now compares Exasol and the stand-in measured the same way on the same day, with [`scripts/bench_exasol.py`](scripts/bench_exasol.py) next to the stand-in script: IST case warm median 3.23 s on Exasol (2.16 s measured by Exasol) and 0.65 s on the stand-in. [`docs/WHY_EXASOL.md`](docs/WHY_EXASOL.md) uses these numbers and adds the 50-run comparison.
+* Re-runs on Exasol on 29 Oct. The 50-run scored evaluation: 50 of 50, every verdict, cause and wrong-fix count the same; gate latency median 4,535 ms to 2,969 ms, max 13,204 ms to 5,546 ms. The red team (seed 11) and the wrong-fix control (5 seeds): the same floors, holes, combinations and 235 / 225 / 10 wrong fixes; only the timings changed.
+* The scaling run, re-run after the unit tail check: the right verdict at every size; at 400,000 orders a day (17,346,085 payment rows) the gate took 15.8 s (was 27.5 s), 15.1 s measured by Exasol (was 26.3 s), CUBE 2.7 s (was 5.9 s), peak temporary memory 344 MiB (was 353 MiB).
+* `samples/eval_report.md` was an Exasol run from 21 Oct; it is now the same evaluation on the DuckDB stand-in, which gives the same verdicts and causes on all 50 runs.
+* The backtest reports and the festival case file were regenerated from their saved JSON and now say "real change, no fault found".
+* The run guide: Windows commands in the quick start, and a troubleshooting entry for bulk loads that fail at once because Podman inherited a proxy.
+* The pitch deck, with the 29 Oct numbers.
 
 ### Fixed
 
 * `receipts audit-match` picked up `AGENT_READER` sessions from `receipts doctor` and from earlier runs; it now matches only this run's agent session. The incoming-day read is now in the client log.
-
-## 1.0.1 (2026-10-28)
-
-No verdict, threshold or reported result changed.
-
-### Added
-
-* `receipts audit-match`: lands the IST case, runs the gate with write-back and the agent's reads through the Exasol MCP server, then matches every statement against `EXA_DBA_AUDIT_SQL` (issued, matched, different, missing, extra). Covered by tests; not yet run on live Exasol (see 1.0.2).
-* [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) with cold and warm runs on the stand-in ([`scripts/bench_standin.py`](scripts/bench_standin.py)) next to the recorded Exasol timings, and [`docs/WHY_EXASOL.md`](docs/WHY_EXASOL.md) with what Exasol does here, measured.
-* A code of conduct, and one sentence near the top of the README on what one bad feed touches (4 views read the bad number, 3 were protected).
-* Windows steps in the run guide's "Without Exasol" section.
-
-### Changed
-
-* The backtest reports and the festival case file were regenerated from their saved JSON and now say "real change, no fault found".
 
 ## 1.0.0 (2026-10-28)
 
