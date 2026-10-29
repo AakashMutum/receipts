@@ -13,6 +13,7 @@ re-run gave the same verdicts and causes as the committed reports.
 * A code of conduct, linked from the contributing guide, and one sentence near the top of the README on what one bad feed touches (4 views read the bad number, 3 were protected).
 * Property-based tests with Hypothesis (`tests/test_properties.py`): for 30 generated faults (class, share, gateway) and every scenario, the verdict and trust status stay in their fixed sets and match, a published number is inside the normal range unless published as a real change, a proven correction lands in the range and is never further from the clean value than the number it corrects, the same batch gives the same verdict twice, and a held number never reaches `PUB.METRIC_TRUST.TRUSTED_VALUE`.
 * Failure-injection tests (`tests/test_failure_injection.py`): the database raises in the undo test, in the lineage read and at each of the five write-back statements; afterwards no trusted value is left for the day, every published row points at an existing case, no stray schema is left, and the next run on the same batch gives the right verdict. On the stand-in, and on Exasol with `RECEIPTS_LIVE_EXASOL=1`.
+* CI runs `ruff check .` (syntax errors and pyflakes only, no formatting rules) on every system, and on Ubuntu a coverage report of the `receipts` package in the job summary. Five unused imports and two f-strings without placeholders were removed.
 
 ### Changed
 

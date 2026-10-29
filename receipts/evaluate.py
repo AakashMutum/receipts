@@ -17,7 +17,6 @@ import json
 import tempfile
 import time
 from dataclasses import replace
-from datetime import date
 from pathlib import Path
 
 from . import wrongfix
@@ -120,7 +119,7 @@ def to_markdown(rep: dict) -> str:
     s = rep["systems"]
     rows = [("Receipts", s["receipts"]), ("Detectors only (ablation, no undo test)", s["detectors_only"]),
             ("Threshold alert (typical monitor)", s["threshold_alert"])]
-    out = [f"# Receipts evaluation", "",
+    out = ["# Receipts evaluation", "",
            f"{rep['runs']} runs: {rep['scenarios']} scenarios x {len(rep['seeds'])} seeds "
            f"({rep['orders_per_day']:,} orders a day, {rep['history_days']} days of history, backend {rep['backend']}). "
            f"Generated {rep['generated_at']}.", "",

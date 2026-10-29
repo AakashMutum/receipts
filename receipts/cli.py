@@ -149,7 +149,7 @@ def cmd_judge_check(a):
 def cmd_sample(a):
     """Run the demo scenarios and save the unedited case files."""
     from . import gate
-    from .faults import DEMO_ORDER, SCENARIOS
+    from .faults import DEMO_ORDER
     from .load import incoming_day, ingest
     be = _be()
     _synthetic_or_exit(be)
@@ -167,7 +167,6 @@ def cmd_sample(a):
 
 def cmd_export_sql(a):
     """Render every statement for Exasol into sql/exasol so it can be read and run by hand."""
-    from datetime import date
     from .decompose import sql_for
     from .dialect import Dialect
     from .faults import SCENARIOS

@@ -1,4 +1,3 @@
-import re
 from datetime import date
 from pathlib import Path
 

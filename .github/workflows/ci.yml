@@ -13,7 +13,18 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e ".[dev]"
-      - run: python -m pytest -q
+      - name: lint (syntax errors and pyflakes only)
+        run: ruff check .
+      - name: tests
+        if: runner.os != 'Linux'
+        run: python -m pytest -q
+      - name: tests with coverage
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          python -m pytest -q --cov=receipts --cov-report=term
+          echo "### Test coverage of the receipts package" >> "$GITHUB_STEP_SUMMARY"
+          python -m coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
       - run: receipts judge-check
       # The one-click scripts: syntax, then a real run of their setup steps (Python, .venv, install) with --check,
       # which stops before the server starts. Not run on Windows (run.bat is checked by tests/test_scripts.py only).

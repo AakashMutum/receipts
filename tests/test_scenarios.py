@@ -32,7 +32,7 @@ def test_held_value_not_trusted_for_agents(duck):
     r = duck.query(f"SELECT TRUST_STATUS, TRUSTED_VALUE FROM PUB.METRIC_TRUST WHERE TXN_DAY = DATE '{DAY}'")[0]
     assert r["trust_status"] == "HELD" and r["trusted_value"] is None
     d = duck.query(f"SELECT IS_HELD, SHOWN_VALUE FROM PUB.DASHBOARD_REVENUE WHERE TXN_DAY = DATE '{DAY}'")[0]
-    prev = duck.scalar(f"SELECT METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY = DATE '2026-10-19'")
+    prev = duck.scalar("SELECT METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY = DATE '2026-10-19'")
     assert d["is_held"] and d["shown_value"] == pytest.approx(prev)
 
 
