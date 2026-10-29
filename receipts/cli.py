@@ -120,8 +120,9 @@ def cmd_eval(a):
 def cmd_judge_check(a):
     """No API key, no Exasol needed. Builds, evaluates and asserts the headline claims."""
     from .evaluate import evaluate
-    print("Receipts judge check: fresh synthetic data, every scenario, scored against ground truth.\n")
-    rep = evaluate(seeds=(11, 22), orders_per_day=12000, backend="duckdb", wrong_fix=False)
+    where = "" if a.backend == "duckdb" else " on Exasol (the database at EXA_DSN is rebuilt for each seed)"
+    print(f"Receipts judge check{where}: fresh synthetic data, every scenario, scored against ground truth.\n")
+    rep = evaluate(seeds=(11, 22), orders_per_day=12000, backend=a.backend, wrong_fix=False)
     s = rep["systems"]
     checks = [
         ("Every faulty batch held, every good batch published", s["receipts"]["hold_decision_accuracy"] == 1.0),
@@ -627,6 +628,8 @@ def main(argv=None):
     e.add_argument("--out", default=str(ROOT / "samples"))
     e.set_defaults(fn=cmd_eval)
     j = sub.add_parser("judge-check", help="reproduce the headline claims, no key or Exasol needed")
+    j.add_argument("--backend", choices=["duckdb", "exasol"], default="duckdb",
+                   help="exasol runs the same checks on the database at EXA_DSN, rebuilding it for each seed")
     j.set_defaults(fn=cmd_judge_check)
     s = sub.add_parser("sample", help="save unedited case files for every demo scenario")
     s.add_argument("--out", default=str(ROOT / "samples" / "cases"))

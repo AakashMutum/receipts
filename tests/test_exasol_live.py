@@ -1,4 +1,4 @@
-"""Checks against a real Exasol database. Skipped unless RECEIPTS_LIVE_EXASOL=1 (CI has no Exasol).
+"""Checks against a real Exasol database. Skipped unless RECEIPTS_LIVE_EXASOL=1 (the `exasol` CI job sets it).
 
     RECEIPTS_LIVE_EXASOL=1 EXA_DSN=127.0.0.1:8563 pytest -q tests/test_exasol_live.py
 
