@@ -1,24 +1,28 @@
 # Audit-log match
 
-Every statement Receipts sent in one full run, matched against `EXA_DBA_AUDIT_SQL` on Exasol 2026.2.0-nano.3. Batch day 2026-10-28, case RC-20261028-A0990F, verdict PROVEN_FAULT, 22.9 s. Reproduce: `receipts audit-match` (needs Exasol with the demo data).
+Every statement Receipts sent in 3 full runs, each a new session that lands the batch again, matched against `EXA_DBA_AUDIT_SQL` on Exasol 2026.2.0-nano.3. Batch day 2026-10-28, the IST case. Reproduce: `receipts audit-match --runs 3` (needs Exasol with the demo data).
 
 Matched means the same text, ignoring whitespace and a trailing semicolon; different means a statement at the same place whose text differs after the first 60 characters; missing means nothing in the audit log. Extra statements are in the audit log for the same session but not in the client's statement log.
 
 ## Gate session: landing, detectors, CUBE, lineage, undo tests, write-back
 
-| Issued | Matched | Different | Missing | Extra in the audit log |
-|---|---|---|---|---|
-| 57 | 57 | 0 | 0 | 83 |
+| Run | Case | Verdict | Seconds | Issued | Matched | Different | Missing | Extra in the audit log |
+|---|---|---|---|---|---|---|---|---|
+| 1 | RC-20261028-4681AD | PROVEN_FAULT | 26.3 | 57 | 57 | 0 | 0 | 83 |
+| 2 | RC-20261028-E7D10D | PROVEN_FAULT | 22.9 | 57 | 57 | 0 | 0 | 83 |
+| 3 | RC-20261028-136961 | PROVEN_FAULT | 20.9 | 57 | 57 | 0 | 0 | 83 |
 
-Extra statements in the audit log, by kind: FLUSH STATISTICS 2, commit (other) 70, session id read 1, statistics or audit read 1, timing marker (SELECT CURRENT_STATEMENT) 9.
+Extra statements in the audit log, by kind, the same in every run: FLUSH STATISTICS 2, commit (other) 70, session id read 1, statistics or audit read 1, timing marker (SELECT CURRENT_STATEMENT) 9.
 
 ## Agent reads through the Exasol MCP server as AGENT_READER
 
-| Issued | Matched | Different | Missing | Extra in the audit log |
-|---|---|---|---|---|
-| 3 | 3 | 0 | 0 | 4 |
+| Run | Issued | Matched | Different | Missing | Extra in the audit log |
+|---|---|---|---|---|---|
+| 1 | 3 | 3 | 0 | 0 | 4 |
+| 2 | 3 | 3 | 0 | 0 | 4 |
+| 3 | 3 | 3 | 0 | 0 | 4 |
 
-Extra statements in the audit log, by kind: commit (other) 3, rollback (other) 1.
+Extra statements in the audit log, by kind, the same in every run: commit (other) 3, rollback (other) 1.
 
 ## Why there are extra statements
 

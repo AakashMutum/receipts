@@ -7,7 +7,7 @@ re-run gave the same verdicts and causes as the committed reports.
 
 ### Added
 
-* `receipts audit-match`: lands the IST case, runs the gate with write-back and the agent's reads through the Exasol MCP server, then matches every statement against `EXA_DBA_AUDIT_SQL` (issued, matched, different, missing, extra). `--runs N` repeats it in new sessions and writes one table row per run. On live Exasol, one run: 57 of 57 gate statements and 3 of 3 agent reads matched, none different or missing ([`docs/AUDIT_MATCH.md`](docs/AUDIT_MATCH.md)).
+* `receipts audit-match`: lands the IST case, runs the gate with write-back and the agent's reads through the Exasol MCP server, then matches every statement against `EXA_DBA_AUDIT_SQL` (issued, matched, different, missing, extra). `--runs N` repeats it in new sessions and writes one table row per run. On live Exasol, three runs in new sessions: 57 of 57 gate statements and 3 of 3 agent reads matched in every run, none different or missing ([`docs/AUDIT_MATCH.md`](docs/AUDIT_MATCH.md)).
 * [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md): Exasol and the stand-in measured the same way on the same day with [`scripts/bench_exasol.py`](scripts/bench_exasol.py) and [`scripts/bench_standin.py`](scripts/bench_standin.py); IST case warm median 3.23 s on Exasol (2.16 s measured by Exasol) and 0.65 s on the stand-in.
 * [`docs/WHY_EXASOL.md`](docs/WHY_EXASOL.md): what Exasol does here, measured, and the same-gate comparison with the stand-in on the real-data backtest and the 50-run evaluation.
 * A code of conduct, linked from the contributing guide, and one sentence near the top of the README on what one bad feed touches (4 views read the bad number, 3 were protected).

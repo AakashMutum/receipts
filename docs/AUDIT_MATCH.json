@@ -1,372 +1,1120 @@
 {
-  "exasol": "2026.2.0-nano.3",
-  "day": "2026-10-28",
-  "case": "RC-20261028-A0990F",
-  "verdict": "PROVEN_FAULT",
-  "seconds": 22.9,
-  "gate": {
-    "issued": 57,
-    "matched": 57,
-    "different": 0,
-    "missing": 0,
-    "extra": 83,
-    "rows": [
-      {
-        "sql": "SELECT MAX(BATCH_DAY) FROM LANDING.ORDERS",
-        "result": "matched"
+  "runs": [
+    {
+      "exasol": "2026.2.0-nano.3",
+      "day": "2026-10-28",
+      "case": "RC-20261028-4681AD",
+      "verdict": "PROVEN_FAULT",
+      "seconds": 26.3,
+      "gate": {
+        "issued": 57,
+        "matched": 57,
+        "different": 0,
+        "missing": 0,
+        "extra": 83,
+        "rows": [
+          {
+            "sql": "SELECT MAX(BATCH_DAY) FROM LANDING.ORDERS",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.ORDERS WHERE BATCH_DAY >= DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.PAYMENTS WHERE BATCH_DAY >= DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.MERCHANTS",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.MERCHANTS SELECT * FROM LANDING.MERCHANTS",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.CATEGORY_MAP",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.CATEGORY_MAP SELECT * FROM LANDING.CATEGORY_MAP",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.FX_RATES",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.FX_RATES SELECT * FROM LANDING.FX_RATES",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY >= DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.ORDERS SELECT * FROM LANDING.ORDERS WHERE BATCH_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.PAYMENTS SELECT * FROM LANDING.PAYMENTS WHERE BATCH_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "UPDATE RAW.PAYMENTS SET CAPTURED_AT = ADD_MINUTES(CAPTURED_AT, 330) WHERE BATCH_DAY = DATE '2026-10-28' AND GATEWAY = 'GW_B'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY, METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY < DATE '2026-10-28' AND TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -14) AND TRUST_STATUS IN ('TRUSTED', 'REAL_CHANGE', 'CORRECTE",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY, REVENUE_INR, TXN_COUNT FROM PIPE.DAILY_REVENUE WHERE TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -14) ORDER BY TXN_DAY",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY, METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY < DATE '2026-10-28' AND TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -35) AND TRUST_STATUS IN ('TRUSTED', 'REAL_CHANGE', 'CORRECTE",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT RECEIPTS.CLOCK_DRIFT('probe', TRUE, 1, 1.0) FROM DUAL",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT p.GATEWAY, p.CURRENCY_CODE,\n  MEDIAN(CASE WHEN p.BATCH_DAY = DATE '2026-10-28' THEN p.AMOUNT END) AS MED_TODAY,\n  MEDIAN(CASE WHEN p.BATCH_DAY < DATE '2026-10-28' THEN p.AMOUNT END) AS MED_BASE",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT t.GATEWAY, t.CURRENCY_CODE, b.MED_BASE,\n  SUM(CASE WHEN t.BATCH_DAY = DATE '2026-10-28' THEN 1 ELSE 0 END) AS N_TODAY,\n  SUM(CASE WHEN t.BATCH_DAY = DATE '2026-10-28' AND t.AMOUNT > 20 * b.MED_",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT x.IS_TODAY, COUNT(*) AS DUP_KEYS, SUM(x.N - 1) AS EXTRA_ROWS\nFROM (\n  SELECT p.PAYMENT_ID, CASE WHEN p.BATCH_DAY = DATE '2026-10-28' THEN 1 ELSE 0 END AS IS_TODAY, COUNT(*) AS N\n  FROM RAW.PAYM",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT 'RAW.MERCHANTS' AS TABLE_NAME, 'MERCHANT_ID' AS KEY_COLUMN, COUNT(*) AS DUP_KEYS, COALESCE(SUM(x.N), 0) AS DIM_ROWS FROM (SELECT MERCHANT_ID, COUNT(*) AS N FROM RAW.MERCHANTS GROUP BY MERCHANT_",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT p.CURRENCY_CODE, COUNT(*) AS PAYMENTS_TODAY, MAX(f.LAST_RATE_DAY) AS LAST_RATE_DAY\nFROM RAW.PAYMENTS p\nLEFT JOIN (SELECT CURRENCY_CODE, MAX(RATE_DAY) AS LAST_RATE_DAY FROM RAW.FX_RATES GROUP BY",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT RECEIPTS.CLOCK_DRIFT(a.SLICE_KEY, a.IS_TODAY, a.BIN_IDX, a.CNT)\nFROM (\nSELECT x.SLICE_KEY, x.IS_TODAY, x.BIN_IDX, CAST(COUNT(*) AS DOUBLE) AS CNT\nFROM (\n  SELECT p.GATEWAY AS SLICE_KEY,\n    CAS",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT o.CATEGORY_CODE, COUNT(*) AS ORDERS_TODAY\nFROM RAW.ORDERS o\nLEFT JOIN RAW.CATEGORY_MAP m ON m.CATEGORY_CODE = o.CATEGORY_CODE\nWHERE o.BATCH_DAY = DATE '2026-10-28' AND m.CATEGORY_CODE IS NULL\nG",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'PIPE'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'PIPE'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'PUB'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'MART'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT\n  GROUPING_ID(CITY, CATEGORY_NAME, CHANNEL, GATEWAY, CURRENCY_CODE, TIER) AS GID,\nf.CITY,\nf.CATEGORY_NAME,\nf.CHANNEL,\nf.GATEWAY,\nf.CURRENCY_CODE,\nf.TIER,\nSUM(CASE WHEN f.TXN_DAY = DATE '2026-10",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT r.BATCH_DAY, r.RAW_PAYMENTS, d.TXN_COUNT\nFROM (SELECT BATCH_DAY, COUNT(DISTINCT PAYMENT_ID) AS RAW_PAYMENTS FROM RAW.PAYMENTS\n      WHERE PAY_STATUS = 'CAPTURED' AND BATCH_DAY >= ADD_DAYS(DATE ",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY, TXN_COUNT FROM PIPE.DAILY_REVENUE WHERE TXN_DAY < DATE '2026-10-28' AND TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -35) ORDER BY TXN_DAY",
+            "result": "matched"
+          },
+          {
+            "sql": "DROP SCHEMA IF EXISTS RECEIPTS_SBX CASCADE",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE SCHEMA RECEIPTS_SBX",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.FIX_PAYMENTS_1 AS\nSELECT\n  PAYMENT_ID,\n  ORDER_ID,\n  BATCH_DAY,\n  LOAD_FILE,\n  GATEWAY,\n  CURRENCY_CODE,\n  AMOUNT,\n  PAY_STATUS,\n  CASE WHEN BATCH_DAY = DATE '2026-",
+            "result": "matched"
+          },
+          {
+            "sql": "-- The revenue pipeline. Six views between the raw sources and the number on the\n-- finance dashboard. Rendered into PIPE for production and into sandbox schemas\n-- for undo tests, where one source at",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.STG_ORDERS AS\nSELECT\n  o.ORDER_ID,\n  o.MERCHANT_ID,\n  o.CITY,\n  o.CATEGORY_CODE,\n  o.CHANNEL\nFROM RAW.ORDERS o",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.DIM_MERCHANT AS\nSELECT\n  m.MERCHANT_ID,\n  m.MERCHANT_NAME,\n  m.TIER\nFROM RAW.MERCHANTS m",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.DIM_CATEGORY AS\nSELECT\n  c.CATEGORY_CODE,\n  c.CATEGORY_NAME\nFROM RAW.CATEGORY_MAP c",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.FX_DAILY AS\nSELECT\n  f.RATE_DAY,\n  f.CURRENCY_CODE,\n  f.INR_PER_UNIT\nFROM RAW.FX_RATES f",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.FCT_REVENUE AS\nSELECT\n  s.TXN_DAY,\n  s.PAYMENT_ID,\n  s.ORDER_ID,\n  o.CITY,\n  c.CATEGORY_NAME,\n  o.CHANNEL,\n  s.GATEWAY,\n  s.CURRENCY_CODE,\n  m.TIER,\n  s.AMOUNT * CO",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.DAILY_REVENUE AS\nSELECT\n  r.TXN_DAY,\n  SUM(r.REVENUE_INR) AS REVENUE_INR,\n  COUNT(*) AS TXN_COUNT\nFROM RECEIPTS_SBX.FCT_REVENUE r\nGROUP BY r.TXN_DAY",
+            "result": "matched"
+          },
+          {
+            "sql": "-- A second metric over the same fact: paid orders per day and the average basket.\nCREATE OR REPLACE VIEW RECEIPTS_SBX.DAILY_ORDERS AS\nSELECT\n  r.TXN_DAY,\n  COUNT(DISTINCT r.ORDER_ID) AS ORDER_COUNT,\n",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY AS TXN_DAY, REVENUE_INR AS V FROM RECEIPTS_SBX.DAILY_REVENUE WHERE TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -14) AND TXN_DAY <= DATE '2026-10-28' ORDER BY TXN_DAY",
+            "result": "matched"
+          },
+          {
+            "sql": "FLUSH STATISTICS",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT s.USER_NAME, s.CLIENT, MIN(a.START_TIME) AS FIRST_READ, COUNT(*) AS READ_COUNT FROM EXA_DBA_AUDIT_SQL a JOIN EXA_DBA_AUDIT_SESSIONS s ON s.SESSION_ID = a.SESSION_ID WHERE a.COMMAND_NAME = 'SELE",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT PARAM_VALUE FROM SYS.EXA_METADATA WHERE PARAM_NAME = 'databaseProductVersion'",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.CASES VALUES ('RC-20261028-4681AD', 'daily_revenue_inr', DATE '2026-10-28',\n        CURRENT_TIMESTAMP, 'PROVEN_FAULT', 26872639.055014, 33237698.514879644,\n        32128818.395014",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-4681AD', 'unit_scale', FALSE,\n            'NOT_FIRED', 'RAW.PAYMENTS', 'AMOUNT', 'whole batch',\n            NULL, NULL, NULL, 'Median payment amount ",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-4681AD', 'duplicate_key', FALSE,\n            'NOT_FIRED', 'RAW.PAYMENTS', 'PAYMENT_ID', 'whole batch',\n            NULL, NULL, NULL, '100 repeated pa",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-4681AD', 'key_fanout', FALSE,\n            'NOT_FIRED', 'RAW.MERCHANTS', 'MERCHANT_ID', 'whole batch',\n            NULL, NULL, NULL, 'Every dimension ",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-4681AD', 'stale_feed', FALSE,\n            'NOT_FIRED', 'RAW.FX_RATES', 'RATE_DAY', 'whole batch',\n            NULL, NULL, NULL, 'Every foreign curren",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-4681AD', 'clock_shift', TRUE,\n            'CONFIRMED', 'RAW.PAYMENTS', 'CAPTURED_AT', 'gateway GW_B',\n            32128818.395014, 0.1955959490707066",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-4681AD', 'orphan_code', FALSE,\n            'NOT_FIRED', 'RAW.ORDERS', 'CATEGORY_CODE', 'whole batch',\n            NULL, NULL, NULL, 'Every category c",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.STEP_TIMINGS VALUES ('RC-20261028-4681AD', 'Read candidate and trusted history', 151.2, 36),\n('RC-20261028-4681AD', 'Run six detectors on the incoming batch', 640.8, NULL),\n('RC-2",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO PUB.DAILY_REVENUE_PUBLISHED VALUES (DATE '2026-10-28', 26872639.055014, 26872639.055014,\n        'HELD', 'RC-20261028-4681AD', CURRENT_TIMESTAMP)",
+            "result": "matched"
+          },
+          {
+            "sql": "UPDATE RECEIPTS.CASES SET CASE_JSON = '{\"case_id\": \"RC-20261028-4681AD\", \"metric\": \"daily_revenue_inr\", \"metric_label\": \"Daily revenue (INR)\", \"day\": \"2026-10-28\", \"day_label\": \"Wed 28 Oct 2026\", \"ope",
+            "result": "matched"
+          }
+        ],
+        "extra_statements": [
+          "SELECT CURRENT_SESSION FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "FLUSH STATISTICS",
+          "COMMIT /* AUTO */",
+          "SELECT STMT_ID, COMMAND_NAME, DURATION, CPU, TEMP_DB_RAM_PEAK, ROW_COUNT FROM EXA_STATISTICS.EXA_SQL_LAST_DAY WHERE SESSION_ID = CURRENT_SESSION AND STMT_ID > 29 AND STMT_ID < 131 ORDER BY STMT_ID",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "FLUSH STATISTICS",
+          "COMMIT /* AUTO */"
+        ],
+        "extra_kinds": {
+          "session id read": 1,
+          "commit (other)": 70,
+          "timing marker (SELECT CURRENT_STATEMENT)": 9,
+          "FLUSH STATISTICS": 2,
+          "statistics or audit read": 1
+        }
       },
-      {
-        "sql": "DELETE FROM RAW.ORDERS WHERE BATCH_DAY >= DATE '2026-10-28'",
-        "result": "matched"
-      },
-      {
-        "sql": "DELETE FROM RAW.PAYMENTS WHERE BATCH_DAY >= DATE '2026-10-28'",
-        "result": "matched"
-      },
-      {
-        "sql": "DELETE FROM RAW.MERCHANTS",
-        "result": "matched"
-      },
-      {
-        "sql": "INSERT INTO RAW.MERCHANTS SELECT * FROM LANDING.MERCHANTS",
-        "result": "matched"
-      },
-      {
-        "sql": "DELETE FROM RAW.CATEGORY_MAP",
-        "result": "matched"
-      },
-      {
-        "sql": "INSERT INTO RAW.CATEGORY_MAP SELECT * FROM LANDING.CATEGORY_MAP",
-        "result": "matched"
-      },
-      {
-        "sql": "DELETE FROM RAW.FX_RATES",
-        "result": "matched"
-      },
-      {
-        "sql": "INSERT INTO RAW.FX_RATES SELECT * FROM LANDING.FX_RATES",
-        "result": "matched"
-      },
-      {
-        "sql": "DELETE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY >= DATE '2026-10-28'",
-        "result": "matched"
-      },
-      {
-        "sql": "INSERT INTO RAW.ORDERS SELECT * FROM LANDING.ORDERS WHERE BATCH_DAY = DATE '2026-10-28'",
-        "result": "matched"
-      },
-      {
-        "sql": "INSERT INTO RAW.PAYMENTS SELECT * FROM LANDING.PAYMENTS WHERE BATCH_DAY = DATE '2026-10-28'",
-        "result": "matched"
-      },
-      {
-        "sql": "UPDATE RAW.PAYMENTS SET CAPTURED_AT = ADD_MINUTES(CAPTURED_AT, 330) WHERE BATCH_DAY = DATE '2026-10-28' AND GATEWAY = 'GW_B'",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT TXN_DAY, METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY < DATE '2026-10-28' AND TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -14) AND TRUST_STATUS IN ('TRUSTED', 'REAL_CHANGE', 'CORRECTE",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT TXN_DAY, REVENUE_INR, TXN_COUNT FROM PIPE.DAILY_REVENUE WHERE TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -14) ORDER BY TXN_DAY",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT TXN_DAY, METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY < DATE '2026-10-28' AND TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -35) AND TRUST_STATUS IN ('TRUSTED', 'REAL_CHANGE', 'CORRECTE",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT RECEIPTS.CLOCK_DRIFT('probe', TRUE, 1, 1.0) FROM DUAL",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT p.GATEWAY, p.CURRENCY_CODE,\n  MEDIAN(CASE WHEN p.BATCH_DAY = DATE '2026-10-28' THEN p.AMOUNT END) AS MED_TODAY,\n  MEDIAN(CASE WHEN p.BATCH_DAY < DATE '2026-10-28' THEN p.AMOUNT END) AS MED_BASE",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT t.GATEWAY, t.CURRENCY_CODE, b.MED_BASE,\n  SUM(CASE WHEN t.BATCH_DAY = DATE '2026-10-28' THEN 1 ELSE 0 END) AS N_TODAY,\n  SUM(CASE WHEN t.BATCH_DAY = DATE '2026-10-28' AND t.AMOUNT > 20 * b.MED_",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT x.IS_TODAY, COUNT(*) AS DUP_KEYS, SUM(x.N - 1) AS EXTRA_ROWS\nFROM (\n  SELECT p.PAYMENT_ID, CASE WHEN p.BATCH_DAY = DATE '2026-10-28' THEN 1 ELSE 0 END AS IS_TODAY, COUNT(*) AS N\n  FROM RAW.PAYM",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT 'RAW.MERCHANTS' AS TABLE_NAME, 'MERCHANT_ID' AS KEY_COLUMN, COUNT(*) AS DUP_KEYS, COALESCE(SUM(x.N), 0) AS DIM_ROWS FROM (SELECT MERCHANT_ID, COUNT(*) AS N FROM RAW.MERCHANTS GROUP BY MERCHANT_",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT p.CURRENCY_CODE, COUNT(*) AS PAYMENTS_TODAY, MAX(f.LAST_RATE_DAY) AS LAST_RATE_DAY\nFROM RAW.PAYMENTS p\nLEFT JOIN (SELECT CURRENCY_CODE, MAX(RATE_DAY) AS LAST_RATE_DAY FROM RAW.FX_RATES GROUP BY",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT RECEIPTS.CLOCK_DRIFT(a.SLICE_KEY, a.IS_TODAY, a.BIN_IDX, a.CNT)\nFROM (\nSELECT x.SLICE_KEY, x.IS_TODAY, x.BIN_IDX, CAST(COUNT(*) AS DOUBLE) AS CNT\nFROM (\n  SELECT p.GATEWAY AS SLICE_KEY,\n    CAS",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT o.CATEGORY_CODE, COUNT(*) AS ORDERS_TODAY\nFROM RAW.ORDERS o\nLEFT JOIN RAW.CATEGORY_MAP m ON m.CATEGORY_CODE = o.CATEGORY_CODE\nWHERE o.BATCH_DAY = DATE '2026-10-28' AND m.CATEGORY_CODE IS NULL\nG",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'PIPE'",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'PIPE'",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'PUB'",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'MART'",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT\n  GROUPING_ID(CITY, CATEGORY_NAME, CHANNEL, GATEWAY, CURRENCY_CODE, TIER) AS GID,\nf.CITY,\nf.CATEGORY_NAME,\nf.CHANNEL,\nf.GATEWAY,\nf.CURRENCY_CODE,\nf.TIER,\nSUM(CASE WHEN f.TXN_DAY = DATE '2026-10",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT r.BATCH_DAY, r.RAW_PAYMENTS, d.TXN_COUNT\nFROM (SELECT BATCH_DAY, COUNT(DISTINCT PAYMENT_ID) AS RAW_PAYMENTS FROM RAW.PAYMENTS\n      WHERE PAY_STATUS = 'CAPTURED' AND BATCH_DAY >= ADD_DAYS(DATE ",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT TXN_DAY, TXN_COUNT FROM PIPE.DAILY_REVENUE WHERE TXN_DAY < DATE '2026-10-28' AND TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -35) ORDER BY TXN_DAY",
-        "result": "matched"
-      },
-      {
-        "sql": "DROP SCHEMA IF EXISTS RECEIPTS_SBX CASCADE",
-        "result": "matched"
-      },
-      {
-        "sql": "CREATE SCHEMA RECEIPTS_SBX",
-        "result": "matched"
-      },
-      {
-        "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.FIX_PAYMENTS_1 AS\nSELECT\n  PAYMENT_ID,\n  ORDER_ID,\n  BATCH_DAY,\n  LOAD_FILE,\n  GATEWAY,\n  CURRENCY_CODE,\n  AMOUNT,\n  PAY_STATUS,\n  CASE WHEN BATCH_DAY = DATE '2026-",
-        "result": "matched"
-      },
-      {
-        "sql": "-- The revenue pipeline. Six views between the raw sources and the number on the\n-- finance dashboard. Rendered into PIPE for production and into sandbox schemas\n-- for undo tests, where one source at",
-        "result": "matched"
-      },
-      {
-        "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.STG_ORDERS AS\nSELECT\n  o.ORDER_ID,\n  o.MERCHANT_ID,\n  o.CITY,\n  o.CATEGORY_CODE,\n  o.CHANNEL\nFROM RAW.ORDERS o",
-        "result": "matched"
-      },
-      {
-        "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.DIM_MERCHANT AS\nSELECT\n  m.MERCHANT_ID,\n  m.MERCHANT_NAME,\n  m.TIER\nFROM RAW.MERCHANTS m",
-        "result": "matched"
-      },
-      {
-        "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.DIM_CATEGORY AS\nSELECT\n  c.CATEGORY_CODE,\n  c.CATEGORY_NAME\nFROM RAW.CATEGORY_MAP c",
-        "result": "matched"
-      },
-      {
-        "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.FX_DAILY AS\nSELECT\n  f.RATE_DAY,\n  f.CURRENCY_CODE,\n  f.INR_PER_UNIT\nFROM RAW.FX_RATES f",
-        "result": "matched"
-      },
-      {
-        "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.FCT_REVENUE AS\nSELECT\n  s.TXN_DAY,\n  s.PAYMENT_ID,\n  s.ORDER_ID,\n  o.CITY,\n  c.CATEGORY_NAME,\n  o.CHANNEL,\n  s.GATEWAY,\n  s.CURRENCY_CODE,\n  m.TIER,\n  s.AMOUNT * CO",
-        "result": "matched"
-      },
-      {
-        "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.DAILY_REVENUE AS\nSELECT\n  r.TXN_DAY,\n  SUM(r.REVENUE_INR) AS REVENUE_INR,\n  COUNT(*) AS TXN_COUNT\nFROM RECEIPTS_SBX.FCT_REVENUE r\nGROUP BY r.TXN_DAY",
-        "result": "matched"
-      },
-      {
-        "sql": "-- A second metric over the same fact: paid orders per day and the average basket.\nCREATE OR REPLACE VIEW RECEIPTS_SBX.DAILY_ORDERS AS\nSELECT\n  r.TXN_DAY,\n  COUNT(DISTINCT r.ORDER_ID) AS ORDER_COUNT,\n",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT TXN_DAY AS TXN_DAY, REVENUE_INR AS V FROM RECEIPTS_SBX.DAILY_REVENUE WHERE TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -14) AND TXN_DAY <= DATE '2026-10-28' ORDER BY TXN_DAY",
-        "result": "matched"
-      },
-      {
-        "sql": "FLUSH STATISTICS",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT s.USER_NAME, s.CLIENT, MIN(a.START_TIME) AS FIRST_READ, COUNT(*) AS READ_COUNT FROM EXA_DBA_AUDIT_SQL a JOIN EXA_DBA_AUDIT_SESSIONS s ON s.SESSION_ID = a.SESSION_ID WHERE a.COMMAND_NAME = 'SELE",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT PARAM_VALUE FROM SYS.EXA_METADATA WHERE PARAM_NAME = 'databaseProductVersion'",
-        "result": "matched"
-      },
-      {
-        "sql": "INSERT INTO RECEIPTS.CASES VALUES ('RC-20261028-A0990F', 'daily_revenue_inr', DATE '2026-10-28',\n        CURRENT_TIMESTAMP, 'PROVEN_FAULT', 26872639.055014, 33237698.514879644,\n        32128818.395014",
-        "result": "matched"
-      },
-      {
-        "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-A0990F', 'unit_scale', FALSE,\n            'NOT_FIRED', 'RAW.PAYMENTS', 'AMOUNT', 'whole batch',\n            NULL, NULL, NULL, 'Median payment amount ",
-        "result": "matched"
-      },
-      {
-        "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-A0990F', 'duplicate_key', FALSE,\n            'NOT_FIRED', 'RAW.PAYMENTS', 'PAYMENT_ID', 'whole batch',\n            NULL, NULL, NULL, '100 repeated pa",
-        "result": "matched"
-      },
-      {
-        "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-A0990F', 'key_fanout', FALSE,\n            'NOT_FIRED', 'RAW.MERCHANTS', 'MERCHANT_ID', 'whole batch',\n            NULL, NULL, NULL, 'Every dimension ",
-        "result": "matched"
-      },
-      {
-        "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-A0990F', 'stale_feed', FALSE,\n            'NOT_FIRED', 'RAW.FX_RATES', 'RATE_DAY', 'whole batch',\n            NULL, NULL, NULL, 'Every foreign curren",
-        "result": "matched"
-      },
-      {
-        "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-A0990F', 'clock_shift', TRUE,\n            'CONFIRMED', 'RAW.PAYMENTS', 'CAPTURED_AT', 'gateway GW_B',\n            32128818.395014, 0.1955959490707066",
-        "result": "matched"
-      },
-      {
-        "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-A0990F', 'orphan_code', FALSE,\n            'NOT_FIRED', 'RAW.ORDERS', 'CATEGORY_CODE', 'whole batch',\n            NULL, NULL, NULL, 'Every category c",
-        "result": "matched"
-      },
-      {
-        "sql": "INSERT INTO RECEIPTS.STEP_TIMINGS VALUES ('RC-20261028-A0990F', 'Read candidate and trusted history', 88.9, 36),\n('RC-20261028-A0990F', 'Run six detectors on the incoming batch', 505.2, NULL),\n('RC-20",
-        "result": "matched"
-      },
-      {
-        "sql": "DELETE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY = DATE '2026-10-28'",
-        "result": "matched"
-      },
-      {
-        "sql": "INSERT INTO PUB.DAILY_REVENUE_PUBLISHED VALUES (DATE '2026-10-28', 26872639.055014, 26872639.055014,\n        'HELD', 'RC-20261028-A0990F', CURRENT_TIMESTAMP)",
-        "result": "matched"
-      },
-      {
-        "sql": "UPDATE RECEIPTS.CASES SET CASE_JSON = '{\"case_id\": \"RC-20261028-A0990F\", \"metric\": \"daily_revenue_inr\", \"metric_label\": \"Daily revenue (INR)\", \"day\": \"2026-10-28\", \"day_label\": \"Wed 28 Oct 2026\", \"ope",
-        "result": "matched"
+      "mcp": {
+        "issued": 3,
+        "matched": 3,
+        "different": 0,
+        "missing": 0,
+        "extra": 4,
+        "rows": [
+          {
+            "sql": "SELECT TXN_DAY, TRUST_STATUS, TRUSTED_VALUE, LAST_TRUSTED_DAY, CASE_ID, AGENT_GUIDANCE FROM PUB.METRIC_TRUST WHERE METRIC_NAME = 'daily_revenue_inr' AND TXN_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT DOWNSTREAM_COUNT, DOWNSTREAM_OBJECTS FROM PUB.METRIC_TRUST WHERE TXN_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT c.SUSPECT, c.SLICE_DESC FROM PUB.CONFIRMED_CAUSES c JOIN PUB.METRIC_TRUST t ON t.CASE_ID = c.CASE_ID WHERE t.TXN_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          }
+        ],
+        "extra_statements": [
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "ROLLBACK /* AUTO */"
+        ],
+        "extra_kinds": {
+          "commit (other)": 3,
+          "rollback (other)": 1
+        },
+        "sessions": [
+          1880405452494274560
+        ],
+        "user": "AGENT_READER",
+        "note": "the three reads were sent through execute_exasol_query; the server may add its own statements"
       }
-    ],
-    "extra_statements": [
-      "SELECT CURRENT_SESSION FROM DUAL",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "SELECT CURRENT_STATEMENT FROM DUAL",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "SELECT CURRENT_STATEMENT FROM DUAL",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "SELECT CURRENT_STATEMENT FROM DUAL",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "SELECT CURRENT_STATEMENT FROM DUAL",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "SELECT CURRENT_STATEMENT FROM DUAL",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "SELECT CURRENT_STATEMENT FROM DUAL",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "SELECT CURRENT_STATEMENT FROM DUAL",
-      "COMMIT /* AUTO */",
-      "SELECT CURRENT_STATEMENT FROM DUAL",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "SELECT CURRENT_STATEMENT FROM DUAL",
-      "COMMIT /* AUTO */",
-      "FLUSH STATISTICS",
-      "COMMIT /* AUTO */",
-      "SELECT STMT_ID, COMMAND_NAME, DURATION, CPU, TEMP_DB_RAM_PEAK, ROW_COUNT FROM EXA_STATISTICS.EXA_SQL_LAST_DAY WHERE SESSION_ID = CURRENT_SESSION AND STMT_ID > 29 AND STMT_ID < 131 ORDER BY STMT_ID",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "FLUSH STATISTICS",
-      "COMMIT /* AUTO */"
-    ],
-    "extra_kinds": {
-      "session id read": 1,
-      "commit (other)": 70,
-      "timing marker (SELECT CURRENT_STATEMENT)": 9,
-      "FLUSH STATISTICS": 2,
-      "statistics or audit read": 1
-    }
-  },
-  "mcp": {
-    "issued": 3,
-    "matched": 3,
-    "different": 0,
-    "missing": 0,
-    "extra": 4,
-    "rows": [
-      {
-        "sql": "SELECT TXN_DAY, TRUST_STATUS, TRUSTED_VALUE, LAST_TRUSTED_DAY, CASE_ID, AGENT_GUIDANCE FROM PUB.METRIC_TRUST WHERE METRIC_NAME = 'daily_revenue_inr' AND TXN_DAY = DATE '2026-10-28'",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT DOWNSTREAM_COUNT, DOWNSTREAM_OBJECTS FROM PUB.METRIC_TRUST WHERE TXN_DAY = DATE '2026-10-28'",
-        "result": "matched"
-      },
-      {
-        "sql": "SELECT c.SUSPECT, c.SLICE_DESC FROM PUB.CONFIRMED_CAUSES c JOIN PUB.METRIC_TRUST t ON t.CASE_ID = c.CASE_ID WHERE t.TXN_DAY = DATE '2026-10-28'",
-        "result": "matched"
-      }
-    ],
-    "extra_statements": [
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "COMMIT /* AUTO */",
-      "ROLLBACK /* AUTO */"
-    ],
-    "extra_kinds": {
-      "commit (other)": 3,
-      "rollback (other)": 1
     },
-    "sessions": [
-      1880326266832420864
-    ],
-    "user": "AGENT_READER",
-    "note": "the three reads were sent through execute_exasol_query; the server may add its own statements"
-  }
+    {
+      "exasol": "2026.2.0-nano.3",
+      "day": "2026-10-28",
+      "case": "RC-20261028-E7D10D",
+      "verdict": "PROVEN_FAULT",
+      "seconds": 22.9,
+      "gate": {
+        "issued": 57,
+        "matched": 57,
+        "different": 0,
+        "missing": 0,
+        "extra": 83,
+        "rows": [
+          {
+            "sql": "SELECT MAX(BATCH_DAY) FROM LANDING.ORDERS",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.ORDERS WHERE BATCH_DAY >= DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.PAYMENTS WHERE BATCH_DAY >= DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.MERCHANTS",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.MERCHANTS SELECT * FROM LANDING.MERCHANTS",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.CATEGORY_MAP",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.CATEGORY_MAP SELECT * FROM LANDING.CATEGORY_MAP",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.FX_RATES",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.FX_RATES SELECT * FROM LANDING.FX_RATES",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY >= DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.ORDERS SELECT * FROM LANDING.ORDERS WHERE BATCH_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.PAYMENTS SELECT * FROM LANDING.PAYMENTS WHERE BATCH_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "UPDATE RAW.PAYMENTS SET CAPTURED_AT = ADD_MINUTES(CAPTURED_AT, 330) WHERE BATCH_DAY = DATE '2026-10-28' AND GATEWAY = 'GW_B'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY, METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY < DATE '2026-10-28' AND TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -14) AND TRUST_STATUS IN ('TRUSTED', 'REAL_CHANGE', 'CORRECTE",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY, REVENUE_INR, TXN_COUNT FROM PIPE.DAILY_REVENUE WHERE TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -14) ORDER BY TXN_DAY",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY, METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY < DATE '2026-10-28' AND TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -35) AND TRUST_STATUS IN ('TRUSTED', 'REAL_CHANGE', 'CORRECTE",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT RECEIPTS.CLOCK_DRIFT('probe', TRUE, 1, 1.0) FROM DUAL",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT p.GATEWAY, p.CURRENCY_CODE,\n  MEDIAN(CASE WHEN p.BATCH_DAY = DATE '2026-10-28' THEN p.AMOUNT END) AS MED_TODAY,\n  MEDIAN(CASE WHEN p.BATCH_DAY < DATE '2026-10-28' THEN p.AMOUNT END) AS MED_BASE",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT t.GATEWAY, t.CURRENCY_CODE, b.MED_BASE,\n  SUM(CASE WHEN t.BATCH_DAY = DATE '2026-10-28' THEN 1 ELSE 0 END) AS N_TODAY,\n  SUM(CASE WHEN t.BATCH_DAY = DATE '2026-10-28' AND t.AMOUNT > 20 * b.MED_",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT x.IS_TODAY, COUNT(*) AS DUP_KEYS, SUM(x.N - 1) AS EXTRA_ROWS\nFROM (\n  SELECT p.PAYMENT_ID, CASE WHEN p.BATCH_DAY = DATE '2026-10-28' THEN 1 ELSE 0 END AS IS_TODAY, COUNT(*) AS N\n  FROM RAW.PAYM",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT 'RAW.MERCHANTS' AS TABLE_NAME, 'MERCHANT_ID' AS KEY_COLUMN, COUNT(*) AS DUP_KEYS, COALESCE(SUM(x.N), 0) AS DIM_ROWS FROM (SELECT MERCHANT_ID, COUNT(*) AS N FROM RAW.MERCHANTS GROUP BY MERCHANT_",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT p.CURRENCY_CODE, COUNT(*) AS PAYMENTS_TODAY, MAX(f.LAST_RATE_DAY) AS LAST_RATE_DAY\nFROM RAW.PAYMENTS p\nLEFT JOIN (SELECT CURRENCY_CODE, MAX(RATE_DAY) AS LAST_RATE_DAY FROM RAW.FX_RATES GROUP BY",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT RECEIPTS.CLOCK_DRIFT(a.SLICE_KEY, a.IS_TODAY, a.BIN_IDX, a.CNT)\nFROM (\nSELECT x.SLICE_KEY, x.IS_TODAY, x.BIN_IDX, CAST(COUNT(*) AS DOUBLE) AS CNT\nFROM (\n  SELECT p.GATEWAY AS SLICE_KEY,\n    CAS",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT o.CATEGORY_CODE, COUNT(*) AS ORDERS_TODAY\nFROM RAW.ORDERS o\nLEFT JOIN RAW.CATEGORY_MAP m ON m.CATEGORY_CODE = o.CATEGORY_CODE\nWHERE o.BATCH_DAY = DATE '2026-10-28' AND m.CATEGORY_CODE IS NULL\nG",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'PIPE'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'PIPE'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'PUB'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'MART'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT\n  GROUPING_ID(CITY, CATEGORY_NAME, CHANNEL, GATEWAY, CURRENCY_CODE, TIER) AS GID,\nf.CITY,\nf.CATEGORY_NAME,\nf.CHANNEL,\nf.GATEWAY,\nf.CURRENCY_CODE,\nf.TIER,\nSUM(CASE WHEN f.TXN_DAY = DATE '2026-10",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT r.BATCH_DAY, r.RAW_PAYMENTS, d.TXN_COUNT\nFROM (SELECT BATCH_DAY, COUNT(DISTINCT PAYMENT_ID) AS RAW_PAYMENTS FROM RAW.PAYMENTS\n      WHERE PAY_STATUS = 'CAPTURED' AND BATCH_DAY >= ADD_DAYS(DATE ",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY, TXN_COUNT FROM PIPE.DAILY_REVENUE WHERE TXN_DAY < DATE '2026-10-28' AND TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -35) ORDER BY TXN_DAY",
+            "result": "matched"
+          },
+          {
+            "sql": "DROP SCHEMA IF EXISTS RECEIPTS_SBX CASCADE",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE SCHEMA RECEIPTS_SBX",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.FIX_PAYMENTS_1 AS\nSELECT\n  PAYMENT_ID,\n  ORDER_ID,\n  BATCH_DAY,\n  LOAD_FILE,\n  GATEWAY,\n  CURRENCY_CODE,\n  AMOUNT,\n  PAY_STATUS,\n  CASE WHEN BATCH_DAY = DATE '2026-",
+            "result": "matched"
+          },
+          {
+            "sql": "-- The revenue pipeline. Six views between the raw sources and the number on the\n-- finance dashboard. Rendered into PIPE for production and into sandbox schemas\n-- for undo tests, where one source at",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.STG_ORDERS AS\nSELECT\n  o.ORDER_ID,\n  o.MERCHANT_ID,\n  o.CITY,\n  o.CATEGORY_CODE,\n  o.CHANNEL\nFROM RAW.ORDERS o",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.DIM_MERCHANT AS\nSELECT\n  m.MERCHANT_ID,\n  m.MERCHANT_NAME,\n  m.TIER\nFROM RAW.MERCHANTS m",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.DIM_CATEGORY AS\nSELECT\n  c.CATEGORY_CODE,\n  c.CATEGORY_NAME\nFROM RAW.CATEGORY_MAP c",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.FX_DAILY AS\nSELECT\n  f.RATE_DAY,\n  f.CURRENCY_CODE,\n  f.INR_PER_UNIT\nFROM RAW.FX_RATES f",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.FCT_REVENUE AS\nSELECT\n  s.TXN_DAY,\n  s.PAYMENT_ID,\n  s.ORDER_ID,\n  o.CITY,\n  c.CATEGORY_NAME,\n  o.CHANNEL,\n  s.GATEWAY,\n  s.CURRENCY_CODE,\n  m.TIER,\n  s.AMOUNT * CO",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.DAILY_REVENUE AS\nSELECT\n  r.TXN_DAY,\n  SUM(r.REVENUE_INR) AS REVENUE_INR,\n  COUNT(*) AS TXN_COUNT\nFROM RECEIPTS_SBX.FCT_REVENUE r\nGROUP BY r.TXN_DAY",
+            "result": "matched"
+          },
+          {
+            "sql": "-- A second metric over the same fact: paid orders per day and the average basket.\nCREATE OR REPLACE VIEW RECEIPTS_SBX.DAILY_ORDERS AS\nSELECT\n  r.TXN_DAY,\n  COUNT(DISTINCT r.ORDER_ID) AS ORDER_COUNT,\n",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY AS TXN_DAY, REVENUE_INR AS V FROM RECEIPTS_SBX.DAILY_REVENUE WHERE TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -14) AND TXN_DAY <= DATE '2026-10-28' ORDER BY TXN_DAY",
+            "result": "matched"
+          },
+          {
+            "sql": "FLUSH STATISTICS",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT s.USER_NAME, s.CLIENT, MIN(a.START_TIME) AS FIRST_READ, COUNT(*) AS READ_COUNT FROM EXA_DBA_AUDIT_SQL a JOIN EXA_DBA_AUDIT_SESSIONS s ON s.SESSION_ID = a.SESSION_ID WHERE a.COMMAND_NAME = 'SELE",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT PARAM_VALUE FROM SYS.EXA_METADATA WHERE PARAM_NAME = 'databaseProductVersion'",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.CASES VALUES ('RC-20261028-E7D10D', 'daily_revenue_inr', DATE '2026-10-28',\n        CURRENT_TIMESTAMP, 'PROVEN_FAULT', 26872639.055014, 33237698.514879644,\n        32128818.395014",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-E7D10D', 'unit_scale', FALSE,\n            'NOT_FIRED', 'RAW.PAYMENTS', 'AMOUNT', 'whole batch',\n            NULL, NULL, NULL, 'Median payment amount ",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-E7D10D', 'duplicate_key', FALSE,\n            'NOT_FIRED', 'RAW.PAYMENTS', 'PAYMENT_ID', 'whole batch',\n            NULL, NULL, NULL, '100 repeated pa",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-E7D10D', 'key_fanout', FALSE,\n            'NOT_FIRED', 'RAW.MERCHANTS', 'MERCHANT_ID', 'whole batch',\n            NULL, NULL, NULL, 'Every dimension ",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-E7D10D', 'stale_feed', FALSE,\n            'NOT_FIRED', 'RAW.FX_RATES', 'RATE_DAY', 'whole batch',\n            NULL, NULL, NULL, 'Every foreign curren",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-E7D10D', 'clock_shift', TRUE,\n            'CONFIRMED', 'RAW.PAYMENTS', 'CAPTURED_AT', 'gateway GW_B',\n            32128818.395014, 0.1955959490707066",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-E7D10D', 'orphan_code', FALSE,\n            'NOT_FIRED', 'RAW.ORDERS', 'CATEGORY_CODE', 'whole batch',\n            NULL, NULL, NULL, 'Every category c",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.STEP_TIMINGS VALUES ('RC-20261028-E7D10D', 'Read candidate and trusted history', 107.8, 36),\n('RC-20261028-E7D10D', 'Run six detectors on the incoming batch', 512.2, NULL),\n('RC-2",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO PUB.DAILY_REVENUE_PUBLISHED VALUES (DATE '2026-10-28', 26872639.055014, 26872639.055014,\n        'HELD', 'RC-20261028-E7D10D', CURRENT_TIMESTAMP)",
+            "result": "matched"
+          },
+          {
+            "sql": "UPDATE RECEIPTS.CASES SET CASE_JSON = '{\"case_id\": \"RC-20261028-E7D10D\", \"metric\": \"daily_revenue_inr\", \"metric_label\": \"Daily revenue (INR)\", \"day\": \"2026-10-28\", \"day_label\": \"Wed 28 Oct 2026\", \"ope",
+            "result": "matched"
+          }
+        ],
+        "extra_statements": [
+          "SELECT CURRENT_SESSION FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "FLUSH STATISTICS",
+          "COMMIT /* AUTO */",
+          "SELECT STMT_ID, COMMAND_NAME, DURATION, CPU, TEMP_DB_RAM_PEAK, ROW_COUNT FROM EXA_STATISTICS.EXA_SQL_LAST_DAY WHERE SESSION_ID = CURRENT_SESSION AND STMT_ID > 29 AND STMT_ID < 131 ORDER BY STMT_ID",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "FLUSH STATISTICS",
+          "COMMIT /* AUTO */"
+        ],
+        "extra_kinds": {
+          "session id read": 1,
+          "commit (other)": 70,
+          "timing marker (SELECT CURRENT_STATEMENT)": 9,
+          "FLUSH STATISTICS": 2,
+          "statistics or audit read": 1
+        }
+      },
+      "mcp": {
+        "issued": 3,
+        "matched": 3,
+        "different": 0,
+        "missing": 0,
+        "extra": 4,
+        "rows": [
+          {
+            "sql": "SELECT TXN_DAY, TRUST_STATUS, TRUSTED_VALUE, LAST_TRUSTED_DAY, CASE_ID, AGENT_GUIDANCE FROM PUB.METRIC_TRUST WHERE METRIC_NAME = 'daily_revenue_inr' AND TXN_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT DOWNSTREAM_COUNT, DOWNSTREAM_OBJECTS FROM PUB.METRIC_TRUST WHERE TXN_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT c.SUSPECT, c.SLICE_DESC FROM PUB.CONFIRMED_CAUSES c JOIN PUB.METRIC_TRUST t ON t.CASE_ID = c.CASE_ID WHERE t.TXN_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          }
+        ],
+        "extra_statements": [
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "ROLLBACK /* AUTO */"
+        ],
+        "extra_kinds": {
+          "commit (other)": 3,
+          "rollback (other)": 1
+        },
+        "sessions": [
+          1880405477287264256
+        ],
+        "user": "AGENT_READER",
+        "note": "the three reads were sent through execute_exasol_query; the server may add its own statements"
+      }
+    },
+    {
+      "exasol": "2026.2.0-nano.3",
+      "day": "2026-10-28",
+      "case": "RC-20261028-136961",
+      "verdict": "PROVEN_FAULT",
+      "seconds": 20.9,
+      "gate": {
+        "issued": 57,
+        "matched": 57,
+        "different": 0,
+        "missing": 0,
+        "extra": 83,
+        "rows": [
+          {
+            "sql": "SELECT MAX(BATCH_DAY) FROM LANDING.ORDERS",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.ORDERS WHERE BATCH_DAY >= DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.PAYMENTS WHERE BATCH_DAY >= DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.MERCHANTS",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.MERCHANTS SELECT * FROM LANDING.MERCHANTS",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.CATEGORY_MAP",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.CATEGORY_MAP SELECT * FROM LANDING.CATEGORY_MAP",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM RAW.FX_RATES",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.FX_RATES SELECT * FROM LANDING.FX_RATES",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY >= DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.ORDERS SELECT * FROM LANDING.ORDERS WHERE BATCH_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RAW.PAYMENTS SELECT * FROM LANDING.PAYMENTS WHERE BATCH_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "UPDATE RAW.PAYMENTS SET CAPTURED_AT = ADD_MINUTES(CAPTURED_AT, 330) WHERE BATCH_DAY = DATE '2026-10-28' AND GATEWAY = 'GW_B'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY, METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY < DATE '2026-10-28' AND TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -14) AND TRUST_STATUS IN ('TRUSTED', 'REAL_CHANGE', 'CORRECTE",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY, REVENUE_INR, TXN_COUNT FROM PIPE.DAILY_REVENUE WHERE TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -14) ORDER BY TXN_DAY",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY, METRIC_VALUE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY < DATE '2026-10-28' AND TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -35) AND TRUST_STATUS IN ('TRUSTED', 'REAL_CHANGE', 'CORRECTE",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT RECEIPTS.CLOCK_DRIFT('probe', TRUE, 1, 1.0) FROM DUAL",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT p.GATEWAY, p.CURRENCY_CODE,\n  MEDIAN(CASE WHEN p.BATCH_DAY = DATE '2026-10-28' THEN p.AMOUNT END) AS MED_TODAY,\n  MEDIAN(CASE WHEN p.BATCH_DAY < DATE '2026-10-28' THEN p.AMOUNT END) AS MED_BASE",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT t.GATEWAY, t.CURRENCY_CODE, b.MED_BASE,\n  SUM(CASE WHEN t.BATCH_DAY = DATE '2026-10-28' THEN 1 ELSE 0 END) AS N_TODAY,\n  SUM(CASE WHEN t.BATCH_DAY = DATE '2026-10-28' AND t.AMOUNT > 20 * b.MED_",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT x.IS_TODAY, COUNT(*) AS DUP_KEYS, SUM(x.N - 1) AS EXTRA_ROWS\nFROM (\n  SELECT p.PAYMENT_ID, CASE WHEN p.BATCH_DAY = DATE '2026-10-28' THEN 1 ELSE 0 END AS IS_TODAY, COUNT(*) AS N\n  FROM RAW.PAYM",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT 'RAW.MERCHANTS' AS TABLE_NAME, 'MERCHANT_ID' AS KEY_COLUMN, COUNT(*) AS DUP_KEYS, COALESCE(SUM(x.N), 0) AS DIM_ROWS FROM (SELECT MERCHANT_ID, COUNT(*) AS N FROM RAW.MERCHANTS GROUP BY MERCHANT_",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT p.CURRENCY_CODE, COUNT(*) AS PAYMENTS_TODAY, MAX(f.LAST_RATE_DAY) AS LAST_RATE_DAY\nFROM RAW.PAYMENTS p\nLEFT JOIN (SELECT CURRENCY_CODE, MAX(RATE_DAY) AS LAST_RATE_DAY FROM RAW.FX_RATES GROUP BY",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT RECEIPTS.CLOCK_DRIFT(a.SLICE_KEY, a.IS_TODAY, a.BIN_IDX, a.CNT)\nFROM (\nSELECT x.SLICE_KEY, x.IS_TODAY, x.BIN_IDX, CAST(COUNT(*) AS DOUBLE) AS CNT\nFROM (\n  SELECT p.GATEWAY AS SLICE_KEY,\n    CAS",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT o.CATEGORY_CODE, COUNT(*) AS ORDERS_TODAY\nFROM RAW.ORDERS o\nLEFT JOIN RAW.CATEGORY_MAP m ON m.CATEGORY_CODE = o.CATEGORY_CODE\nWHERE o.BATCH_DAY = DATE '2026-10-28' AND m.CATEGORY_CODE IS NULL\nG",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'PIPE'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'PIPE'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'PUB'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT VIEW_NAME, VIEW_TEXT FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = 'MART'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT\n  GROUPING_ID(CITY, CATEGORY_NAME, CHANNEL, GATEWAY, CURRENCY_CODE, TIER) AS GID,\nf.CITY,\nf.CATEGORY_NAME,\nf.CHANNEL,\nf.GATEWAY,\nf.CURRENCY_CODE,\nf.TIER,\nSUM(CASE WHEN f.TXN_DAY = DATE '2026-10",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT r.BATCH_DAY, r.RAW_PAYMENTS, d.TXN_COUNT\nFROM (SELECT BATCH_DAY, COUNT(DISTINCT PAYMENT_ID) AS RAW_PAYMENTS FROM RAW.PAYMENTS\n      WHERE PAY_STATUS = 'CAPTURED' AND BATCH_DAY >= ADD_DAYS(DATE ",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY, TXN_COUNT FROM PIPE.DAILY_REVENUE WHERE TXN_DAY < DATE '2026-10-28' AND TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -35) ORDER BY TXN_DAY",
+            "result": "matched"
+          },
+          {
+            "sql": "DROP SCHEMA IF EXISTS RECEIPTS_SBX CASCADE",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE SCHEMA RECEIPTS_SBX",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.FIX_PAYMENTS_1 AS\nSELECT\n  PAYMENT_ID,\n  ORDER_ID,\n  BATCH_DAY,\n  LOAD_FILE,\n  GATEWAY,\n  CURRENCY_CODE,\n  AMOUNT,\n  PAY_STATUS,\n  CASE WHEN BATCH_DAY = DATE '2026-",
+            "result": "matched"
+          },
+          {
+            "sql": "-- The revenue pipeline. Six views between the raw sources and the number on the\n-- finance dashboard. Rendered into PIPE for production and into sandbox schemas\n-- for undo tests, where one source at",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.STG_ORDERS AS\nSELECT\n  o.ORDER_ID,\n  o.MERCHANT_ID,\n  o.CITY,\n  o.CATEGORY_CODE,\n  o.CHANNEL\nFROM RAW.ORDERS o",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.DIM_MERCHANT AS\nSELECT\n  m.MERCHANT_ID,\n  m.MERCHANT_NAME,\n  m.TIER\nFROM RAW.MERCHANTS m",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.DIM_CATEGORY AS\nSELECT\n  c.CATEGORY_CODE,\n  c.CATEGORY_NAME\nFROM RAW.CATEGORY_MAP c",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.FX_DAILY AS\nSELECT\n  f.RATE_DAY,\n  f.CURRENCY_CODE,\n  f.INR_PER_UNIT\nFROM RAW.FX_RATES f",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.FCT_REVENUE AS\nSELECT\n  s.TXN_DAY,\n  s.PAYMENT_ID,\n  s.ORDER_ID,\n  o.CITY,\n  c.CATEGORY_NAME,\n  o.CHANNEL,\n  s.GATEWAY,\n  s.CURRENCY_CODE,\n  m.TIER,\n  s.AMOUNT * CO",
+            "result": "matched"
+          },
+          {
+            "sql": "CREATE OR REPLACE VIEW RECEIPTS_SBX.DAILY_REVENUE AS\nSELECT\n  r.TXN_DAY,\n  SUM(r.REVENUE_INR) AS REVENUE_INR,\n  COUNT(*) AS TXN_COUNT\nFROM RECEIPTS_SBX.FCT_REVENUE r\nGROUP BY r.TXN_DAY",
+            "result": "matched"
+          },
+          {
+            "sql": "-- A second metric over the same fact: paid orders per day and the average basket.\nCREATE OR REPLACE VIEW RECEIPTS_SBX.DAILY_ORDERS AS\nSELECT\n  r.TXN_DAY,\n  COUNT(DISTINCT r.ORDER_ID) AS ORDER_COUNT,\n",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT TXN_DAY AS TXN_DAY, REVENUE_INR AS V FROM RECEIPTS_SBX.DAILY_REVENUE WHERE TXN_DAY >= ADD_DAYS(DATE '2026-10-28', -14) AND TXN_DAY <= DATE '2026-10-28' ORDER BY TXN_DAY",
+            "result": "matched"
+          },
+          {
+            "sql": "FLUSH STATISTICS",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT s.USER_NAME, s.CLIENT, MIN(a.START_TIME) AS FIRST_READ, COUNT(*) AS READ_COUNT FROM EXA_DBA_AUDIT_SQL a JOIN EXA_DBA_AUDIT_SESSIONS s ON s.SESSION_ID = a.SESSION_ID WHERE a.COMMAND_NAME = 'SELE",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT PARAM_VALUE FROM SYS.EXA_METADATA WHERE PARAM_NAME = 'databaseProductVersion'",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.CASES VALUES ('RC-20261028-136961', 'daily_revenue_inr', DATE '2026-10-28',\n        CURRENT_TIMESTAMP, 'PROVEN_FAULT', 26872639.055014, 33237698.514879644,\n        32128818.395014",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-136961', 'unit_scale', FALSE,\n            'NOT_FIRED', 'RAW.PAYMENTS', 'AMOUNT', 'whole batch',\n            NULL, NULL, NULL, 'Median payment amount ",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-136961', 'duplicate_key', FALSE,\n            'NOT_FIRED', 'RAW.PAYMENTS', 'PAYMENT_ID', 'whole batch',\n            NULL, NULL, NULL, '100 repeated pa",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-136961', 'key_fanout', FALSE,\n            'NOT_FIRED', 'RAW.MERCHANTS', 'MERCHANT_ID', 'whole batch',\n            NULL, NULL, NULL, 'Every dimension ",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-136961', 'stale_feed', FALSE,\n            'NOT_FIRED', 'RAW.FX_RATES', 'RATE_DAY', 'whole batch',\n            NULL, NULL, NULL, 'Every foreign curren",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-136961', 'clock_shift', TRUE,\n            'CONFIRMED', 'RAW.PAYMENTS', 'CAPTURED_AT', 'gateway GW_B',\n            32128818.395014, 0.1955959490707066",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.EVIDENCE VALUES ('RC-20261028-136961', 'orphan_code', FALSE,\n            'NOT_FIRED', 'RAW.ORDERS', 'CATEGORY_CODE', 'whole batch',\n            NULL, NULL, NULL, 'Every category c",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO RECEIPTS.STEP_TIMINGS VALUES ('RC-20261028-136961', 'Read candidate and trusted history', 92.3, 36),\n('RC-20261028-136961', 'Run six detectors on the incoming batch', 522.2, NULL),\n('RC-20",
+            "result": "matched"
+          },
+          {
+            "sql": "DELETE FROM PUB.DAILY_REVENUE_PUBLISHED WHERE TXN_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "INSERT INTO PUB.DAILY_REVENUE_PUBLISHED VALUES (DATE '2026-10-28', 26872639.055014, 26872639.055014,\n        'HELD', 'RC-20261028-136961', CURRENT_TIMESTAMP)",
+            "result": "matched"
+          },
+          {
+            "sql": "UPDATE RECEIPTS.CASES SET CASE_JSON = '{\"case_id\": \"RC-20261028-136961\", \"metric\": \"daily_revenue_inr\", \"metric_label\": \"Daily revenue (INR)\", \"day\": \"2026-10-28\", \"day_label\": \"Wed 28 Oct 2026\", \"ope",
+            "result": "matched"
+          }
+        ],
+        "extra_statements": [
+          "SELECT CURRENT_SESSION FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "SELECT CURRENT_STATEMENT FROM DUAL",
+          "COMMIT /* AUTO */",
+          "FLUSH STATISTICS",
+          "COMMIT /* AUTO */",
+          "SELECT STMT_ID, COMMAND_NAME, DURATION, CPU, TEMP_DB_RAM_PEAK, ROW_COUNT FROM EXA_STATISTICS.EXA_SQL_LAST_DAY WHERE SESSION_ID = CURRENT_SESSION AND STMT_ID > 29 AND STMT_ID < 131 ORDER BY STMT_ID",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "FLUSH STATISTICS",
+          "COMMIT /* AUTO */"
+        ],
+        "extra_kinds": {
+          "session id read": 1,
+          "commit (other)": 70,
+          "timing marker (SELECT CURRENT_STATEMENT)": 9,
+          "FLUSH STATISTICS": 2,
+          "statistics or audit read": 1
+        }
+      },
+      "mcp": {
+        "issued": 3,
+        "matched": 3,
+        "different": 0,
+        "missing": 0,
+        "extra": 4,
+        "rows": [
+          {
+            "sql": "SELECT TXN_DAY, TRUST_STATUS, TRUSTED_VALUE, LAST_TRUSTED_DAY, CASE_ID, AGENT_GUIDANCE FROM PUB.METRIC_TRUST WHERE METRIC_NAME = 'daily_revenue_inr' AND TXN_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT DOWNSTREAM_COUNT, DOWNSTREAM_OBJECTS FROM PUB.METRIC_TRUST WHERE TXN_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          },
+          {
+            "sql": "SELECT c.SUSPECT, c.SLICE_DESC FROM PUB.CONFIRMED_CAUSES c JOIN PUB.METRIC_TRUST t ON t.CASE_ID = c.CASE_ID WHERE t.TXN_DAY = DATE '2026-10-28'",
+            "result": "matched"
+          }
+        ],
+        "extra_statements": [
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "COMMIT /* AUTO */",
+          "ROLLBACK /* AUTO */"
+        ],
+        "extra_kinds": {
+          "commit (other)": 3,
+          "rollback (other)": 1
+        },
+        "sessions": [
+          1880405500006825984
+        ],
+        "user": "AGENT_READER",
+        "note": "the three reads were sent through execute_exasol_query; the server may add its own statements"
+      }
+    }
+  ]
 }
