@@ -1,5 +1,8 @@
 # Brief for judges
 
+**Demo video:** [Watch the 3-minute demo](https://github.com/user-attachments/assets/d216481e-cd1d-42eb-9047-4662d2b23c78).
+One live run on Exasol Personal: the number is held, the cause is proven by undoing it, the trust flag is set for agents, and the evidence is shown.
+
 | | |
 |---|---|
 | Project | **Receipts: Proof for Every Number That Moves** |

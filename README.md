@@ -6,6 +6,10 @@
 
 **When a daily business number moves, Receipts holds it back, proves inside Exasol which upstream fault caused it by undoing that fault in a sandbox, and tells dashboards and AI agents whether to trust it.**
 
+Watch the 3-minute demo
+
+https://github.com/user-attachments/assets/d216481e-cd1d-42eb-9047-4662d2b23c78
+
 Version 1.0.2, last updated 2026-10-29.
 
 **Start in 30 seconds** (Python 3.10 or newer; the first run installs the packages, then the command center opens in your browser):
@@ -18,7 +22,7 @@ Version 1.0.2, last updated 2026-10-29.
 
 **Judging?** Read [`JUDGES.md`](JUDGES.md): every criterion, its evidence and the command that reproduces it, in three minutes.
 
-**Submission:** [Pitch deck (PDF)](docs/Receipts_ExaThon_2026_Deck.pdf) | [Pitch deck (PowerPoint, with transitions)](docs/Receipts_ExaThon_2026_Deck.pptx)
+**Submission:** [Pitch deck (PDF)](docs/Receipts_ExaThon_2026_Deck.pdf) | [Pitch deck (PowerPoint, with transitions)](docs/Receipts_ExaThon_2026_Deck.pptx) | [Demo video](https://github.com/user-attachments/assets/d216481e-cd1d-42eb-9047-4662d2b23c78)
 
 | Strongest evidence | Result | Report |
 |---|---|---|
