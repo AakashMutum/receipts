@@ -10,7 +10,7 @@ Watch the 3-minute demo
 
 https://github.com/user-attachments/assets/d216481e-cd1d-42eb-9047-4662d2b23c78
 
-Version 1.0.2, last updated 2026-10-29.
+Version 1.0.0, last updated 2026-10-30.
 
 **Start in 30 seconds** (Python 3.10 or newer; the first run installs the packages, then the command center opens in your browser):
 

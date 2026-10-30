@@ -1,12 +1,19 @@
 # Changelog
 
-## 1.0.2 (2026-10-29)
-
-Everything since 1.0.0. Version 1.0.1 was never tagged; its changes are listed here. No threshold changed, and every
-re-run gave the same verdicts and causes as the committed reports.
+## 1.0.0 (2026-10-30)
 
 ### Added
 
+* **The gate.** When a daily metric moves, Receipts holds it, runs six detectors on the incoming batch (unit change, duplicate rows, join fan-out, stale FX feed, clock shift as a Python UDF inside Exasol, unmapped codes) and names a cause only after undoing it in a sandbox schema brings the number back into range with published history unchanged. Scored on 10 scenarios x 5 seeds on Exasol: 50 of 50 ([`samples/exasol/eval_report.md`](samples/exasol/eval_report.md)).
+* **A trust flag for people and agents.** `PUB.METRIC_TRUST` says per day whether the number may be quoted and what to quote instead; `PUB.DASHBOARD_REVENUE` shows the last trusted value while a number is held.
+* **Watch mode.** `receipts watch` and `receipts serve --watch` judge each newly landed batch and write alerts (`tests/test_watch.py`).
+* **Lab mode and the red team.** Planting faults, Break the pipeline and `receipts redteam` run only in lab mode and only on the built-in synthetic data ([`samples/exasol/redteam_report.md`](samples/exasol/redteam_report.md)).
+* **Who saw this number.** Each receipt lists the views that read the affected metric or column, from the view catalog, and `PUB.METRIC_TRUST` carries `DOWNSTREAM_COUNT` and `DOWNSTREAM_OBJECTS`; on Exasol the audit log names who read them ([`samples/exasol/live_checks.md`](samples/exasol/live_checks.md)).
+* **Trust badge.** `GET /badge.svg` and `/badge/<metric>.svg`, read-only ([`docs/screenshots/12_badges.png`](docs/screenshots/12_badges.png)).
+* **Configurable metrics.** `receipts.yaml` and `receipts connect --check`; paid orders per day and average basket ship as examples ([`samples/metrics_report.md`](samples/metrics_report.md)).
+* **Wrong-fix control.** `receipts wrongfix` feeds the gate deliberately wrong corrections: 235 tried, 225 rejected, 10 accepted and listed ([`samples/exasol/wrongfix_report.md`](samples/exasol/wrongfix_report.md)).
+* **Blind test kit.** `receipts blindtest` and [`docs/BLIND_TEST.md`](docs/BLIND_TEST.md); no blind test results are claimed.
+* **A read-only user for AI agents.** `receipts init` creates `AGENT_READER` with `SELECT` on `PUB` only; a Claude Code session limited to the Exasol MCP tools answered through it ([`docs/MCP_REAL_RUN.md`](docs/MCP_REAL_RUN.md)), and the server was also run at protocol level ([`docs/MCP_PROTOCOL_RUN.md`](docs/MCP_PROTOCOL_RUN.md)).
 * `receipts audit-match`: lands the IST case, runs the gate with write-back and the agent's reads through the Exasol MCP server, then matches every statement against `EXA_DBA_AUDIT_SQL` (issued, matched, different, missing, extra). `--runs N` repeats it in new sessions and writes one table row per run. On live Exasol, three runs in new sessions: 57 of 57 gate statements and 3 of 3 agent reads matched in every run, none different or missing ([`docs/AUDIT_MATCH.md`](docs/AUDIT_MATCH.md)).
 * [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md): Exasol and the stand-in measured the same way on the same day with [`scripts/bench_exasol.py`](scripts/bench_exasol.py) and [`scripts/bench_standin.py`](scripts/bench_standin.py); IST case warm median 3.23 s on Exasol (2.16 s measured by Exasol) and 0.65 s on the stand-in.
 * [`docs/WHY_EXASOL.md`](docs/WHY_EXASOL.md): what Exasol does here, measured, and the same-gate comparison with the stand-in on the real-data backtest and the 50-run evaluation.
@@ -28,29 +35,11 @@ re-run gave the same verdicts and causes as the committed reports.
 
 ### Fixed
 
-* Names in `receipts.yaml` are now checked when the file is loaded: each must be a plain SQL identifier (letters, digits and underscores, at most 128 characters, not a reserved word). Before, any text was accepted and written straight into SQL, so a crafted name could have added its own statement. Tests: `tests/test_metric_names.py` (20 hostile names, and `connect --check` refusing a hostile file before connecting).
-* `receipts audit-match` picked up `AGENT_READER` sessions from `receipts doctor` and from earlier runs; it now matches only this run's agent session. The incoming-day read is now in the client log.
-
-## 1.0.0 (2026-10-28)
-
-### Added
-
-* **The gate.** When a daily metric moves, Receipts holds it, runs six detectors on the incoming batch (unit change, duplicate rows, join fan-out, stale FX feed, clock shift as a Python UDF inside Exasol, unmapped codes) and names a cause only after undoing it in a sandbox schema brings the number back into range with published history unchanged. Scored on 10 scenarios x 5 seeds on Exasol: 50 of 50 ([`samples/exasol/eval_report.md`](samples/exasol/eval_report.md)).
-* **A trust flag for people and agents.** `PUB.METRIC_TRUST` says per day whether the number may be quoted and what to quote instead; `PUB.DASHBOARD_REVENUE` shows the last trusted value while a number is held.
-* **Watch mode.** `receipts watch` and `receipts serve --watch` judge each newly landed batch and write alerts (`tests/test_watch.py`).
-* **Lab mode and the red team.** Planting faults, Break the pipeline and `receipts redteam` run only in lab mode and only on the built-in synthetic data ([`samples/exasol/redteam_report.md`](samples/exasol/redteam_report.md)).
-* **Who saw this number.** Each receipt lists the views that read the affected metric or column, from the view catalog, and `PUB.METRIC_TRUST` carries `DOWNSTREAM_COUNT` and `DOWNSTREAM_OBJECTS`; on Exasol the audit log names who read them ([`samples/exasol/live_checks.md`](samples/exasol/live_checks.md)).
-* **Trust badge.** `GET /badge.svg` and `/badge/<metric>.svg`, read-only ([`docs/screenshots/12_badges.png`](docs/screenshots/12_badges.png)).
-* **Configurable metrics.** `receipts.yaml` and `receipts connect --check`; paid orders per day and average basket ship as examples ([`samples/metrics_report.md`](samples/metrics_report.md)).
-* **Wrong-fix control.** `receipts wrongfix` feeds the gate deliberately wrong corrections: 235 tried, 225 rejected, 10 accepted and listed ([`samples/exasol/wrongfix_report.md`](samples/exasol/wrongfix_report.md)).
-* **Blind test kit.** `receipts blindtest` and [`docs/BLIND_TEST.md`](docs/BLIND_TEST.md); no blind test results are claimed.
-* **A read-only user for AI agents.** `receipts init` creates `AGENT_READER` with `SELECT` on `PUB` only; a Claude Code session limited to the Exasol MCP tools answered through it ([`docs/MCP_REAL_RUN.md`](docs/MCP_REAL_RUN.md)), and the server was also run at protocol level ([`docs/MCP_PROTOCOL_RUN.md`](docs/MCP_PROTOCOL_RUN.md)).
-
-### Fixed
-
 * **The red team hole.** A x100 unit change on 2% of one gateway was published as a real change; the unit tail check closed it: unit floor 100% to 2%, holes 1 to 0 ([`before`](samples/exasol/redteam_report_before.md), [`after`](samples/exasol/redteam_report.md)).
 * **History for unpublished metrics.** A merchant fan-out rewrote past days in the views and moved the baseline with it; `RECEIPTS.METRIC_HISTORY` now keeps a snapshot. Average basket published wrong 6 of 16 held-out faults before, 0 after ([`before`](samples/metrics_heldout_before.md), [`after`](samples/exasol/metrics_heldout_after.md)).
 * **Audit-log reads on Exasol.** The window start is shifted from session time to the audit log's system time, statistics are flushed first, and the `READS` alias, a reserved word in Exasol, is now `READ_COUNT` ([`samples/exasol/live_checks.md`](samples/exasol/live_checks.md)).
+* Names in `receipts.yaml` are now checked when the file is loaded: each must be a plain SQL identifier (letters, digits and underscores, at most 128 characters, not a reserved word). Before, any text was accepted and written straight into SQL, so a crafted name could have added its own statement. Tests: `tests/test_metric_names.py` (20 hostile names, and `connect --check` refusing a hostile file before connecting).
+* `receipts audit-match` picked up `AGENT_READER` sessions from `receipts doctor` and from earlier runs; it now matches only this run's agent session. The incoming-day read is now in the client log.
 
 ### Known limits
 
