@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+* A crash in the weekday baseline when one weekday has no trading history, found on real data (a shop that never trades on Saturdays). Such a weekday now expects 0 and is left out of the weekday-adjusted history; zero on that day is normal, anything else is held as UNEXPLAINED. The published reports do not change.
+
 ## 1.0.0 (2026-10-30)
 
 ### Added

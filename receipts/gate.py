@@ -128,7 +128,8 @@ def expected(hist: dict[date, float], day: date, weekday: str = "auto") -> tuple
     if (weekday != "off" and len(by_wd) == 7 and all(len(x) >= 3 for x in by_wd.values())
             and (weekday == "on" or _weekly_pattern(by_wd))):
         idx = {w: statistics.mean(x) for w, x in by_wd.items()}
-        flat = [hist[d] / idx[d.weekday()] for d in days]
+        # a weekday with no trading history (index 0) expects 0 and is left out of the adjusted history
+        flat = [hist[d] / idx[d.weekday()] for d in days if idx[d.weekday()]]
         level = statistics.mean(flat)
         sd = statistics.pstdev(flat) * idx[day.weekday()]
         return level * idx[day.weekday()], sd, True
@@ -334,7 +335,8 @@ def run(be: Backend, day: date, scenario: dict | None = None, write_back: bool =
                 s["outcome"] = "PARTIAL"
                 s["reason"] = f"Explains {frac:.0%} of the move on its own, but the rest is still unexplained."
     elif anomaly:
-        verdict = "REAL_CHANGE" if (volume["ok"] and recon["ok"]) else "UNEXPLAINED"
+        # a move away from an expected 0 (a weekday that never trades) is never called a real change
+        verdict = "REAL_CHANGE" if (B and volume["ok"] and recon["ok"]) else "UNEXPLAINED"
     elif eligible:
         verdict = "UNEXPLAINED"
     else:
