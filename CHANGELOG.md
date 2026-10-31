@@ -14,6 +14,7 @@
 ### Changed
 
 * README, JUDGES, NOVELTY, EVAL_CARD and JURY_QA: "0 holes" now reads "0 holes on seed 11", the 25-seed red team is reported with its 13 holes, and partial clock shifts are no longer described as always held.
+* The README headline table, the JUDGES brief and EVAL_CARD now show the 25-seed and real-data results, and timing figures are labelled by what they measure (the gate alone, the CLI run with write-back, or a click in the live UI until the HELD banner shows).
 
 ### Fixed
 

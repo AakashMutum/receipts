@@ -21,22 +21,27 @@ Core 5, Podman on WSL2, about 7.7 GiB visible to the VM), unless a line says the
 | Data | What it is |
 |---|---|
 | Synthetic marketplace | Seeded generator: 8 cities, 6 categories, 4 gateways, a USD slice with daily FX, evening-heavy shopping in IST, background payment retries; 42 days of history plus the incoming day. Faults are SQL in `receipts/faults.py`, which the engine never imports |
-| NYC TLC yellow taxi trips | Public, Jan to Mar 2024, 9,554,757 trips, mapped onto the same tables by an adapter (`receipts/backtest.py`) |
+| NYC TLC yellow taxi trips | Public, Jan to Mar 2024, 9,554,757 trips, mapped onto the same tables by an adapter (`receipts/backtest.py`); and 2023 and 2024, 76,412,486 trips in the judged months, in monthly chunks (`scripts/backtest_taxi_chunks.py`) |
+| UCI Online Retail II with ECB reference rates | Public (CC BY 4.0), UK sales of one online retailer, Dec 2009 to Dec 2011, converted to rupees with ECB cross rates; not Indian data (`scripts/backtest_retail.py`) |
 
 ## Results
 
 | Test | Result | Report |
 |---|---|---|
+| Scored evaluation, 10 scenarios x 25 seeds, 20,000 orders a day | 250 of 250; cause precision and recall 100%, 0 wrong causes. Ablation without the undo test: 25 wrong causes. The DuckDB stand-in gives the same verdict and causes in 250 of 250 | [`samples/exasol/eval_extended.md`](../samples/exasol/eval_extended.md) |
+| Wrong-fix control, 25 seeds | 1,175 deliberately wrong corrections tried, 1,129 rejected, 46 accepted and listed by seed; in every one the gate's own verdict did not use it | [`samples/exasol/wrongfix_extended.md`](../samples/exasol/wrongfix_extended.md) |
+| Real data, NYC taxi 2023 and 2024, 23 monthly chunks | 76,412,486 trips, 696 real days, 8 held, 34 real changes with no fault found; 45 of 46 planted faults caught (the miss was held); 742 of 742 gate runs agree with the stand-in | [`samples/exasol/real_backtest_taxi_2023_2024.md`](../samples/exasol/real_backtest_taxi_2023_2024.md) |
+| Real data, UCI Online Retail II with ECB rates (UK sales in rupees, not Indian data) | 703 days, 64 held (13 closures); 5 of 9 planted faults caught; 2 duplicate-file faults published, 3.1% and 11.5% off; 712 of 712 gate runs agree with the stand-in | [`samples/exasol/real_backtest_retail.md`](../samples/exasol/real_backtest_retail.md) |
 | Scored evaluation, 10 scenarios x 5 seeds, 20,000 orders a day | 50 of 50; cause precision and recall 100%, 0 wrong causes. Ablation without the undo test: 5 wrong causes. Threshold alert: 0% of causes; on the masked pair it held 4 of 5 seeds without naming a cause and stayed silent on the fifth (+4.0%, inside the range). Corrected values within 0.017% of the clean value | [`samples/exasol/eval_report.md`](../samples/exasol/eval_report.md) |
 | Held-out variants, 17, written after the detectors were fixed | caught 15, held 1, published under 4% off 1, published wrong 0 (before the tail check: caught 13, held 3) | [`samples/exasol/variants_report.md`](../samples/exasol/variants_report.md) |
-| Real data, 56 days judged, after the tail check | 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (real change, no fault found); 6 of 6 planted faults caught; 62 of 62 runs agree with the DuckDB stand-in; the same verdicts as before the tail check | [`samples/exasol/real_backtest.md`](../samples/exasol/real_backtest.md) |
+| Real data, NYC taxi Jan to Mar 2024, 56 days judged, after the tail check | 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (real change, no fault found); 6 of 6 planted faults caught; 62 of 62 runs agree with the DuckDB stand-in; the same verdicts as before the tail check | [`samples/exasol/real_backtest.md`](../samples/exasol/real_backtest.md) |
 | Newest checks on live Exasol | 10 of 10 pass: blast radius, audit-log reader, `DOWNSTREAM_*` columns, metric history, `connect --check`, both new metrics, badge | [`samples/exasol/live_checks.md`](../samples/exasol/live_checks.md) |
 | Red team, seed 11, 20,000 orders a day | Floors on seed 11: unit 2%, duplicates 2%, fan-out 2%, new codes 5%, clock faults 100%, stale FX caught. 0 holes on seed 11 (1 before the tail check). 8 of 9 opposite-direction pairs caught, 1 held with one cause | [`samples/exasol/redteam_report.md`](../samples/exasol/redteam_report.md) |
 | Red team, 25 seeds, 20,000 orders a day | **13 holes, listed by seed**: a clock shift on 25% or 50% of gateway GW_B published as NO_INCIDENT, 4.0% to 8.1% off. Floors vary by seed: unit 2% on 20 seeds and 100% on 5, new codes 5% on 24 and 10% on 1. 225 opposite-direction pairs: 197 caught, 28 held, 0 wrong | [`samples/exasol/redteam_extended.md`](../samples/exasol/redteam_extended.md) |
 | Held-out partial unit changes, 24, frozen before the tail check | before: caught 0, held 24; after: caught 12 (all x1000), held 12 (all x10); published 0 both times | [`samples/exasol/heldout_unit_after.md`](../samples/exasol/heldout_unit_after.md) |
 | Scaling, IST case (29 Oct, after the unit tail check) | Right verdict at 20k, 100k, 200k and 400k orders a day; at 400k (17,346,085 payment rows) the gate takes 15.8 s, 15.1 s measured by Exasol, peak temporary memory 344 MiB | [`samples/exasol/scaling.md`](../samples/exasol/scaling.md) |
-| Live demo, click to HELD | median 8.4 s over 5 runs (6.8 to 20.5 s) | [`samples/exasol/timings.md`](../samples/exasol/timings.md) |
-| IST case, `receipts run ist_utc`, one session on an idle laptop | median 5.6 s end to end over 4 repeats, 4.6 s measured by Exasol, 63 to 69 MiB peak temporary memory | [`samples/exasol/timings.md`](../samples/exasol/timings.md) |
+| Live demo in the browser, click Break the pipeline until the HELD banner shows (lands the fault, gate with write-back, page polls) | median 8.4 s over 5 runs (6.8 to 20.5 s) | [`samples/exasol/timings.md`](../samples/exasol/timings.md) |
+| IST case, `receipts run ist_utc` (CLI, gate with write-back), one session on an idle laptop | median 5.6 s end to end over 4 repeats, 4.6 s measured by Exasol, 63 to 69 MiB peak temporary memory | [`samples/exasol/timings.md`](../samples/exasol/timings.md) |
 | Read-only agent user | reads PUB; refused on RAW, PIPE, RECEIPTS, insert, update, delete, create schema | [`docs/MCP_DEMO.md`](MCP_DEMO.md) |
 
 ## The unit-change hole: before and after the tail check
@@ -102,7 +107,7 @@ past days, and every wrong-gateway fix was rejected.
 * A fault without a detector is held as UNEXPLAINED when it leaves the normal range, and published when it
   does not. On real taxi data the normal range is about plus or minus 22%.
 * The undo test alone cannot tell a right from a wrong correction on a slice smaller than the normal range:
-  10 of 235 wrong corrections, all on the smallest gateway, pass the rules (above). Detector nomination covers it.
+  10 of 235 wrong corrections on 5 seeds (46 of 1,175 on 25 seeds), all on the smallest gateway, pass the rules (above). Detector nomination covers it.
 * Configured metrics: the detectors are bound to the payments layout. On the stand-in's 16 held-out faults, two orphan-code faults of -3.7% and -4.0% on order count were held although they sit just
   under the 4% line ([`samples/metrics_heldout_after.md`](../samples/metrics_heldout_after.md)).
 * A fault smaller than the day-to-day swing is published: on Online Retail II a payment file loaded twice went out as a trusted number on two of the three days it was planted, 3.1% and 11.5% off, inside a normal range of plus or minus 83%.

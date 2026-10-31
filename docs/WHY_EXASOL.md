@@ -38,7 +38,7 @@ The 50-run scored evaluation (10 scenarios x 5 seeds, 20,000 orders a day) ran o
 
 The two agree on the verdict, the causes and the change on all 50 runs.
 
-For the IST case at 20,000 orders a day, measured the same way on both on 29 Oct, the gate takes a median 3.2 s warm
+For the IST case at 20,000 orders a day, measured the same way on both on 29 Oct, the gate alone, without write-back, takes a median 3.2 s warm
 on Exasol (2.2 s of it measured by Exasol) and 0.65 s on the stand-in, same verdict ([`BENCHMARKS.md`](BENCHMARKS.md)).
 
 ## Where the stand-in is fine

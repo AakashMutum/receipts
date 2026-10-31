@@ -20,7 +20,7 @@ Recorded on 29 Oct 2026, one job at a time, with the same method on both: [`scri
 on Exasol) and a new process that runs the gate once, 3 times. This is a fresh load and a new session, not a database
 restart. Warm: 3 repeats in one process after a first run. Without write-back. All 14 runs, the first warm runs included, gave PROVEN_FAULT.
 
-| Gate, end to end | Cold, median (range) | Warm, median (range) |
+| Gate only, IST case, without write-back, end to end | Cold, median (range) | Warm, median (range) |
 |---|---|---|
 | Exasol | 3.38 s (3.17 to 4.15) | 3.23 s (3.12 to 3.27) |
 | Exasol, measured by Exasol | 2.28 s (2.03 to 2.74) | 2.16 s (2.12 to 2.18) |
@@ -41,7 +41,7 @@ Median per step, warm:
 
 Earlier recordings of the same case, with write-back: 5.6 s median end to end and 4.6 s measured by Exasol on 26 Oct
 ([`samples/exasol/timings.md`](../samples/exasol/timings.md)), and 0.54 s cold and 0.55 s warm on the stand-in on 28 Oct
-(without write-back). Click Break the pipeline to the HELD banner: median 8.4 s over 5 runs (6.8 to 20.5 s), 26 Oct, same report.
+(without write-back). In the live UI, from clicking Break the pipeline until the HELD banner shows (landing the fault, the gate with write-back and the page's polling): median 8.4 s over 5 runs (6.8 to 20.5 s), 26 Oct, same report.
 
 ## Scaling on Exasol
 

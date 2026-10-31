@@ -10,7 +10,7 @@ Watch the 3-minute demo
 
 https://github.com/user-attachments/assets/d216481e-cd1d-42eb-9047-4662d2b23c78
 
-Version 1.0.0, last updated 2026-10-30.
+Version 1.0.0, last updated 2026-10-31.
 
 **Start in 30 seconds** (Python 3.10 or newer; the first run installs the packages, then the command center opens in your browser):
 
@@ -26,11 +26,11 @@ Version 1.0.0, last updated 2026-10-30.
 
 | Strongest evidence | Result | Report |
 |---|---|---|
-| Scored evaluation, 10 scenarios x 5 seeds, Exasol | **50 of 50** right verdict and right causes; without the undo test, 5 wrong causes | [`eval_report.md`](samples/exasol/eval_report.md) |
+| Scored evaluation, 10 scenarios x 25 seeds, Exasol | **250 of 250** right verdict and exactly the right causes; without the undo test, 25 wrong causes; the DuckDB stand-in gives the same verdict and causes in 250 of 250 | [`eval_extended.md`](samples/exasol/eval_extended.md) |
+| Real data, NYC taxi trips 2023 and 2024, Exasol | 76,412,486 trips, 696 real days, **8 held**; **45 of 46** planted faults caught with the right cause (the miss was held, not published). Also UCI Online Retail II: 703 days, 64 held, 5 of 9 caught, 2 duplicate-file faults published | [`real_backtest_taxi_2023_2024.md`](samples/exasol/real_backtest_taxi_2023_2024.md), [`real_backtest_retail.md`](samples/exasol/real_backtest_retail.md) |
+| Red team, every fault shrunk until it is no longer proven, Exasol | 0 holes on seed 11; over 25 seeds, **13 holes, listed by seed**: a partial clock shift on one gateway published as NO_INCIDENT | [`redteam_extended.md`](samples/exasol/redteam_extended.md) |
+| Wrong-fix control, 25 seeds, Exasol | 1,175 deliberately wrong corrections: 1,129 rejected, 46 accepted and listed; in every one the gate's own verdict did not use it | [`wrongfix_extended.md`](samples/exasol/wrongfix_extended.md) |
 | Held-out partial unit changes, frozen before the fix, Exasol | 24 cases: 12 caught, 12 held, **0 published** | [`heldout_unit_after.md`](samples/exasol/heldout_unit_after.md) |
-| Red team, every fault shrunk until it is no longer proven, Exasol | 0 holes on seed 11 after the unit tail check (1 found and closed); over 25 seeds, **13 holes, listed by seed**: a partial clock shift on one gateway published as NO_INCIDENT, 4.0% to 8.1% off | [`redteam_report.md`](samples/exasol/redteam_report.md), [`redteam_extended.md`](samples/exasol/redteam_extended.md) |
-| Real data, 9,554,757 NYC taxi trips, Exasol | 56 real days, **0 held**, 2 real changes with no fault found; 6 of 6 planted faults caught; 62 of 62 gate runs agree with the stand-in | [`real_backtest.md`](samples/exasol/real_backtest.md) |
-| Wrong-fix control, Exasol | 235 deliberately wrong corrections: 225 rejected, 10 accepted and listed | [`wrongfix_report.md`](samples/exasol/wrongfix_report.md) |
 
 <p align="center">
   <a href="https://github.com/AakashMutum/receipts/actions"><img src="https://img.shields.io/github/actions/workflow/status/AakashMutum/receipts/ci.yml?branch=main&label=CI" alt="CI status"></a>
@@ -54,13 +54,13 @@ Every number below was measured on Exasol Personal 2026.2.0-nano.3 on one laptop
 | Red team on seed 11: shrink each fault until the gate stops proving it | Floors on seed 11: unit change 2%, duplicates 2%, fan-out 2%, new codes 5%, clock faults 100%, stale FX caught. 0 holes on seed 11 (1 before the unit tail check: a x100 unit change on 2% of one gateway was published, 6.5% off) | [`redteam_report.md`](samples/exasol/redteam_report.md) |
 | Red team over 25 seeds (11 to 275), same protocol | **13 holes, listed by seed**, all a clock shift on gateway GW_B published as NO_INCIDENT: 10 at 25% of its payments (4.0% to 4.4% off), 3 at 50% (7.4% to 8.1% off). Floors vary by seed: unit change 2% on 20 seeds and 100% on 5 (held without a cause below that, never published); new codes 5% on 24 seeds, 10% on 1; duplicates and fan-out 2% on all 25. 225 opposite-direction pairs: 197 caught, 28 held, 0 wrong | [`redteam_extended.md`](samples/exasol/redteam_extended.md) |
 | Scored evaluation over 25 seeds, 250 runs | **250 of 250** right verdict and exactly the right causes, 0 wrong causes; the DuckDB stand-in gives the same verdict and causes in 250 of 250 | [`eval_extended.md`](samples/exasol/eval_extended.md) |
-| Wrong-fix control over 25 seeds | 1,175 deliberately wrong corrections: 1,129 rejected, 46 accepted and listed by seed; in all 46 runs the gate still confirmed exactly the planted causes | [`wrongfix_extended.md`](samples/exasol/wrongfix_extended.md) |
+| Wrong-fix control over 25 seeds | 1,175 deliberately wrong corrections: 1,129 rejected, 46 accepted and listed by seed; in every one the gate's own verdict did not use it | [`wrongfix_extended.md`](samples/exasol/wrongfix_extended.md) |
 | Real data: NYC taxi trips, 2023 and 2024, in 23 monthly chunks with the published history carried forward | 76.4 million trips, 696 real days judged, **8 held**, 34 real changes with no fault found; **45 of 46** planted faults caught with the right cause (the miss was held, not published); 742 of 742 gate runs agree with the stand-in | [`real_backtest_taxi_2023_2024.md`](samples/exasol/real_backtest_taxi_2023_2024.md) |
 | Real data: UCI Online Retail II, UK sales converted to rupees with ECB rates (not Indian data) | 703 days judged, **64 held** (13 of them days the shop was closed); **5 of 9** planted faults caught (3 of 3 stale FX); **2 duplicate-file faults published**, 3.1% and 11.5% off, inside a normal range of plus or minus 83%; 712 of 712 gate runs agree with the stand-in | [`real_backtest_retail.md`](samples/exasol/real_backtest_retail.md) |
 | Audit-log match, three more runs on 31 Oct, each in a new session | 57 of 57 gate statements and 3 of 3 agent reads matched in every run, none different or missing | [`AUDIT_MATCH.md`](docs/AUDIT_MATCH.md) |
 | Held-out partial unit changes (24, frozen before the tail check was written) | Before: caught 0, held 24. After: **caught 12** (every x1000 case), held 12 (every x10 case). Published 0 in both | [`heldout_unit_after.md`](samples/exasol/heldout_unit_after.md) |
 | Scaling: the IST case after a fresh load | Right verdict at every size up to **400,000 orders a day, 17,346,085 payment rows**: gate 15.8 s, CUBE over 5.95 million rows 2.7 s (29 Oct, after the unit tail check). Nothing larger was measured | [`scaling.md`](samples/exasol/scaling.md) |
-| Live demo: click Break the pipeline to the HELD banner | **8.4 s** median over 5 runs (6.8 to 20.5 s), every gate step shown as it finishes | [`timings.md`](samples/exasol/timings.md) |
+| Live demo in the browser: click Break the pipeline until the HELD banner shows (lands the fault, runs the gate with write-back, the page polls) | **8.4 s** median over 5 runs (6.8 to 20.5 s), every gate step shown as it finishes | [`timings.md`](samples/exasol/timings.md) |
 | Held-out fault variants (17, written after the detectors were fixed) | caught 15, held 1, published but under 4% off 1, published wrong 0 (before the unit tail check: caught 13, held 3) | [`variants_report.md`](samples/exasol/variants_report.md) |
 | A read-only agent user | `AGENT_READER` reads `PUB.METRIC_TRUST`; Exasol refuses it on RAW, PIPE, RECEIPTS and on every write | [`MCP_DEMO.md`](docs/MCP_DEMO.md) |
 
@@ -91,7 +91,7 @@ Receipts runs in two modes:
 | `SYS.EXA_SQL_KEYWORDS` | `receipts doctor` checks every identifier against reserved words |
 | Exasol MCP server | Agents read `PUB.METRIC_TRUST` before quoting a number |
 
-One incident on Exasol, `receipts run ist_utc` at 20,000 orders a day, measured in one session on an idle laptop ([`samples/exasol/timings.md`](samples/exasol/timings.md)): 27 SQL statements from the client, median 5.6 s end to end over 4 repeats (6.6 s on the first run after a fresh load). Exasol's own statistics: median 4.6 s inside the database over 37 statements, the CUBE 0.9 s, peak temporary memory 63 to 69 MiB. Median per step over the 4 repeats, end to end:
+One incident on Exasol, `receipts run ist_utc` at 20,000 orders a day (the CLI: lands the batch, runs the gate with write-back), measured in one session on an idle laptop ([`samples/exasol/timings.md`](samples/exasol/timings.md)): 27 SQL statements from the client, median 5.6 s end to end over 4 repeats (6.6 s on the first run after a fresh load). Exasol's own statistics: median 4.6 s inside the database over 37 statements, the CUBE 0.9 s, peak temporary memory 63 to 69 MiB. Median per step over the 4 repeats, end to end:
 
 | Step | Time |
 |---|---|
@@ -236,7 +236,7 @@ Every receipt lists the views that read the affected metric or column, found by 
 
 ## Is the undo test circular? The wrong-fix control
 
-`receipts wrongfix` shows the gate's own rules deliberately wrong corrections for every planted fault: the right fix on the wrong gateway, the wrong factor, the right fix on every day instead of tonight, or the fix for a cause that was not planted. On Exasol, 5 seeds, 20,000 orders a day: **235 tried, 225 rejected, 10 accepted** ([`samples/exasol/wrongfix_report.md`](samples/exasol/wrongfix_report.md)); the stand-in accepts the same 10. Every fix applied to past days and every wrong-gateway fix was rejected. The 10 accepted are all on the smallest gateway: a x1000 correction where x100 was planted (4), or a x100 correction while the total was already inside the range (6). In each, the gate's real verdict named only the planted causes, because no detector nominated the wrong fix. The same control runs inside `receipts eval` and `receipts redteam`.
+`receipts wrongfix` shows the gate's own rules deliberately wrong corrections for every planted fault: the right fix on the wrong gateway, the wrong factor, the right fix on every day instead of tonight, or the fix for a cause that was not planted. Over 25 seeds: 1,175 tried, 1,129 rejected, 46 accepted, each listed by seed ([`samples/exasol/wrongfix_extended.md`](samples/exasol/wrongfix_extended.md)). On Exasol, 5 seeds, 20,000 orders a day: **235 tried, 225 rejected, 10 accepted** ([`samples/exasol/wrongfix_report.md`](samples/exasol/wrongfix_report.md)); the stand-in accepts the same 10. Every fix applied to past days and every wrong-gateway fix was rejected. The 10 accepted are all on the smallest gateway: a x1000 correction where x100 was planted (4), or a x100 correction while the total was already inside the range (6). In each, the gate's real verdict named only the planted causes, because no detector nominated the wrong fix. The same control runs inside `receipts eval` and `receipts redteam`.
 
 ## Your own metric
 
@@ -429,7 +429,7 @@ receipts/
 │   ├── hosted.py        rate limits and automatic reset for a public demo
 │   └── api.py           FastAPI endpoints for the command center
 ├── web/                 command center: index.html, app.css, app.js
-├── tests/               171 tests (2 of them run only against a live Exasol)
+├── tests/               220 tests (2 of them run only against a live Exasol)
 ├── samples/             committed, unedited reports and case files (samples/exasol from Exasol)
 ├── sql/exasol/          all rendered Exasol SQL, for reading
 ├── mcp/                 MCP client config and agent instructions
@@ -458,7 +458,7 @@ Besides the three-system test matrix, CI runs a separate `exasol` job ([`.github
 * **A partial clock shift can be published wrong.** A clock shift on 25% of one gateway moves revenue only about 4%, and on 50% about 8%; no cause is proven, so when the total stays inside the normal range it is published as `NO_INCIDENT`. Over 25 red team seeds this happened 13 times, 4.0% to 8.1% off ([`redteam_extended.md`](samples/exasol/redteam_extended.md)); on the other seeds the same shifts were held without a proven cause or were under 4% off. Detection floors vary by seed.
 * A x10 unit change on 2% to 10% of one gateway is held without a proven cause, and so is a x100 change on 50% of one on 5 of 25 red team seeds (on two of them down to 10% and 2%).
 * **A fault smaller than the day-to-day swing is published.** On the Online Retail II data a payment file loaded twice went out as a trusted number on two of the three days it was planted, 3.1% and 11.5% off, inside a normal range of plus or minus 83% ([`real_backtest_retail.md`](samples/exasol/real_backtest_retail.md)).
-* On a slice smaller than the normal range the undo test alone cannot tell a right correction from a wrong one: in the wrong-fix control 10 of 235 wrong corrections pass the rules, all on the smallest gateway (about 5% of revenue), for example dividing it by 1000 where x100 was planted, or by 100 when the total was already in range. The gate's verdicts stayed right because no detector nominated them; the detector carries the proof there.
+* On a slice smaller than the normal range the undo test alone cannot tell a right correction from a wrong one: in the wrong-fix control on 5 seeds 10 of 235 wrong corrections pass the rules (46 of 1,175 on 25 seeds, every one on GW_C, [`wrongfix_extended.md`](samples/exasol/wrongfix_extended.md)), all on the smallest gateway (about 5% of revenue), for example dividing it by 1000 where x100 was planted, or by 100 when the total was already in range. The gate's verdicts stayed right because no detector nominated them; the detector carries the proof there.
 * For a configured metric the band, weekday baseline, lineage, undo test and blast radius follow the config; the detectors and the slice breakdown are bound to the payments layout, and only `daily_revenue_inr` is written to `PUB`.
 * No holiday calendar, so closure and holiday days are held: on the Online Retail II data 13 of the 64 held days are days the shop was closed on a weekday it usually trades. On the 2023 and 2024 taxi data 8 of 696 days were held, each listed in the report. A real change with no fault found becomes part of the baseline. Corrections are hotfixes; the real fix is upstream.
 

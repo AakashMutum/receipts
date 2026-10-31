@@ -105,7 +105,7 @@ The header now shows **Exasol** and **Python UDF in the database**. Every receip
 
 TLS: local deployments use a self-signed certificate, so certificate checks are off by default (`EXA_INSECURE=1`). Set `EXA_INSECURE=0` and use a DSN with a fingerprint for anything shared.
 
-Measured on Exasol Personal 2026.2.0-nano.3 (Windows 11, Podman on WSL2 with 6 CPUs and 7.7 GiB RAM visible to the VM, 20,000 orders a day): `receipts init --fresh` took 15.9 s, and `receipts run ist_utc` reaches `PROVEN_FAULT` in a median of 5.6 s end to end over 4 repeats (4.6 s inside the database by Exasol's statistics; 6.6 s on the first run after a fresh load). The slowest steps are the sandbox undo test (1.4 s) and the `GROUP BY CUBE` over 11,074 slices (1.3 s). All from one session on 26 Oct: [`samples/exasol/timings.md`](../samples/exasol/timings.md). The full evaluation on Exasol (`receipts eval --backend exasol --out samples/exasol`, 50 runs) passes 50 of 50 with a median gate latency of 3.4 s and takes about 9 minutes. `receipts variants --backend exasol --seeds 11 --out samples/exasol` takes about 2 minutes. Both rebuild the database once per seed, so run `receipts init --fresh` afterwards to get the demo data back.
+Measured on Exasol Personal 2026.2.0-nano.3 (Windows 11, Podman on WSL2 with 6 CPUs and 7.7 GiB RAM visible to the VM, 20,000 orders a day): `receipts init --fresh` took 15.9 s, and `receipts run ist_utc` (the CLI, gate with write-back) reaches `PROVEN_FAULT` in a median of 5.6 s end to end over 4 repeats (4.6 s inside the database by Exasol's statistics; 6.6 s on the first run after a fresh load). The slowest steps are the sandbox undo test (1.4 s) and the `GROUP BY CUBE` over 11,074 slices (1.3 s). All from one session on 26 Oct: [`samples/exasol/timings.md`](../samples/exasol/timings.md). The full evaluation on Exasol (`receipts eval --backend exasol --out samples/exasol`, 50 runs) passes 50 of 50 with a median gate latency of 3.4 s and takes about 9 minutes. `receipts variants --backend exasol --seeds 11 --out samples/exasol` takes about 2 minutes. Both rebuild the database once per seed, so run `receipts init --fresh` afterwards to get the demo data back.
 
 Measured earlier (before the unit tail check), at 100,000 orders a day (`receipts init --fresh --orders-per-day 100000`, 4.2 million payment rows, about 40 s to load and 2.5 minutes including data generation) `ist_utc` takes 6.8 s and `masked_pair` 9.7 s on the same laptop.
 
@@ -201,7 +201,7 @@ published row, so the demo can run again.
 
 Measured on Exasol Personal 2026.2.0-nano.3 on the laptop described in section 2, with
 `python scripts/measure_break.py --runs 5` (a headless browser that clicks the button): IST written as UTC on
-GW_B, click to HELD banner in a median of 8.4 s (6.8 to 20.5 s over 5 runs, one slow run at 20.5 s), on 26 Oct after the unit tail check. Port 8000 was taken on this laptop, so it ran on 8765.
+GW_B, from the click until the HELD banner shows (landing the fault, the gate with write-back and the page's polling) in a median of 8.4 s (6.8 to 20.5 s over 5 runs, one slow run at 20.5 s), on 26 Oct after the unit tail check. Port 8000 was taken on this laptop, so it ran on 8765.
 
 The **Red team** tab next to it shows the detection floor per fault class from the saved red team report (seed 11) and
 runs one attack live (`receipts redteam` writes the report; see the README). Run it on the built-in synthetic
