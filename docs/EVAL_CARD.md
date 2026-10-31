@@ -31,8 +31,9 @@ Core 5, Podman on WSL2, about 7.7 GiB visible to the VM), unless a line says the
 | Held-out variants, 17, written after the detectors were fixed | caught 15, held 1, published under 4% off 1, published wrong 0 (before the tail check: caught 13, held 3) | [`samples/exasol/variants_report.md`](../samples/exasol/variants_report.md) |
 | Real data, 56 days judged, after the tail check | 0 held, 54 NO_INCIDENT, 2 REAL_CHANGE (real change, no fault found); 6 of 6 planted faults caught; 62 of 62 runs agree with the DuckDB stand-in; the same verdicts as before the tail check | [`samples/exasol/real_backtest.md`](../samples/exasol/real_backtest.md) |
 | Newest checks on live Exasol | 10 of 10 pass: blast radius, audit-log reader, `DOWNSTREAM_*` columns, metric history, `connect --check`, both new metrics, badge | [`samples/exasol/live_checks.md`](../samples/exasol/live_checks.md) |
-| Red team, seed 11, 20,000 orders a day | Floors: unit 2%, duplicates 2%, fan-out 2%, new codes 5%, clock faults 100%, stale FX caught. 0 holes (1 before the tail check). 8 of 9 opposite-direction pairs caught, 1 held with one cause |
-| Held-out partial unit changes, 24, frozen before the tail check | before: caught 0, held 24; after: caught 12 (all x1000), held 12 (all x10); published 0 both times | [`samples/exasol/heldout_unit_after.md`](../samples/exasol/heldout_unit_after.md) | [`samples/exasol/redteam_report.md`](../samples/exasol/redteam_report.md) |
+| Red team, seed 11, 20,000 orders a day | Floors on seed 11: unit 2%, duplicates 2%, fan-out 2%, new codes 5%, clock faults 100%, stale FX caught. 0 holes on seed 11 (1 before the tail check). 8 of 9 opposite-direction pairs caught, 1 held with one cause | [`samples/exasol/redteam_report.md`](../samples/exasol/redteam_report.md) |
+| Red team, 25 seeds, 20,000 orders a day | **13 holes, listed by seed**: a clock shift on 25% or 50% of gateway GW_B published as NO_INCIDENT, 4.0% to 8.1% off. Floors vary by seed: unit 2% on 20 seeds and 100% on 5, new codes 5% on 24 and 10% on 1. 225 opposite-direction pairs: 197 caught, 28 held, 0 wrong | [`samples/exasol/redteam_extended.md`](../samples/exasol/redteam_extended.md) |
+| Held-out partial unit changes, 24, frozen before the tail check | before: caught 0, held 24; after: caught 12 (all x1000), held 12 (all x10); published 0 both times | [`samples/exasol/heldout_unit_after.md`](../samples/exasol/heldout_unit_after.md) |
 | Scaling, IST case (29 Oct, after the unit tail check) | Right verdict at 20k, 100k, 200k and 400k orders a day; at 400k (17,346,085 payment rows) the gate takes 15.8 s, 15.1 s measured by Exasol, peak temporary memory 344 MiB | [`samples/exasol/scaling.md`](../samples/exasol/scaling.md) |
 | Live demo, click to HELD | median 8.4 s over 5 runs (6.8 to 20.5 s) | [`samples/exasol/timings.md`](../samples/exasol/timings.md) |
 | IST case, `receipts run ist_utc`, one session on an idle laptop | median 5.6 s end to end over 4 repeats, 4.6 s measured by Exasol, 63 to 69 MiB peak temporary memory | [`samples/exasol/timings.md`](../samples/exasol/timings.md) |
@@ -56,7 +57,7 @@ the fix was written and were not used to tune it.
 | Real-data backtest | 0 held, REAL_CHANGE on 13 Feb and 27 Feb, 6 of 6 | the same: 0 held, REAL_CHANGE on 13 Feb and 27 Feb, 6 of 6, all 62 verdicts and causes unchanged |
 
 Reports: `samples/exasol/*_before.md` and the files without the suffix. The DuckDB stand-in gives the same
-held-out counts and the same red team floors.
+held-out counts and the same red team floors on seed 11.
 
 On the masked pair the total stayed inside the normal range in 1 of 5 seeds (seed 44, +4.0%), and Receipts proved both causes in all 5.
 
@@ -97,15 +98,16 @@ past days, and every wrong-gateway fix was rejected.
 
 * **Not closed:** a x10 unit change on 2% to 10% of a gateway is held without a proven cause (12 of 24 held-out
   cases): those amounts mostly stay below the 20x cut. Held, not published, but a person has to look.
-* Partial clock shifts (25% to 50%) are held without a proven cause. Safe, but a person has to investigate.
+* **Partial clock shifts can be published wrong.** A clock shift on 25% of one gateway moves revenue only about 4%, and on 50% about 8%; no cause is proven, so when the total stays inside the normal range it is published as NO_INCIDENT. Over 25 red team seeds that happened 13 times, 4.0% to 8.1% off; on the other seeds the same shifts were held without a proven cause or were under 4% off.
 * A fault without a detector is held as UNEXPLAINED when it leaves the normal range, and published when it
   does not. On real taxi data the normal range is about plus or minus 22%.
 * The undo test alone cannot tell a right from a wrong correction on a slice smaller than the normal range:
   10 of 235 wrong corrections, all on the smallest gateway, pass the rules (above). Detector nomination covers it.
 * Configured metrics: the detectors are bound to the payments layout. On the stand-in's 16 held-out faults, two orphan-code faults of -3.7% and -4.0% on order count were held although they sit just
   under the 4% line ([`samples/metrics_heldout_after.md`](../samples/metrics_heldout_after.md)).
-* No holiday calendar; a real change with no fault found becomes part of the baseline.
-* Red team and scaling ran on one seed and one laptop. The eval ran on 5 seeds.
+* A fault smaller than the day-to-day swing is published: on Online Retail II a payment file loaded twice went out as a trusted number on two of the three days it was planted, 3.1% and 11.5% off, inside a normal range of plus or minus 83%.
+* No holiday calendar, so closure and holiday days are held (13 of the 64 held days on Online Retail II are closures); a real change with no fault found becomes part of the baseline.
+* Scaling ran on one seed and one laptop. The eval and the wrong-fix control ran on 5 seeds and the red team on 1, and all three again on 25; detection floors vary by seed.
 
 Where each result was verified, and what was not run here, is in one place:
 [README, Verified and not covered](../README.md#verified-and-not-covered).

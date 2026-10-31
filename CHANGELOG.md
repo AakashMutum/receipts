@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Added
+
+* [`samples/exasol/eval_extended.md`](samples/exasol/eval_extended.md): the scored evaluation over 25 seeds on Exasol, 250 of 250; the stand-in agrees on all 250 runs.
+* [`samples/exasol/wrongfix_extended.md`](samples/exasol/wrongfix_extended.md): the wrong-fix control over 25 seeds, 1,175 tried, 1,129 rejected, 46 accepted and listed; the gate still confirmed exactly the planted causes in all 46.
+* [`samples/exasol/redteam_extended.md`](samples/exasol/redteam_extended.md): the red team over 25 seeds, **13 holes, listed by seed**, all a partial clock shift on one gateway published as NO_INCIDENT, 4.0% to 8.1% off. Not closed.
+* [`samples/exasol/real_backtest_retail.md`](samples/exasol/real_backtest_retail.md) and [`scripts/backtest_retail.py`](scripts/backtest_retail.py): UCI Online Retail II with ECB rates, 703 days, 64 held, 5 of 9 planted faults caught, 2 duplicate-file faults published (3.1% and 11.5% off).
+* [`samples/exasol/real_backtest_taxi_2023_2024.md`](samples/exasol/real_backtest_taxi_2023_2024.md) and [`scripts/backtest_taxi_chunks.py`](scripts/backtest_taxi_chunks.py): NYC taxi trips 2023 and 2024 in monthly chunks, 76.4 million trips, 696 days, 8 held, 45 of 46 caught (the miss was held).
+* Three more audit-log matches on 31 Oct in [`docs/AUDIT_MATCH.md`](docs/AUDIT_MATCH.md): 57 of 57 and 3 of 3 in each; [`docs/DATA_MANIFEST.md`](docs/DATA_MANIFEST.md) for the public data used.
+
+### Changed
+
+* README, JUDGES, NOVELTY, EVAL_CARD and JURY_QA: "0 holes" now reads "0 holes on seed 11", the 25-seed red team is reported with its 13 holes, and partial clock shifts are no longer described as always held.
+
 ### Fixed
 
 * A crash in the weekday baseline when one weekday has no trading history, found on real data (a shop that never trades on Saturdays). Such a weekday now expects 0 and is left out of the weekday-adjusted history; zero on that day is normal, anything else is held as UNEXPLAINED. The published reports do not change.
@@ -41,7 +54,7 @@
 
 ### Fixed
 
-* **The red team hole.** A x100 unit change on 2% of one gateway was published as a real change; the unit tail check closed it: unit floor 100% to 2%, holes 1 to 0 ([`before`](samples/exasol/redteam_report_before.md), [`after`](samples/exasol/redteam_report.md)).
+* **The red team hole.** A x100 unit change on 2% of one gateway was published as a real change; the unit tail check closed it: unit floor 100% to 2%, holes 1 to 0 on seed 11 ([`before`](samples/exasol/redteam_report_before.md), [`after`](samples/exasol/redteam_report.md)).
 * **History for unpublished metrics.** A merchant fan-out rewrote past days in the views and moved the baseline with it; `RECEIPTS.METRIC_HISTORY` now keeps a snapshot. Average basket published wrong 6 of 16 held-out faults before, 0 after ([`before`](samples/metrics_heldout_before.md), [`after`](samples/exasol/metrics_heldout_after.md)).
 * **Audit-log reads on Exasol.** The window start is shifted from session time to the audit log's system time, statistics are flushed first, and the `READS` alias, a reserved word in Exasol, is now `READ_COUNT` ([`samples/exasol/live_checks.md`](samples/exasol/live_checks.md)).
 * Names in `receipts.yaml` are now checked when the file is loaded: each must be a plain SQL identifier (letters, digits and underscores, at most 128 characters, not a reserved word). Before, any text was accepted and written straight into SQL, so a crafted name could have added its own statement. Tests: `tests/test_metric_names.py` (20 hostile names, and `connect --check` refusing a hostile file before connecting).

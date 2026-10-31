@@ -277,11 +277,30 @@ def report(backend: str) -> None:
     head += [f"* `{k}`: {v}." for k, v in NOT_APPLIED.items()]
     missed = [r for r in planted if not r["caught"]]
     empty = [r for r in held if r["value"] == 0]
+    above = [r for r in held if r["value"] and r["change_pct"] > 0]
+    below = [r for r in held if r["value"] and r["change_pct"] <= 0]
+    band = sorted(r["band_pct"] for r in clean)[len(clean) // 2]
+    low = ", ".join(f"{r['day']} {r['change_pct']:+.0%}" for r in below)
     head += ["", "## In short", "",
-             f"* Real days held: **{len(held)} of {len(clean)}**. Of these, {len(empty)} had no captured invoice at all "
-             f"(change -100%), and {sum(r['change_pct'] > 0.4 for r in held)} were more than 40% above the expected "
-             "value. A wholesale shop's daily total swings far more than the synthetic data: the median normal range "
-             "here is wide (see below), and the gate still holds a day it cannot explain.",
+             f"* Real days held: **{len(held)} of {len(clean)}** ({len(held) / len(clean):.1%}, about one day in "
+             f"{round(len(clean) / len(held))}). No fault was planted on any of them, so every one is a hold a person "
+             "would have to look at and release.",
+             "* The held days, classified from the data:",
+             f"  * **Shop closed on a day it usually trades: {len(empty)}** (no captured invoice at all, change -100%): "
+             + ", ".join(f"{r['day']} {r['weekday']}" for r in empty) + ". Receipts has no holiday calendar, so a "
+             "closure on a weekday it normally trades is held as UNEXPLAINED. These dates fall around Easter, at the "
+             "end of May and August, at Christmas and on 29 April 2011; they were not checked against an official "
+             "calendar of public holidays (the official gov.uk list starts in 2019, and the archived page for these "
+             "years could not be read), so none is labelled a holiday here.",
+             f"  * **Trading days held, no cause found: {len(above) + len(below)}**: {len(above)} above the expected "
+             f"value (each at least {min(r['change_pct'] for r in above):+.0%}) and {len(below)} below "
+             f"({low}). "
+             "The gate does not say why; what made these days large was not investigated.",
+             f"* What the hold rate means: a wholesale shop's daily total swings far more than the synthetic data or "
+             f"the taxi data (the median normal range here is plus or minus {band:.0%}), so the gate publishes most "
+             "days and still holds a day it cannot explain. On data this lumpy, about one day in "
+             f"{round(len(clean) / len(held))} needs a person, and a fault smaller than the swing is published "
+             "(the two duplicate-file faults below).",
              f"* Planted faults caught with the right cause: **{len(planted) - len(missed)} of {len(planted)}**. "
              "Missed, by name: " + ("; ".join(
                  f"{r['day']} {r['fault']} ({r['verdict']}, {'held' if r['held'] else 'PUBLISHED'}, real error "

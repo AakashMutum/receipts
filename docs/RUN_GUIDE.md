@@ -203,7 +203,7 @@ Measured on Exasol Personal 2026.2.0-nano.3 on the laptop described in section 2
 `python scripts/measure_break.py --runs 5` (a headless browser that clicks the button): IST written as UTC on
 GW_B, click to HELD banner in a median of 8.4 s (6.8 to 20.5 s over 5 runs, one slow run at 20.5 s), on 26 Oct after the unit tail check. Port 8000 was taken on this laptop, so it ran on 8765.
 
-The **Red team** tab next to it shows the detection floor per fault class from the saved red team report and
+The **Red team** tab next to it shows the detection floor per fault class from the saved red team report (seed 11) and
 runs one attack live (`receipts redteam` writes the report; see the README). Run it on the built-in synthetic
 data or a sandbox copy, never on live production tables.
 
