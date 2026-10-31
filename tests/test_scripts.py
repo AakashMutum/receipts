@@ -43,7 +43,13 @@ def test_exasol_scripts_never_install_exasol(name):
         assert forbidden not in text
 
 
-def test_demo_opens_the_browser_only_once_the_server_answers(monkeypatch):
+@pytest.mark.parametrize("proxied", [False, True])
+def test_demo_opens_the_browser_only_once_the_server_answers(monkeypatch, proxied):
+    if proxied:  # a proxy that does not exist must not stop the check of the local server
+        for var in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"):
+            monkeypatch.setenv(var, "http://127.0.0.1:9")
+        for var in ("NO_PROXY", "no_proxy"):
+            monkeypatch.delenv(var, raising=False)
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
             self.send_response(200)

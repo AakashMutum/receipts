@@ -506,11 +506,14 @@ def _open_browser_when_up(url: str, timeout: float = 120) -> None:
     import urllib.request
     import webbrowser
 
+    # the server is on 127.0.0.1 or localhost: never send the check through a system or environment proxy
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
     def wait_and_open():
         end = time.monotonic() + timeout
         while time.monotonic() < end:
             try:
-                with urllib.request.urlopen(url + "api/overview", timeout=2):
+                with opener.open(url + "api/overview", timeout=2):
                     webbrowser.open(url)
                     return
             except Exception:
